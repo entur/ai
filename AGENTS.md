@@ -73,6 +73,7 @@ Read the relevant documents below based on the task at hand. Always read `CONVEN
 | **Security** | [docs/security.md](docs/security.md) |
 | **Code review** | [docs/code-review.md](docs/code-review.md) |
 | **Markdown / documentation format** | [docs/markdown.md](docs/markdown.md) |
+| **Writing documentation** | [docs/documentation.md](docs/documentation.md), [docs/markdown.md](docs/markdown.md) |
 
 ## Critical Rules
 
