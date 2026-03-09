@@ -4,28 +4,28 @@ Rules for writing documentation in Entur repositories. Follow [markdown.md](mark
 
 ## Methodology
 
-- Plan the outline before writing content
-- Iterate on both outline and content
+- Plan outline before writing
+- Iterate on outline and content
 - Seek feedback through co-writing or review
-- Review and update documentation routinely
+- Review and update routinely
 
 ## Core Principles
 
 - **"Why", not "what"** -- code shows what, docs explain why
 - **Close to code** -- prefer Javadoc/KDoc/godoc/docstrings over separate files
-- **Accurate** -- outdated docs are worse than none. Update docs when code changes
+- **Accurate** -- outdated docs are worse than none. Update docs with code changes
 - **For the next developer** -- assume an Entur developer unfamiliar with this project
 
 ## Be Explicitly Purposeful
 
-State these up front in every document:
+State up front in every document:
 
 - **Target audience** -- who is this for?
 - **Intent** -- what will the reader accomplish?
-- **Scope** -- what is and is not covered. Link out for other topics
+- **Scope** -- what is/isn't covered; link out for other topics
 - **Prerequisites** -- required knowledge or setup, with links
 - **Outcome-oriented headings** -- Do: "Get started with the common Helm chart" / Don't: "Copy `./helm` from helm-charts"
-- **Further reading** -- list recommended next documents at the end
+- **Further reading** -- list next documents at the end
 
 ## When to Write Documentation
 
@@ -40,7 +40,7 @@ Write or update when:
 Do **not** document:
 
 - Self-explanatory private methods or trivial getters/setters
-- What the code already says -- don't restate code in English
+- What the code already says
 - In separate files when an inline comment suffices
 
 ## Documentation Types
@@ -52,7 +52,7 @@ Use language-native formats: Javadoc (Java), KDoc (Kotlin), godoc (Go), docstrin
 - Document all public classes, interfaces, methods, and functions
 - Include `@param`/`@return`/`@throws` when not obvious from the name
 - Document side effects, thread-safety, and performance characteristics
-- Keep the first sentence short -- it is the summary in generated docs
+- Keep first sentence short -- it becomes the summary in generated docs
 
 ### README.md
 
@@ -73,7 +73,7 @@ Every repository root `README.md` must contain:
 
 ### Architecture Decision Records
 
-Use AsciiDoc in `doc/adr/`. See [CONVENTIONS.md](../CONVENTIONS.md) for format.
+AsciiDoc in `doc/adr/`. See [CONVENTIONS.md](../CONVENTIONS.md) for format.
 
 ### Configuration Documentation
 
@@ -86,45 +86,45 @@ Document every environment variable and config key:
 | `CACHE_TTL_SECONDS` | Cache time-to-live | `300` | No |
 ```
 
-Place in the README or `docs/configuration.md`.
+Place in README or `docs/configuration.md`.
 
 ## Writing Style
 
 ### Language and Tone
 
-- Write in English, plain and direct
+- English, plain and direct
 - Active voice, present tense -- Do: "The service validates the token." / Don't: "The token is validated by the service."
-- Strong, precise verbs -- "generates", not "is responsible for generating"
+- Strong verbs -- "generates", not "is responsible for generating"
 - One sentence per thought
 - Consistent abbreviations -- always `PaaS`, never `Paas` or `PAAS`
 
 ### Structure
 
 - Follow [markdown.md](markdown.md)
-- One `#` heading per file, no skipped heading levels
-- Every heading followed by a paragraph before the next heading or list
+- One `#` heading per file, no skipped levels
+- Every heading followed by content before the next heading or list
 - Every list preceded by an explanation
 - Numbered lists only when order matters
-- Homogeneous list entries -- same grammatical form. Do: "red, green, and blue" / Don't: "red, green, and pick up the trash"
+- Homogeneous list entries -- same grammatical form
 - Link rather than duplicate content
 
 ### Code Examples
 
-- Runnable examples when possible
-- Lead with correct usage; clearly label bad examples and reconsider if they are needed
+- Runnable when possible
+- Lead with correct usage; clearly label bad examples
 - Minimal -- only what illustrates the point
-- Always specify the language tag on fenced code blocks
+- Always specify language tag on fenced code blocks
 
 ### Images and Diagrams
 
-- Use images only when text is insufficient
+- Use only when text is insufficient
 - Every image needs alt text and a caption
-- Annotate to draw attention to the relevant parts
+- Annotate relevant parts
 - Charts must have correct axes, units, and labels
 
 ## File Organization
 
-Place documentation according to the standard layout in [CONVENTIONS.md](../CONVENTIONS.md):
+Per standard layout in [CONVENTIONS.md](../CONVENTIONS.md):
 
 - `docs/` -- published documentation shared beyond the team
 - `doc/adr/` -- Architecture Decision Records
@@ -133,7 +133,7 @@ Place documentation according to the standard layout in [CONVENTIONS.md](../CONV
 ## Maintaining Documentation
 
 - Review docs in every PR where code changes
-- Delete docs for removed features instead of leaving them stale
+- Delete docs for removed features
 - Run `markdownlint-cli2 "**/*.md"` before committing (see [markdown.md](markdown.md))
 - Treat doc lint failures the same as code lint failures
 

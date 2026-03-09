@@ -34,26 +34,23 @@ tasks.withType<Test> {
 
 ### Dockerfile
 
+See [docker.md](docker.md) for Dockerfile conventions, base images, and multi-stage builds. Simple example:
+
 ```dockerfile
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY build/libs/*.jar app.jar
-
-# Non-root user
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
-
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
 ```
 
 ## Logging
 
-Use [entur/cloud-logging](https://github.com/entur/cloud-logging) -- Entur's standard logging library for JVM applications on GCP. It provides plug-and-play structured JSON logging, on-demand logging for cost reduction, request-response logging, and human-readable output during local development.
+Use [entur/cloud-logging](https://github.com/entur/cloud-logging) for structured JSON logging on GCP. See [logging.md](logging.md) for general standards.
 
 ### Setup
-
-Import the BOM and the GCP web starter:
 
 ```kotlin
 // build.gradle.kts
@@ -62,18 +59,16 @@ val cloudLoggingVersion = "x.y.z"  // check Maven Central for latest
 dependencies {
     implementation(platform("no.entur.logging.cloud:bom:$cloudLoggingVersion"))
     testImplementation(platform("no.entur.logging.cloud:bom:$cloudLoggingVersion"))
-
-    // Base logging (required)
     implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web")
     testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
 }
 ```
 
-Remove any existing `logback.xml` or `logback-spring.xml` -- cloud-logging provides its own configuration automatically.
+Remove any existing `logback.xml` or `logback-spring.xml` -- cloud-logging provides its own configuration.
 
 ### Usage
 
-Use standard SLF4J logging -- cloud-logging handles the JSON formatting, GCP severity mapping, and correlation-id propagation:
+Standard SLF4J -- cloud-logging handles JSON formatting, GCP severity mapping, and correlation-id propagation:
 
 ```java
 import org.slf4j.Logger;
@@ -86,10 +81,9 @@ LOG.warn("Retry attempt {} for route {}", attempt, routeId);
 LOG.error("Failed to fetch route {}", routeId, exception);
 ```
 
-Configure log levels via Spring properties:
+Configure levels via Spring properties:
 
 ```yaml
-# application.yml
 logging:
   level:
     root: INFO
@@ -98,17 +92,12 @@ logging:
 
 ### Optional: Request-Response Logging
 
-Log HTTP request and response bodies (Logbook-based):
-
 ```kotlin
-// build.gradle.kts
 dependencies {
     implementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web")
     testImplementation("no.entur.logging.cloud:request-response-spring-boot-starter-gcp-web-test")
 }
 ```
-
-Exclude noisy endpoints:
 
 ```yaml
 logbook:
@@ -119,36 +108,34 @@ logbook:
 
 ### Optional: On-Demand Logging
 
-Reduce logging costs by only capturing full logs for problematic requests. When enabled, happy-case requests log at a higher threshold (e.g. WARN), but if an error occurs, all buffered log statements for that request (including INFO) are flushed:
+Reduces logging costs -- buffers log statements and only flushes full logs for failed requests:
 
 ```kotlin
-// build.gradle.kts
 dependencies {
     implementation("no.entur.logging.cloud:on-demand-spring-boot-starter-gcp-web")
 }
 ```
 
 ```yaml
-# application.yml
 entur:
   logging:
     http:
       ondemand:
         enabled: true
         success:
-          level: warn                            # happy case: only log WARN+
+          level: warn
         failure:
-          level: info                            # failure: flush all INFO+ logs
+          level: info
           http:
             status-code:
-              equal-or-higher-than: 400          # trigger on 4xx/5xx
+              equal-or-higher-than: 400
           logger:
-            level: error                         # trigger on ERROR log statements
+            level: error
 ```
 
 ### Local Development
 
-In test scope, cloud-logging automatically provides human-readable colored output. You can toggle the output format:
+In test scope, cloud-logging provides human-readable colored output:
 
 ```yaml
 entur:
@@ -157,8 +144,6 @@ entur:
 ```
 
 ### DevOpsLogger (Additional Severity Levels)
-
-For operational severity beyond standard SLF4J levels:
 
 ```java
 import no.entur.logging.cloud.api.DevOpsLogger;
@@ -204,12 +189,12 @@ management:
 
 ### Health Checks
 
-Spring Boot Actuator provides the health endpoints expected by Kubernetes:
+Spring Boot Actuator provides Kubernetes health endpoints:
 
 - Liveness: `/actuator/health/liveness`
 - Readiness: `/actuator/health/readiness`
 
-These are the defaults in the Entur common Helm chart. Do not change these paths unless you also update the Helm values.
+These are defaults in the Entur common Helm chart. Do not change unless you also update Helm values.
 
 ## Coding Patterns
 
@@ -324,14 +309,11 @@ class RouteServiceTest {
     @Test
     @DisplayName("findById returns route when it exists")
     void findById_existingRoute_returnsRoute() {
-        // Arrange
         Route route = TestFixtures.aRoute().build();
         when(routeRepository.findById("route-1")).thenReturn(Optional.of(route));
 
-        // Act
         Optional<RouteResponse> result = routeService.findById("route-1");
 
-        // Assert
         assertThat(result).isPresent();
         assertThat(result.get().id()).isEqualTo("route-1");
     }
@@ -379,25 +361,24 @@ class RouteRepositoryIntegrationTest {
 
 ## Redis (Memorystore)
 
-Entur uses **Google Memorystore for Redis** as a managed key-value store. Infrastructure is provisioned via the `terraform-google-memorystore` Terraform module (see [terraform/modules.md](terraform/modules.md#memorystore-redis)). Connection credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) are injected via Kubernetes secrets.
+Entur uses **Google Memorystore for Redis** as a managed key-value store. Infrastructure via `terraform-google-memorystore` (see [terraform/modules.md](terraform/modules.md#memorystore-redis)). Credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) injected via Kubernetes secrets.
 
 ### When to Use Redis
 
 | Use Case | Redis? | Notes |
 |----------|--------|-------|
-| Caching (HTTP responses, DB queries) | Yes | Primary use case. Reduces load on PostgreSQL |
+| Caching (HTTP responses, DB queries) | Yes | Primary use case |
 | Session storage | Yes | Shared sessions across pods |
 | Rate limiting / counters | Yes | Atomic `INCR` with TTL |
 | Distributed locks | Yes | Use Redisson or Spring Integration |
 | Idempotency keys (Kafka dedup) | Yes | `SET key value NX EX ttl` pattern |
-| Primary data store | **No** | Use PostgreSQL. Redis is not durable by default |
+| Primary data store | **No** | Use PostgreSQL |
 | Complex queries / joins | **No** | Use PostgreSQL |
 | Large objects (> 1 MB) | **No** | Use Cloud Storage |
 
 ### Dependencies
 
 ```kotlin
-// build.gradle.kts
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
@@ -406,26 +387,25 @@ dependencies {
 ### Configuration
 
 ```yaml
-# application.yml
 spring:
   data:
     redis:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD}
-      timeout: 2000ms              # connection + command timeout
-      connect-timeout: 1000ms      # TCP connection timeout
+      timeout: 2000ms
+      connect-timeout: 1000ms
       lettuce:
         pool:
-          max-active: 8            # max concurrent connections
+          max-active: 8
           max-idle: 8
           min-idle: 2
-          max-wait: 1000ms         # max wait for a connection from the pool
+          max-wait: 1000ms
 ```
 
 ### Spring Cache Abstraction
 
-The simplest approach -- use `@Cacheable` annotations with Redis as the backing store:
+Use `@Cacheable` annotations with Redis as the backing store:
 
 ```java
 @Configuration
@@ -448,7 +428,7 @@ public class CacheConfig {
         return RedisCacheManager.builder(factory)
             .cacheDefaults(cacheConfiguration())
             .withCacheConfiguration("routes",
-                cacheConfiguration().entryTtl(Duration.ofHours(1)))   // per-cache TTL
+                cacheConfiguration().entryTtl(Duration.ofHours(1)))
             .withCacheConfiguration("stops",
                 cacheConfiguration().entryTtl(Duration.ofMinutes(30)))
             .build();
@@ -479,7 +459,7 @@ public class RouteService {
 
 ### Direct RedisTemplate Usage
 
-For more control (counters, locks, sets, hashes):
+For counters, locks, sets, hashes:
 
 ```java
 @Component
@@ -504,8 +484,6 @@ public class RateLimiter {
 
 ### Key Naming Conventions
 
-Use a consistent prefix scheme to avoid collisions and enable monitoring:
-
 ```text
 {app}:{domain}:{id}           -- entity cache
 {app}:rate:{clientId}          -- rate limiting
@@ -517,16 +495,16 @@ Examples: `products-api:route:ENT:Route:123`, `products-api:rate:partner-xyz`
 
 ### Best Practices
 
-- **Always set TTLs** -- never store keys without expiration. Unbounded growth will exhaust memory and cause eviction of other keys.
-- **Use `allkeys-lfu`** eviction policy (configured in Terraform) -- least-frequently-used keys are evicted first when memory is full.
-- **Keep values small** -- serialize to JSON, avoid storing entire entity graphs. Aim for < 100 KB per key.
-- **Use `NX` (set-if-not-exists)** for distributed locks and idempotency: `SET key value NX EX 60`.
-- **Handle failures gracefully** -- Redis is a cache, not a primary store. If Redis is unavailable, fall back to the database. Never let a Redis outage cause the application to fail.
-- **Avoid `KEYS *`** in production -- it blocks the single-threaded Redis server. Use `SCAN` for iteration.
-- **Use pipelining** for batch operations to reduce round trips.
-- **Namespace keys** with the application name to avoid collisions when multiple apps share a Redis instance.
-- **Monitor memory** -- set alerts on `used_memory` vs `maxmemory`. See [observability.md](observability.md) for metrics and alerting.
-- **Do not use Redis as a message queue** -- use Kafka instead. Redis Pub/Sub has no persistence or delivery guarantees.
+- **Always set TTLs** -- unbounded growth exhausts memory
+- **Use `allkeys-lfu`** eviction policy (configured in Terraform)
+- **Keep values small** -- JSON, aim for < 100 KB per key
+- **Use `NX` (set-if-not-exists)** for distributed locks and idempotency
+- **Handle failures gracefully** -- Redis is a cache, not primary store. Fall back to DB on failure
+- **Avoid `KEYS *`** in production -- blocks Redis. Use `SCAN` instead
+- **Use pipelining** for batch operations
+- **Namespace keys** with app name to avoid collisions
+- **Monitor memory** -- alert on `used_memory` vs `maxmemory` (see [observability.md](observability.md))
+- **Do not use Redis as a message queue** -- use Kafka. Redis Pub/Sub has no persistence
 
 ### Testing
 
@@ -565,10 +543,9 @@ class RouteControllerTest {
 
 ## Artifactory (JFrog)
 
-Entur uses JFrog Artifactory as the artifact repository for internal packages. Configure Gradle to resolve from Artifactory:
+Configure Gradle to resolve from Entur's JFrog Artifactory:
 
 ```kotlin
-// build.gradle.kts
 repositories {
     val entur_artifactory_user: String? by project
     val entur_artifactory_password: String? by project
@@ -584,32 +561,30 @@ repositories {
 }
 ```
 
-Set credentials locally in `$HOME/.gradle/gradle.properties` or as environment variables. In GitHub Actions, use the organization secrets `ARTIFACTORY_AUTH_USER` and `ARTIFACTORY_AUTH_TOKEN`.
+Credentials: `$HOME/.gradle/gradle.properties` locally, or `ARTIFACTORY_AUTH_USER`/`ARTIFACTORY_AUTH_TOKEN` org secrets in GitHub Actions.
 
 ## Spring MVC vs WebFlux
 
-**Default to Spring MVC** unless you have a demonstrated need for high-concurrency I/O.
+**Default to Spring MVC** unless you need high-concurrency I/O with an end-to-end non-blocking stack (R2DBC, reactive HTTP clients).
 
-Choose **WebFlux** when the entire stack can be end-to-end non-blocking (R2DBC, reactive HTTP clients) and you need efficient handling of many concurrent I/O operations, streaming, SSE, or WebSockets.
-
-Choose **MVC** when the stack is mostly blocking (JDBC/JPA, legacy SDKs), workloads are CPU-bound, or the team prefers imperative code. MVC has a lower learning curve, more intuitive debugging, and broader library compatibility.
-
-Risks of WebFlux: steep learning curve (Mono/Flux, backpressure), harder debugging (reactive stack traces), testing complexity (StepVerifier), and mixing blocking code with reactive degrades performance.
+- **WebFlux**: streaming, SSE, WebSockets, many concurrent I/O ops
+- **MVC**: blocking stack (JDBC/JPA), CPU-bound, simpler debugging, broader library support
+- **Risks of WebFlux**: steep learning curve, harder debugging, testing complexity, blocking code degrades performance
 
 ## Connection Pool Sizing
 
-When using HPA with Cloud SQL, total database connections = `number_of_pods * max_pool_size_per_pod`. HikariCP defaults to a pool size of 10. With 5 pods: `5 * 10 = 50` connections consumed.
+Total DB connections = `number_of_pods * max_pool_size_per_pod`. HikariCP defaults to pool size 10. With 5 pods: `5 * 10 = 50` connections.
 
-Each connection consumes RAM on the database. Ensure the Cloud SQL instance tier's `max_connections` (minus 3 reserved for superuser) can handle the worst-case HPA pod count. See [Terraform modules](terraform/modules.md) for Cloud SQL instance sizing.
+Ensure Cloud SQL `max_connections` (minus 3 reserved) handles worst-case HPA pod count. See [Terraform modules](terraform/modules.md) for Cloud SQL sizing.
 
 ## Rate Limiting
 
-Under heavy load, all threads can become busy waiting for database connections, causing HTTP 503 errors. Implement rate limiting to protect the service:
+Under heavy load, threads can block waiting for DB connections, causing HTTP 503. Options:
 
-- **Spring approach**: Extend `OncePerRequestFilter` to create a QoS filter that returns HTTP 503 when requests exceed a per-second limit
-- **Resilience4j approach**: Use `@RateLimiter` annotation from Resilience4j
+- **Spring**: `OncePerRequestFilter` QoS filter returning 503 when rate exceeded
+- **Resilience4j**: `@RateLimiter` annotation
 
-The **client-side connection timeout must be shorter than the server-side timeout** to ensure clients are properly notified of errors.
+Client-side connection timeout must be shorter than server-side timeout.
 
 ## Dependencies
 
@@ -627,13 +602,13 @@ The **client-side connection timeout must be shorter than the server-side timeou
 | `spring-cloud-gcp-starter-secretmanager` | Secret Manager integration |
 | `flyway-core` | Database migrations |
 | `postgresql` | PostgreSQL driver |
-| `org.entur.data:entur-kafka-spring-starter` | Kafka producer/consumer with Aiven defaults ([docs](kafka.md)) |
-| `org.entur.openapi:entur-springdoc-starter` | Entur OpenAPI extensions for springdoc ([docs](api-design.md#entur-springdoc-starter)) |
+| `org.entur.data:entur-kafka-spring-starter` | Kafka producer/consumer ([docs](kafka.md)) |
+| `org.entur.openapi:entur-springdoc-starter` | OpenAPI extensions ([docs](api-design.md#entur-springdoc-starter)) |
 | `org.entur.metrics:metrics-spring-boot-starter` | Prometheus metrics with Entur defaults ([docs](observability.md#entur-metrics-starter-spring-boot)) |
 
 ### Cloud SQL Connectivity
 
-When using Cloud SQL, the application connects via the Cloud SQL proxy sidecar (configured in Helm). Configure the datasource to connect to `localhost`:
+Connects via Cloud SQL proxy sidecar (configured in Helm):
 
 ```yaml
 spring:
@@ -643,4 +618,4 @@ spring:
     password: ${PG_PASSWORD}
 ```
 
-The `PG_USER`, `PG_PASSWORD`, and `DB_NAME` values come from Kubernetes secrets created by the Terraform `terraform-google-sql-db` module.
+`PG_USER`, `PG_PASSWORD`, `DB_NAME` come from Kubernetes secrets created by `terraform-google-sql-db`.

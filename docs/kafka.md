@@ -1,8 +1,8 @@
 # Kafka / Event Streaming
 
-Entur uses **Apache Kafka** hosted on **Aiven** for event streaming and asynchronous messaging between services. The standard library is **`entur-kafka-spring-starter`** (`org.entur.data:entur-kafka-spring-starter`), which provides Spring Boot autoconfiguration with sensible defaults.
+Entur uses **Apache Kafka** on **Aiven** for event streaming. The standard library is **`entur-kafka-spring-starter`** (`org.entur.data:entur-kafka-spring-starter`), providing Spring Boot autoconfiguration with sensible defaults.
 
-For advanced Kafka topics (error handling strategies, operational patterns), see the [Data Handbook](https://enturas.atlassian.net/wiki/spaces/TD/pages/4962451517/2+-+Data+Streaming+Kafka).
+For advanced topics, see the [Data Handbook](https://enturas.atlassian.net/wiki/spaces/TD/pages/4962451517/2+-+Data+Streaming+Kafka).
 
 ## When to Use Kafka vs REST
 
@@ -15,7 +15,7 @@ For advanced Kafka topics (error handling strategies, operational patterns), see
 
 ### Aiven Clusters
 
-Entur operates separate Kafka clusters per environment, each with internal (VPC-peered) and public endpoints:
+Separate clusters per environment, each with internal (VPC-peered) and public endpoints:
 
 | Cluster Enum | Use When | Environment |
 |-------------|----------|-------------|
@@ -26,15 +26,15 @@ Entur operates separate Kafka clusters per environment, each with internal (VPC-
 | `AIVEN_PUBLIC_PROD_INT` | App runs locally or outside VPC | Production |
 | `AIVEN_PROD_EXT` | External partner access | Production |
 
-**Rule**: Use `*_INT` clusters for apps running in the corresponding Kubernetes environment. Use `*_PUBLIC_*_INT` for local development or apps running outside the VPC. Use `*_EXT` clusters only for external partner integrations.
+**Rule**: `*_INT` for apps in the corresponding K8s environment. `*_PUBLIC_*_INT` for local dev or outside VPC. `*_EXT` only for external partners.
 
 ### Authentication
 
-All clusters use **SASL/SCRAM-SHA-512** authentication over TLS (`SASL_SSL` security protocol). Credentials (username/password) are provisioned per service and must be stored in **Google Secret Manager**, referenced via ExternalSecrets in Helm -- never hardcode them.
+All clusters use **SASL/SCRAM-SHA-512** over TLS (`SASL_SSL`). Credentials are provisioned per service and must be stored in **Google Secret Manager** via ExternalSecrets in Helm -- never hardcode them.
 
 ### Schema Registry
 
-Each cluster has an associated **Confluent Schema Registry** for Avro and Protobuf schema management. The schema registry URL is automatically resolved from the cluster enum. Authentication uses the same SASL credentials as basic auth.
+Each cluster has a **Confluent Schema Registry** for Avro and Protobuf. The URL is auto-resolved from the cluster enum. Auth uses the same SASL credentials as basic auth.
 
 ## Dependency Setup
 
@@ -52,11 +52,11 @@ dependencies {
 }
 ```
 
-The starter is published to Entur's JFrog Artifactory. Check [Artifactory](https://entur2.jfrog.io) for the latest version. See [java.md](java.md#artifactory-jfrog) for repository configuration.
+Published to Entur's [JFrog Artifactory](https://entur2.jfrog.io). See [java.md](java.md#artifactory-jfrog) for repository configuration.
 
 ## Configuration
 
-All configuration is under the `entur.kafka` prefix. The starter autoconfigures both producer and consumer beans.
+All config is under the `entur.kafka` prefix. The starter autoconfigures both producer and consumer beans.
 
 ### Minimal Configuration
 
@@ -73,7 +73,7 @@ entur:
 
 ### Per-Environment Configuration
 
-Use Spring profiles to select the correct cluster per environment:
+Use Spring profiles to select the correct cluster:
 
 ```yaml
 # application.yml (shared)
@@ -116,7 +116,7 @@ entur:
 
 ### Separate Producer/Consumer Clusters
 
-If you need to produce to a different cluster than you consume from (e.g., cross-environment replication):
+For producing to a different cluster than consuming from:
 
 ```yaml
 entur:
@@ -141,13 +141,13 @@ entur:
       enabled: false   # disable producer beans (e.g., consumer-only service)
 ```
 
-Note: DLT functionality requires the producer to be enabled (it produces to DLT topics).
+Note: DLT functionality requires the producer to be enabled.
 
 ## Producing Messages
 
 ### Standard Producer (Avro, String Keys)
 
-The most common pattern -- Avro-serialized values with string keys:
+Most common pattern -- Avro values with string keys:
 
 ```kotlin
 @Component
@@ -168,7 +168,7 @@ class OrderEventProducer(
 }
 ```
 
-The `correlationId` parameter is added as an `X-Correlation-Id` header automatically.
+The `correlationId` is added as an `X-Correlation-Id` header automatically.
 
 ### Avro-Keyed Producer
 
@@ -185,7 +185,7 @@ class MyProducer(
 }
 ```
 
-Remember to configure the key serializer/deserializer:
+Requires key serializer config:
 
 ```yaml
 entur:
@@ -195,8 +195,6 @@ entur:
 ```
 
 ### Protobuf Producer
-
-For Protocol Buffers values:
 
 ```kotlin
 @Component
@@ -209,7 +207,7 @@ class ProtobufProducer(
 }
 ```
 
-Configure the value serializer:
+Requires value serializer config:
 
 ```yaml
 entur:
@@ -286,7 +284,7 @@ class OrderEventListener {
 }
 ```
 
-**Important**: Always use `containerFactory = "enturListenerFactory"` -- this is the factory bean provided by the starter with all Entur defaults applied.
+**Important**: Always use `containerFactory = "enturListenerFactory"` -- the factory with all Entur defaults.
 
 ### Avro-Keyed Consumer
 
@@ -302,6 +300,8 @@ fun onEvent(
 
 ### Protobuf Consumer
 
+Uses a different container factory: `enturSpecificProtobufConsumerFactory`.
+
 ```kotlin
 @KafkaListener(topics = ["proto-topic"], containerFactory = "enturSpecificProtobufConsumerFactory")
 fun onProtoEvent(
@@ -311,10 +311,6 @@ fun onProtoEvent(
     process(message)
 }
 ```
-
-Note the different container factory: `enturSpecificProtobufConsumerFactory`.
-
-Configure the value deserializer and specific message type:
 
 ```yaml
 entur:
@@ -326,7 +322,7 @@ entur:
 
 ### GenericRecord Consumer
 
-For schemaless or dynamically typed topics:
+For schemaless or dynamically typed topics. Set `useSpecificAvro: false`:
 
 ```kotlin
 @KafkaListener(topics = ["generic-topic"], containerFactory = "enturListenerFactory")
@@ -335,8 +331,6 @@ fun onGenericEvent(@Payload message: ConsumerRecord<Any, Any>) {
     process(value)
 }
 ```
-
-Set `useSpecificAvro: false` for GenericRecord consumption:
 
 ```yaml
 entur:
@@ -361,7 +355,7 @@ entur:
 
 ### Standalone Consumer (No Consumer Group)
 
-For consumers that must read all partitions independently (no group coordination):
+For consumers that must read all partitions independently:
 
 ```kotlin
 @KafkaListener(
@@ -377,8 +371,6 @@ fun onEvent(
     process(message)
 }
 ```
-
-Required configuration for standalone consumers:
 
 ```yaml
 entur:
@@ -399,7 +391,7 @@ spring:
 
 ### Non-Blocking Retry with DLT
 
-The starter supports **non-blocking retry** using separate retry topics with exponential backoff. Failed messages are moved to retry topics, allowing the consumer to continue processing other messages.
+The starter supports **non-blocking retry** using separate retry topics with exponential backoff. Failed messages move to retry topics, allowing the consumer to continue processing.
 
 ```yaml
 entur:
@@ -416,11 +408,11 @@ entur:
       useSamePartition: false              # let Kafka choose partition on retry topics
 ```
 
-**Retry topic naming**: For a topic `order-events`, retry topics are named `order-events-retry-0`, `order-events-retry-1`, etc., with a final DLT topic `order-events-dlt`.
+Retry topic naming: `order-events` → `order-events-retry-0`, `order-events-retry-1`, ..., `order-events-dlt`.
 
 ### Blocking Retry for Transient Errors
 
-For errors where all messages would fail (e.g., a downstream service being down), use blocking retries to pause consumption rather than flooding retry topics:
+For errors where all messages would fail (e.g., downstream service down), use blocking retries to pause consumption:
 
 ```yaml
 entur:
@@ -436,7 +428,7 @@ entur:
 
 ### Fatal Exceptions (Skip to DLT)
 
-For exceptions that should never be retried:
+Exceptions that should never be retried:
 
 ```yaml
 entur:
@@ -449,8 +441,6 @@ entur:
 
 ### DLT Handler
 
-To process messages that land in the DLT:
-
 ```kotlin
 @Component
 class OrderDltHandler {
@@ -460,8 +450,6 @@ class OrderDltHandler {
     }
 }
 ```
-
-Configure in YAML:
 
 ```yaml
 entur:
@@ -473,7 +461,7 @@ entur:
 
 ### Manual Retry/DLT with Annotations
 
-If the starter's retry configuration is insufficient, use Spring Kafka annotations directly (set `entur.kafka.retry.enabled: false`):
+If the starter's retry config is insufficient, use Spring Kafka annotations directly (set `entur.kafka.retry.enabled: false`):
 
 ```kotlin
 @RetryableTopic(kafkaTemplate = "enturKafkaTemplate")
@@ -493,8 +481,6 @@ fun onDlt(@Payload event: MyEvent) {
 
 ### Custom Retry Exception Logging
 
-Override the default retry exhaustion logging:
-
 ```kotlin
 @Bean
 fun customRetryExceptionLogger() = CustomRetryExceptionLogger { exception, consumerRecord, nextDestination ->
@@ -506,7 +492,7 @@ fun customRetryExceptionLogger() = CustomRetryExceptionLogger { exception, consu
 
 ### Handling Deserialization Errors
 
-Messages that fail to deserialize never reach the listener. To route these to the DLT, configure the list of expected Avro classes:
+Messages that fail deserialization never reach the listener. Configure expected Avro classes to route these to the DLT:
 
 ```yaml
 entur:
@@ -516,11 +502,11 @@ entur:
       - "org.entur.myapp.PaymentEvent"
 ```
 
-This enables a `DelegatingByTypeSerializer` that can publish the raw bytes to the DLT. **Keep this list up to date** -- missing types will cause the error handler to fail.
+This enables a `DelegatingByTypeSerializer` for DLT publishing. **Keep this list up to date** -- missing types cause the error handler to fail.
 
 ### Custom Error Handler
 
-For fully custom error handling, provide a bean named `enturCustomErrorHandler`:
+Provide a bean named `enturCustomErrorHandler` for fully custom error handling (overrides all defaults including retry topic naming):
 
 ```kotlin
 @Bean(name = ["enturCustomErrorHandler"])
@@ -533,13 +519,9 @@ fun enturCustomErrorHandler(): CommonErrorHandler =
     )
 ```
 
-Note: This overrides all default error handling including retry topic naming.
-
 ## Avro Schema Management
 
-### Generating Classes from Schemas
-
-Use the Gradle Avro plugin to generate Java/Kotlin classes from `.avsc` files:
+Place `.avsc` schema files in `src/main/avro/`. The Gradle Avro plugin generates classes during compilation:
 
 ```kotlin
 plugins {
@@ -547,17 +529,11 @@ plugins {
 }
 ```
 
-Place `.avsc` schema files in `src/main/avro/`. The plugin generates classes during compilation.
-
-### Schema Registry
-
-The starter automatically configures the Confluent Schema Registry client based on the selected cluster. Schema compatibility is enforced at the registry level -- schemas must be backward-compatible by default.
+The starter auto-configures the Confluent Schema Registry client based on the selected cluster. Schemas must be backward-compatible by default (enforced at the registry level).
 
 ## Testing
 
 ### Unit/Integration Test Configuration
-
-For tests using embedded Kafka or Testcontainers:
 
 ```yaml
 # application-test.yml
@@ -574,7 +550,7 @@ entur:
       group: "test-group"
 ```
 
-Override `bootstrapServer` and `schemaRegistryUrl` directly for test environments -- this takes precedence over `kafkaCluster`.
+Override `bootstrapServer` and `schemaRegistryUrl` directly -- takes precedence over `kafkaCluster`.
 
 ### Testcontainers with Kafka
 
@@ -600,11 +576,11 @@ class KafkaIntegrationTest {
 
 ## Redis as Kafka State Store
 
-Redis (Memorystore) is commonly paired with Kafka consumers for deduplication, state caching, and idempotent processing. For Redis infrastructure setup, see [terraform/modules.md](terraform/modules.md#memorystore-redis). For general Redis usage patterns, see [java.md](java.md#redis-memorystore) or [go.md](go.md#redis-memorystore).
+Redis (Memorystore) is commonly paired with Kafka consumers for deduplication, state caching, and idempotent processing. For Redis infrastructure, see [terraform/modules.md](terraform/modules.md#memorystore-redis). For general Redis patterns, see [java.md](java.md#redis-memorystore) or [go.md](go.md#redis-memorystore).
 
 ### Idempotent Consumer (Deduplication)
 
-Kafka provides at-least-once delivery, meaning consumers may receive the same message more than once. Use Redis `SET NX EX` to track processed message IDs and skip duplicates:
+Kafka provides at-least-once delivery. Use Redis `SET NX EX` to deduplicate:
 
 ```kotlin
 @Component
@@ -634,11 +610,11 @@ class OrderEventListener(
 }
 ```
 
-**TTL guidance**: Set the deduplication key TTL to at least the maximum expected redelivery window. 24 hours is a safe default. If your retry/DLT configuration retries for at most 2 hours, a 4-hour TTL is sufficient.
+**TTL guidance**: Set dedup key TTL to at least the max expected redelivery window. 24h is a safe default; if retry/DLT retries for at most 2h, 4h TTL suffices.
 
 ### Consumer State Cache
 
-When a consumer needs to enrich events with reference data, use Redis to cache lookups and avoid repeated database queries:
+Cache reference data lookups to avoid repeated DB queries:
 
 ```kotlin
 @Component
@@ -672,86 +648,17 @@ class EnrichmentListener(
 
 ### Best Practices for Redis + Kafka
 
-- **Always use TTLs** on deduplication and cache keys -- Kafka consumer patterns can generate large volumes of keys.
-- **Handle Redis failures gracefully** -- if Redis is down, either process the message (risking duplicates) or throw to trigger Kafka retry. Choose based on your idempotency requirements.
-- **Use the event ID or Kafka offset as the dedup key** -- `{topic}:{partition}:{offset}` is naturally unique.
-- **Do not use Redis as a Kafka replacement** -- Redis Pub/Sub has no persistence, no consumer groups, and no delivery guarantees.
-- **Namespace keys** with the application name to avoid collisions: `myapp:dedup:`, `myapp:cache:`.
+- **Always use TTLs** -- Kafka consumer patterns generate large volumes of keys
+- **Handle Redis failures gracefully** -- if Redis is down, either process (risking duplicates) or throw to trigger Kafka retry, based on idempotency requirements
+- **Use event ID or Kafka offset as dedup key** -- `{topic}:{partition}:{offset}` is naturally unique
+- **Do not use Redis as a Kafka replacement** -- Redis Pub/Sub has no persistence, no consumer groups, no delivery guarantees
+- **Namespace keys** with app name to avoid collisions: `myapp:dedup:`, `myapp:cache:`
 
 ## Observability
 
-The starter automatically registers **Micrometer/Prometheus** listeners on both producer and consumer factories when a `MeterRegistry` bean is present. This exposes standard Kafka client metrics (e.g., `kafka_producer_*`, `kafka_consumer_*`) to your Prometheus endpoint without additional configuration.
+The starter auto-registers **Micrometer/Prometheus** listeners on producer and consumer factories when a `MeterRegistry` bean is present. Standard Kafka client metrics (`kafka_producer_*`, `kafka_consumer_*`) are exposed without additional configuration.
 
-For additional Kafka consumer metrics (processing time via `@Timed` and consumption delay tracking), use the constants from the Entur metrics starter. See [observability.md](observability.md#kafka-consumer-metrics) for patterns and standard metric names.
-
-## Configuration Reference
-
-### Full Configuration Tree
-
-```yaml
-entur:
-  kafka:
-    kafkaCluster: "AIVEN_TEST_INT"              # cluster enum (sets bootstrap + schema registry)
-    producerCluster:                             # override cluster for producers only
-    bootstrapServer:                             # override bootstrap server (takes precedence over cluster)
-    producerBootstrapServer:                     # override bootstrap server for producers only
-    schemaRegistryUrl:                           # override schema registry URL
-    producerSchemaRegistryUrl:                   # override schema registry URL for producers only
-    schemaRegistryBasicAuth:                     # custom schema registry basic auth (username:password)
-    securityProtocol: "SASL_SSL"                 # SASL_SSL (default) or PLAINTEXT (testing)
-    keySerializer: "...StringSerializer"         # key serializer class
-    keyDeserializer: "...StringDeserializer"     # key deserializer class
-    valueSerializer: "...KafkaAvroSerializer"    # value serializer class
-    valueDeserializer: "...KafkaAvroDeserializer" # value deserializer class
-    avroSerializableClasses: []                  # explicit class list for deserialization error handling
-
-    sasl:
-      mechanism: "SCRAM-SHA-512"                 # SASL mechanism
-      module: "...ScramLoginModule"              # JAAS login module
-      username:                                  # SASL username
-      password:                                  # SASL password
-      producerUsername:                           # separate producer username
-      producerPassword:                           # separate producer password
-
-    consumer:
-      enabled: true
-      group:                                     # consumer group ID (null for standalone)
-      useSpecificAvro: true                      # true for SpecificRecord, false for GenericRecord
-      offsetReset:                               # "latest" or "earliest"
-      sessionTimeoutMs:                          # heartbeat timeout (ms)
-      maxPollIntervalMs:                         # max time between polls (ms)
-      maxPollRecords:                            # records per poll batch
-      enableAutoCommit:                          # automatic offset commits
-      specificProtobufMessageValue:              # protobuf message class name
-
-    producer:
-      enabled: true
-      acks:                                      # "0", "1", or "all"
-      retries:                                   # number of retries
-      enableIdempotence:                         # exactly-once per partition
-      transactionIdPrefix:                       # enables transactions
-      allowNonTransactional: true                # allow non-transactional sends when transactions enabled
-      maxInFlightRequests:                       # max unacknowledged requests
-      deliveryTimeoutMs:                         # max send timeout (ms)
-      compressionType:                           # none, gzip, snappy, lz4, zstd
-
-    retry:
-      enabled: false
-      retryTopics: []                            # empty = all topics
-      retryTopicsPrefix:                         # prefix for retry topic names
-      useSamePartition: false                    # maintain partition on retry
-      initialInterval: 5000                      # initial retry delay (ms)
-      intervalMultiplier: 5.0                    # exponential backoff multiplier
-      maxInterval: 125000                        # max retry delay (ms)
-      maxAttempts: 3                             # total attempts including original
-      blockingRetryExceptions: []                # exceptions for blocking retry
-      blockingInterval: 1000                     # blocking retry initial delay (ms)
-      blockingIntervalMultiplier: 5.0            # blocking retry backoff multiplier
-      maxBlockingInterval: 125000                # max blocking retry delay (ms)
-      fatalExceptions: []                        # exceptions that skip to DLT
-      dltHandlerBean:                            # bean name for DLT handler
-      dltHandlerMethod:                          # method name for DLT handler
-```
+For processing time (`@Timed`) and consumption delay tracking, see [observability.md](observability.md#kafka-consumer-metrics).
 
 ## Key Beans Provided
 

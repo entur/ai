@@ -1,20 +1,16 @@
 # Structured Logging Standards
 
-All Entur services must use structured logging in JSON format. This enables efficient log querying in Google Cloud Logging and correlation across distributed services.
+All services must produce structured JSON logs to stdout. GCP Cloud Logging automatically ingests stdout from Kubernetes pods.
 
-## Format
-
-All log output must be JSON, written to stdout. Google Cloud Logging automatically ingests stdout from Kubernetes pods.
-
-### Required Fields
+## Required Fields
 
 | Field | Description | Example |
 |-------|-------------|---------|
 | `timestamp` | ISO 8601 timestamp | `2025-01-15T10:30:00.123Z` |
 | `severity` / `level` | Log level | `INFO`, `WARN`, `ERROR` |
-| `message` / `msg` | Human-readable log message | `"Request processed"` |
+| `message` / `msg` | Human-readable message | `"Request processed"` |
 
-### Recommended Fields
+## Recommended Fields
 
 | Field | Description | Example |
 |-------|-------------|---------|
@@ -25,22 +21,20 @@ All log output must be JSON, written to stdout. Google Cloud Logging automatical
 | `application` | Application name | `my-application` |
 | `environment` | Runtime environment | `dev`, `tst`, `prd` |
 
-## Implementation by Language
+## Implementation
 
 ### Java / Kotlin (Spring Boot)
 
-Use [entur/cloud-logging](https://github.com/entur/cloud-logging) -- Entur's standard logging library for JVM applications. It provides plug-and-play structured JSON logging for GCP with no manual `logback.xml` configuration required.
+Use [entur/cloud-logging](https://github.com/entur/cloud-logging) -- plug-and-play structured JSON logging for GCP (no manual `logback.xml` needed):
 
 ```kotlin
-// build.gradle.kts -- add the BOM and GCP web starter
+// build.gradle.kts
 dependencies {
     implementation(platform("no.entur.logging.cloud:bom:$cloudLoggingVersion"))
     implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web")
     testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
 }
 ```
-
-Use standard SLF4J -- cloud-logging handles JSON output, GCP severity mapping, and correlation automatically:
 
 ```java
 import org.slf4j.Logger;
@@ -52,16 +46,11 @@ LOG.info("Route found for id {}", routeId);
 LOG.error("Failed to fetch route {}", routeId, exception);
 ```
 
-Optional features (add the corresponding starters):
-
-- **Request-response logging** (`request-response-spring-boot-starter-gcp-web`) -- Logbook-based HTTP body logging
-- **On-demand logging** (`on-demand-spring-boot-starter-gcp-web`) -- reduce logging costs by buffering and only flushing full logs for failed requests
-
-See [java.md](java.md) for full setup details.
+Optional starters: `request-response-spring-boot-starter-gcp-web` (Logbook HTTP body logging), `on-demand-spring-boot-starter-gcp-web` (buffer and flush only on failure). See [java.md](java.md) for full details.
 
 ### Go
 
-Use [entur/go-logging](https://github.com/entur/go-logging) -- Entur's standard logging SDK for Go on GCP:
+Use [entur/go-logging](https://github.com/entur/go-logging):
 
 ```go
 import "github.com/entur/go-logging"
@@ -70,11 +59,11 @@ logging.Info().Str("routeId", routeId).Str("origin", origin).Msg("route found")
 logging.Error().Err(err).Str("routeId", routeId).Msg("failed to fetch route")
 ```
 
-The SDK handles JSON output, caller location, and GCP-compatible log levels automatically. Default log level is read from the `LOG_LEVEL` environment variable (defaults to `warning` if unset). See [go.md](go.md) for full usage details.
+Handles JSON output, caller location, and GCP-compatible levels. Default level from `LOG_LEVEL` env var (defaults to `warning`). See [go.md](go.md) for full details.
 
 ### Python
 
-Use the standard `logging` module with JSON formatting:
+Use standard `logging` with JSON formatting:
 
 ```python
 import logging
@@ -102,22 +91,20 @@ logger.info("Route found", extra={"route_id": route_id, "origin": origin})
 
 ### Guidelines
 
-- **Production** should run at `INFO` level by default
-- **Never log secrets**, tokens, passwords, or PII (personally identifiable information)
-- **Never log payment details** (PCI-DSS compliance)
-- **Never log request/response bodies** at INFO level -- use DEBUG
-- **Log at the boundary**: log when entering/exiting the system (HTTP requests, message consumption), not inside every method
-- **Include context**: always include enough context to trace a log entry back to a specific request or operation
-- **Don't log and throw**: either log the error or propagate it, not both (to avoid duplicate log entries)
-- **Prevent log injection**: all logging components must appropriately encode user-supplied data to prevent log forging
-- Session tokens must only appear in logs in irreversible, hashed form
+- Production runs at `INFO` by default
+- **Never log** secrets, tokens, passwords, or PII
+- **Never log** payment details (PCI-DSS)
+- **Never log** request/response bodies at INFO -- use DEBUG
+- **Log at boundaries**: entering/exiting the system (HTTP requests, message consumption), not inside every method
+- **Include context**: enough to trace back to a specific request or operation
+- **Don't log and throw**: either log or propagate, not both
+- **Prevent log injection**: encode user-supplied data to prevent log forging
+- Session tokens in logs only in irreversible hashed form
 
 ### Security Events to Log
 
-Log these events for security monitoring and incident investigation:
-
 - Successful and failed authentication attempts
-- Access control failures (unauthorized access attempts)
+- Access control failures
 - Input validation failures
 - Deserialization failures
 - Application startup and shutdown
@@ -126,12 +113,12 @@ Log these events for security monitoring and incident investigation:
 
 ### Distributed Tracing
 
-- Spring Boot applications should use Micrometer Tracing to propagate trace context
-- Go applications should propagate the `X-Cloud-Trace-Context` header
-- Include `traceId` and `spanId` in all log entries for cross-service correlation
+- Spring Boot: use Micrometer Tracing for trace context propagation
+- Go: propagate `X-Cloud-Trace-Context` header
+- Include `traceId` and `spanId` in all log entries
 
 ### Request IDs
 
-- Generate a unique request ID at the ingress point if one is not present in the `X-Request-ID` header
-- Propagate the request ID through all downstream calls
-- Include the request ID in all log entries and error responses
+- Generate unique request ID at ingress if not in `X-Request-ID` header
+- Propagate through all downstream calls
+- Include in all log entries and error responses

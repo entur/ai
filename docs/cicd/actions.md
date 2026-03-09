@@ -2,7 +2,7 @@
 
 Reference: [entur/gha-meta](https://github.com/entur/gha-meta)
 
-In addition to reusable workflows, Entur provides composite actions for authentication and common tasks. These are used internally by the reusable workflows but can also be used directly in custom workflow steps.
+Composite actions for authentication and common tasks. Used internally by reusable workflows but available for custom steps.
 
 ## Available Actions
 
@@ -14,8 +14,6 @@ In addition to reusable workflows, Entur provides composite actions for authenti
 
 ## Cloud Authentication
 
-Authenticate with Google Cloud Platform:
-
 ```yaml
 steps:
   - uses: entur/gha-meta/.github/actions/cloud-auth@v1
@@ -23,11 +21,9 @@ steps:
       environment: dev
 ```
 
-This sets up Workload Identity Federation for secure, keyless authentication.
+Sets up Workload Identity Federation for keyless authentication.
 
 ## Kubernetes Authentication
-
-Authenticate with GKE:
 
 ```yaml
 steps:
@@ -38,22 +34,20 @@ steps:
 
 ## Docker Registry Authentication
 
-Authenticate with Google Artifact Registry:
-
 ```yaml
 steps:
   - uses: entur/gha-meta/.github/actions/docker-auth@v1
 ```
 
-## When to Use Composite Actions Directly
+## When to Use Directly
 
-Prefer the reusable workflows (`gha-docker`, `gha-helm`, `gha-terraform`) for standard operations. Use the composite actions directly only when:
+Prefer reusable workflows (`gha-docker`, `gha-helm`, `gha-terraform`) for standard operations. Use composite actions directly only when:
 
-- You need custom workflow steps that aren't covered by the reusable workflows
-- You need to combine authentication with custom commands in a single job
+- You need custom steps not covered by reusable workflows
+- You need auth combined with custom commands in a single job
 - You're building a new reusable workflow
 
-Example: custom deployment with kubectl:
+Example -- custom kubectl deployment:
 
 ```yaml
 jobs:

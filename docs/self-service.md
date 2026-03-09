@@ -1,55 +1,51 @@
 # Self-Service Platform Provisioning
 
-Entur's developer platform provides self-service capabilities for provisioning GCP projects, CI/CD pipelines, and application environments. You define YAML manifests in a `.entur/` directory in your repository and apply them through a GitOps-based pull request workflow.
+Define YAML manifests in `.entur/` and apply through a GitOps PR workflow.
 
 ## How It Works
 
-The self-service system uses a **Platform Orchestrator** that watches for manifest changes in pull requests:
-
-1. Create or modify YAML manifests in the `.entur/` folder of your repository.
-2. Open a pull request. The orchestrator validates the manifests and presents a **plan** (similar to `terraform plan`) showing proposed changes.
-3. Review the plan. If it looks correct, comment `entur apply` on the PR.
-4. Wait for the apply to succeed, then merge the PR.
+1. Create/modify YAML manifests in `.entur/`.
+2. Open a PR. The orchestrator validates and presents a **plan**.
+3. Comment `entur apply` on the PR.
+4. Wait for apply to succeed, then merge.
 
 ### Aborting or Rolling Back
 
-- **Not yet applied**: Simply close the PR.
-- **Already applied**: Revert the manifest change, run `entur apply` again, then merge or close the PR.
+- **Not yet applied**: Close the PR.
+- **Already applied**: Revert the manifest, run `entur apply` again, then merge/close.
 
 ### GitHub Repository Requirements
 
-By default the Platform Orchestrator has read/write access to all repositories in the Entur organization. If you use Repository Rulesets (restrict pushes, etc.), you must add a bypass for the **Platform Orchestrator** GitHub application on each rule.
+If you use Repository Rulesets, add a bypass for the **Platform Orchestrator** GitHub application on each rule.
 
 ## Manifest Kinds
 
-There are two categories of manifests. The **GitHub manifest** must be applied before any **Application manifest**.
+The **GitHub manifest** must be applied before any **Application manifest**.
 
 | Kind | apiVersion | Purpose |
 |------|-----------|---------|
-| `GitHubActions` | `orchestrator.entur.io/github/v1` | Configures GCP Workload Identity and GitHub environments for CI/CD |
-| `GoogleCloudApplication` | `orchestrator.entur.io/apps/v1` | Provisions GCP projects for containerized K8s applications |
-| `GoogleCloudFirebaseApplication` | `orchestrator.entur.io/apps/v1` | Provisions GCP projects for Firebase applications |
-| `GoogleCloudDataProject` | `orchestrator.entur.io/apps/v1` | Provisions GCP projects for data workloads |
-
-> **Note:** The `metadata.id` field has different constraints per kind. For `GitHubActions`, it must match the GitHub repository name (1--63 chars, alphanumeric plus `-`, `_`, `.`). For Application kinds, it is the "App ID" (3--10 lowercase alphanumeric chars only). See the reference sections below for full validation rules.
+| `GitHubActions` | `orchestrator.entur.io/github/v1` | GCP Workload Identity + GitHub environments for CI/CD |
+| `GoogleCloudApplication` | `orchestrator.entur.io/apps/v1` | GCP projects for containerized K8s apps |
+| `GoogleCloudFirebaseApplication` | `orchestrator.entur.io/apps/v1` | GCP projects for Firebase apps |
+| `GoogleCloudDataProject` | `orchestrator.entur.io/apps/v1` | GCP projects for data workloads |
 
 ### File Conventions
 
-- Manifests live in `.entur/` at the repository root
+- Manifests live in `.entur/` at repository root
 - One YAML document per file (no multi-doc `---`)
 - Default naming: `.entur/<metadata.id>.yaml`
 
 ## Getting Started
 
-This section walks through the most common setup: a containerized application on Kubernetes in Google Cloud.
+Common setup: containerized application on Kubernetes in Google Cloud.
 
 ### Prerequisites
 
 - Read the [DevOps Handbook](https://enturnett.atlassian.net/wiki/spaces/ESP/overview) Plan section
-- Onboard to GitHub and create a repository for your application
-- Build a basic web application that listens on TCP port `8080` and returns HTTP `200 OK` on:
-  - `GET /actuator/health/liveness`
-  - `GET /actuator/health/readiness`
+- Onboard to GitHub and create a repository
+- Build a web application listening on port `8080` with:
+  - `GET /actuator/health/liveness` → HTTP 200
+  - `GET /actuator/health/readiness` → HTTP 200
 
 ### Step 1: Create the GitHub Manifest
 
@@ -86,13 +82,10 @@ spec:
 
 ### Step 3: Apply via PR
 
-1. Commit both files to a new branch (for example `application-init`).
-2. Push and open a pull request targeting your main branch.
-3. Wait for the plan output on both manifests. Review the proposed changes.
-4. Comment `entur apply` on the PR.
-5. Wait for successful apply status, then merge.
-
-You can now build and deploy using GitHub Actions across `dev`, `tst`, and `prd` environments.
+1. Commit both files to a new branch.
+2. Push and open a PR targeting main.
+3. Review the plan output, then comment `entur apply`.
+4. Wait for successful apply, then merge.
 
 ### Next Steps
 
@@ -105,53 +98,21 @@ You can now build and deploy using GitHub Actions across `dev`, `tst`, and `prd`
 
 ## GitHubActions Manifest Reference
 
-The `GitHubActions` kind configures GCP Workload Identity and GitHub environments for CI/CD access.
+Configures GCP Workload Identity and GitHub environments for CI/CD.
 
 ### GitHubActions Fields
 
-#### `apiVersion` (required)
-
-Must be `orchestrator.entur.io/github/v1`.
-
-#### `kind` (required)
-
-Must be `GitHubActions`.
-
-#### `metadata.id` (required, immutable)
-
-- Type: `string`
-- Length: 1--63
-- Pattern: `^[A-Za-z0-9_.-]+$`
-- **Must match the GitHub repository name exactly**
-
-If the repository is renamed, delete this manifest and create a new one with the updated name.
-
-#### `metadata.trigger` (optional)
-
-- Type: `integer` (Unix timestamp in seconds)
-- Default: current timestamp
-- Range: `1`--`9999999999`
-
-Change this value to force the orchestrator to re-apply infrastructure without other manifest changes. Useful when you accidentally merge without running `entur apply`.
-
-#### `spec.environments` (optional)
-
-- Type: `array`
-- Valid values: `dev`, `tst`, `prd`
-- Default: `["dev", "tst", "prd"]`
-- Values must be unique
-
-GitHub environments and GCP Workload Identity credentials are provisioned for each listed environment. If set, must match environments in the linked Application manifest.
-
-### GitHubActions Validation Rules
-
-- `metadata.id` must be 1--63 characters, alphanumeric plus `-`, `_`, `.`
-- Environment names must be `dev`, `tst`, or `prd`
-- Environment list must contain unique values
+| Field | Required | Type | Constraints |
+|-------|----------|------|-------------|
+| `apiVersion` | yes | | Must be `orchestrator.entur.io/github/v1` |
+| `kind` | yes | | Must be `GitHubActions` |
+| `metadata.id` | yes (immutable) | string | 1--63 chars, `^[A-Za-z0-9_.-]+$`. **Must match the GitHub repository name.** If repo is renamed, delete and recreate this manifest. |
+| `metadata.trigger` | no | integer | Unix timestamp (1--9999999999). Change to force re-apply without other manifest changes. |
+| `spec.environments` | no | array | Values from `dev`, `tst`, `prd` (unique). Default: all three. Must match linked Application manifest. |
 
 ### GitHubActions Examples
 
-Minimal (uses defaults -- all three environments):
+Minimal (defaults to all three environments):
 
 ```yaml
 apiVersion: orchestrator.entur.io/github/v1
@@ -191,23 +152,23 @@ spec:
 
 ## Application Manifest Reference
 
-Application manifests provision GCP projects and related resources. Three kinds are supported: `GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, and `GoogleCloudDataProject`.
+Provisions GCP projects and related resources. Three kinds: `GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`.
 
 ### Application Fields
 
-- **`apiVersion`** (required): Must be `orchestrator.entur.io/apps/v1`
-- **`kind`** (required): One of `GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`
+- **`apiVersion`** (required): `orchestrator.entur.io/apps/v1`
+- **`kind`** (required): One of the three kinds above
 
 #### `metadata` (required)
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| `id` | string | yes | 3--10 chars, `^[a-z0-9]+$`, must NOT end with `sbx\|dev\|tst\|test\|prd\|prod`, must NOT start with `ent-`. **Immutable -- changing this is destructive.** |
+| `id` | string | yes | 3--10 chars, `^[a-z0-9]+$`, must NOT end with `sbx\|dev\|tst\|test\|prd\|prod`, must NOT start with `ent-`. **Immutable -- changing deletes and recreates GCP projects.** |
 | `displayName` | string | yes | Human-friendly name |
-| `name` | string | yes | 3--30 chars, `^[a-z0-9-]+$`. Becomes the Kubernetes namespace. Changing is disruptive (namespace rename, pod restarts). |
+| `name` | string | yes | 3--30 chars, `^[a-z0-9-]+$`. Becomes K8s namespace. **Changing is disruptive** (namespace rename, pod restarts). |
 | `owner` | string | yes | Must start with `team-` |
 | `trigger` | integer | no | Unix timestamp to force re-apply |
-| `domain` | string | no | Deprecated -- avoid unless explicitly needed |
+| `domain` | string | no | Deprecated -- avoid |
 
 #### `spec.environments` (required)
 
@@ -215,11 +176,9 @@ One or more of: `dev`, `tst`, `prd`.
 
 #### `spec.repositories` (recommended)
 
-List of GitHub repository names that can deploy to this application. Required for GitHub Actions to have CI/CD permissions to the application's GCP projects.
+GitHub repository names that can deploy to this application. Required for CI/CD permissions.
 
 ### Optional spec Blocks
-
-These are the schema-defined properties available under `spec`:
 
 - `kubernetes.enabled`, `kubernetes.clusterGroup` (`entur` or `journeyPlanner`), `kubernetes.securityPolicy.level`, `kubernetes.networkPolicies.enabled|denyInternal|denyPublic|denyEgress|ingress.allowedNamespaces`
 - `terraform.createBackend`
@@ -240,21 +199,11 @@ For `GoogleCloudDataProject` only:
 
 - `dataAccess.external` (boolean)
 
-Both `metadata` and `spec` have `additionalProperties: false` -- do not introduce fields not listed above.
-
-### Application Validation Rules
-
-- `metadata.id`: 3--10 lowercase alphanumeric, no environment suffixes, no `ent-` prefix
-- `metadata.name`: 3--30 lowercase alphanumeric plus hyphens
-- `metadata.owner`: must start with `team-`
-- `spec.environments`: at least one of `dev`, `tst`, `prd`
-- Changing `metadata.id` is **destructive** (deletes and recreates GCP projects)
-- Changing `metadata.name` is **disruptive** (namespace rename, pod restarts)
+Both `metadata` and `spec` have `additionalProperties: false` -- no unlisted fields allowed.
 
 ### YAML Conventions
 
 - 2-space indentation, no tabs
-- Properly indent lists (especially `repositories:` and `environments:`)
 - Use explicit booleans (`true`/`false`)
 
 ### Application Minimal Templates
@@ -376,4 +325,4 @@ spec:
 
 ## Testing with Mock Manifests
 
-A mock manifest kind (`orchestrator.entur.io/mock/v1`, kind `MockItem`) exists for safely testing the self-service workflow without affecting real resources. The flow is identical to production manifests: create/modify/delete a `.entur/*.yaml` file, open a PR, review the plan, comment `entur apply`, and merge. Use this to verify the workflow before provisioning real GCP projects.
+A mock manifest kind (`orchestrator.entur.io/mock/v1`, kind `MockItem`) exists for testing the workflow without affecting real resources. The flow is identical: create `.entur/*.yaml`, open PR, review plan, `entur apply`, merge.

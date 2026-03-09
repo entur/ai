@@ -1,6 +1,6 @@
 # Entur Terraform Modules
 
-Entur provides shared Terraform modules for provisioning GCP infrastructure. Always use these modules instead of raw `google_*` resources for managed services.
+Always use Entur shared modules instead of raw `google_*` resources for managed services.
 
 ## Modules
 
@@ -9,6 +9,7 @@ Entur provides shared Terraform modules for provisioning GCP infrastructure. Alw
 | [terraform-google-init](https://github.com/entur/terraform-google-init) | Platform and app discovery (required by other modules) | `github.com/entur/terraform-google-init//modules/init?ref=v1` |
 | [terraform-google-sql-db](https://github.com/entur/terraform-google-sql-db) | Cloud SQL (PostgreSQL) | `github.com/entur/terraform-google-sql-db//modules/postgresql?ref=v1` |
 | [terraform-google-memorystore](https://github.com/entur/terraform-google-memorystore) | Memorystore (Redis) | `github.com/entur/terraform-google-memorystore//modules/redis?ref=v2` |
+| [terraform-google-cloud-storage](https://github.com/entur/terraform-google-cloud-storage) | Cloud Storage buckets | `github.com/entur/terraform-google-cloud-storage//modules/bucket?ref=v0.2.2` |
 
 ## Directory Structure
 
@@ -26,7 +27,7 @@ terraform/
 
 ## Init Module (Required)
 
-The `terraform-google-init` module is a **data-only module** that discovers GCP platform and application attributes. All other Entur modules depend on it.
+Data-only module that discovers GCP platform and application attributes. All other Entur modules depend on it.
 
 ```hcl
 module "init" {
@@ -36,10 +37,9 @@ module "init" {
 }
 ```
 
-### Variables
+Standard variables:
 
 ```hcl
-# variables.tf
 variable "app_id" {
   description = "Application ID"
   type        = string
@@ -57,9 +57,7 @@ app_id      = "my-application"
 environment = "dev"
 ```
 
-### Outputs
-
-The init module provides:
+### Init Outputs
 
 | Output | Description |
 |--------|-------------|
@@ -80,7 +78,7 @@ The init module provides:
 
 ## Cloud SQL (PostgreSQL)
 
-Provisions a Cloud SQL PostgreSQL instance with automatic secret and Kubernetes resource creation.
+Provisions Cloud SQL PostgreSQL with automatic secret and Kubernetes resource creation.
 
 ```hcl
 module "postgresql" {
@@ -136,12 +134,10 @@ module "postgresql" {
 
 ### What Gets Created
 
-- Cloud SQL PostgreSQL instance
-- Database(s)
+- Cloud SQL PostgreSQL instance + database(s)
 - Application user with password
-- Google Secret Manager secrets: `PG_USER`, `PG_PASSWORD`
-- Kubernetes ConfigMap with connection info
-- Kubernetes Secret with credentials
+- Secret Manager secrets: `PG_USER`, `PG_PASSWORD`
+- Kubernetes ConfigMap (connection info) + Secret (credentials)
 
 ### Application Configuration (Spring Boot)
 
@@ -157,7 +153,7 @@ The Cloud SQL proxy sidecar (enabled via `postgres.enabled: true` in Helm) handl
 
 ## Memorystore (Redis)
 
-Provisions a Memorystore Redis instance with automatic secret and Kubernetes resource creation.
+Provisions Redis with automatic secret and Kubernetes resource creation.
 
 ```hcl
 module "redis" {
@@ -198,7 +194,7 @@ module "redis" {
 ### What Gets Created (Redis)
 
 - Memorystore Redis instance
-- Google Secret Manager secrets: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
+- Secret Manager secrets: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
 - Kubernetes ConfigMap and Secret with connection info
 
 ### Redis Application Configuration (Spring Boot)
@@ -224,132 +220,9 @@ common:
       - REDIS_PASSWORD
 ```
 
-## Complete Example
-
-```hcl
-# main.tf
-
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 5.0"
-    }
-  }
-  backend "gcs" {}
-}
-
-module "init" {
-  source      = "github.com/entur/terraform-google-init//modules/init?ref=v1"
-  app_id      = var.app_id
-  environment = var.environment
-}
-
-module "postgresql" {
-  source    = "github.com/entur/terraform-google-sql-db//modules/postgresql?ref=v1"
-  init      = module.init
-  databases = ["routedb"]
-}
-
-module "redis" {
-  source = "github.com/entur/terraform-google-memorystore//modules/redis?ref=v2"
-  init   = module.init
-}
-
-# Custom resources (use google_* only for resources not covered by Entur modules)
-resource "google_pubsub_topic" "route_events" {
-  name    = "${module.init.app.id}-route-events"
-  project = module.init.app.project_id
-  labels  = module.init.labels
-}
-
-resource "google_pubsub_subscription" "route_events_sub" {
-  name    = "${module.init.app.id}-route-events-sub"
-  topic   = google_pubsub_topic.route_events.name
-  project = module.init.app.project_id
-  labels  = module.init.labels
-
-  ack_deadline_seconds = 20
-  message_retention_duration = "604800s"  # 7 days
-
-  retry_policy {
-    minimum_backoff = "10s"
-    maximum_backoff = "600s"
-  }
-
-  dead_letter_policy {
-    dead_letter_topic     = google_pubsub_topic.route_events_dlq.id
-    max_delivery_attempts = 10
-  }
-}
-```
-
-```hcl
-# variables.tf
-variable "app_id" {
-  description = "Application ID"
-  type        = string
-}
-
-variable "environment" {
-  description = "Environment"
-  type        = string
-  validation {
-    condition     = contains(["dev", "tst", "prd"], var.environment)
-    error_message = "Environment must be dev, tst, or prd."
-  }
-}
-```
-
-```hcl
-# env/dev.tfvars
-app_id      = "route-service"
-environment = "dev"
-```
-
-## Workspaces
-
-Entur uses Terraform workspaces to manage multiple environments with a single configuration. Each workspace has its own state file.
-
-```bash
-terraform init
-terraform workspace new dev
-terraform apply -var-file=env/dev.tfvars
-
-# Switch environment:
-terraform workspace select tst
-terraform apply -var-file=env/tst.tfvars
-```
-
-Workspace-specific logic (e.g. larger instances in production):
-
-```hcl
-module "postgresql" {
-  source       = "github.com/entur/terraform-google-sql-db//modules/postgresql?ref=v1"
-  init         = module.init
-  databases    = ["my-database"]
-  machine_size = {
-    tier = terraform.workspace == "prd" ? "db-custom-1-3840" : "db-f1-micro"
-  }
-}
-```
-
-## Backend State
-
-State is stored in a GCS bucket auto-created by the platform (naming: `ent-gcs-tfa-<appId>`):
-
-```hcl
-terraform {
-  backend "gcs" {
-    bucket = "ent-gcs-tfa-<appId>"
-  }
-}
-```
-
 ## Cloud Storage
 
-Use the [terraform-google-cloud-storage](https://github.com/entur/terraform-google-cloud-storage) module for storage buckets:
+Buckets are private by default. Avoid making them public unless absolutely necessary.
 
 ```hcl
 module "cloud-storage" {
@@ -364,11 +237,9 @@ resource "google_storage_bucket_iam_member" "reader" {
 }
 ```
 
-Buckets are private by default. Avoid making them public unless absolutely necessary.
-
 ## PostgreSQL IAM Authentication
 
-Enable IAM authentication for Cloud SQL to avoid password-based access:
+Enable IAM authentication to avoid password-based access:
 
 ```hcl
 module "postgresql" {
@@ -414,23 +285,51 @@ resource "google_bigquery_dataset_iam_member" "viewer" {
 
 Grant IAM at the group level when possible. Be cautious with project-level `roles/bigquery.user` -- it allows creating new datasets.
 
+## Workspaces
+
+Entur uses workspaces to manage environments with a single configuration. Each workspace has its own state file.
+
+```bash
+terraform init
+terraform workspace new dev
+terraform apply -var-file=env/dev.tfvars
+
+# Switch environment:
+terraform workspace select tst
+terraform apply -var-file=env/tst.tfvars
+```
+
+Workspace-specific logic:
+
+```hcl
+module "postgresql" {
+  source       = "github.com/entur/terraform-google-sql-db//modules/postgresql?ref=v1"
+  init         = module.init
+  databases    = ["my-database"]
+  machine_size = {
+    tier = terraform.workspace == "prd" ? "db-custom-1-3840" : "db-f1-micro"
+  }
+}
+```
+
+## Backend State
+
+State stored in GCS bucket auto-created by the platform (naming: `ent-gcs-tfa-<appId>`):
+
+```hcl
+terraform {
+  backend "gcs" {
+    bucket = "ent-gcs-tfa-<appId>"
+  }
+}
+```
+
 ## Troubleshooting
 
-### State locked to newer version
-
-Contact `#talk-utviklerplattform`. The GCS bucket has versioning enabled and the state file can be restored.
-
-### State locked but no deployments running
-
-Caused by a cancelled `terraform apply`. Use `terraform force-unlock`. As a last resort, manually delete the lock file from the GCS bucket.
-
-### Resource not created properly or manually deleted
-
-Use `terraform state list` to find the resource, `terraform state rm <id>` to remove it from state, then re-run to recreate. For resources created externally, use `terraform import`.
-
-### Cannot find resource in cloud project
-
-Ensure tfvars files are in `./terraform/env/`. Verify you are connected to the correct cluster and workspace:
+- **State locked to newer version**: Contact `#talk-utviklerplattform`. GCS bucket has versioning; state can be restored.
+- **State locked, no deployments running**: Caused by cancelled `terraform apply`. Use `terraform force-unlock`. Last resort: manually delete lock file from GCS bucket.
+- **Resource not created or manually deleted**: `terraform state list` → `terraform state rm <id>` → re-run. For externally created resources, use `terraform import`.
+- **Cannot find resource in cloud project**: Ensure tfvars are in `./terraform/env/`. Verify cluster and workspace:
 
 ```bash
 gcloud container clusters get-credentials <cluster-name> --region europe-west1 --project <gcp-project-id>
@@ -439,12 +338,12 @@ terraform workspace select dev
 
 ## Best Practices
 
-1. **Always pin module versions** with `?ref=TAG` -- never use unversioned references
-2. **Always use the init module** as the base for all other modules and resources
+1. **Pin module versions** with `?ref=TAG` -- never use unversioned references
+2. **Always use the init module** as base for all other modules and resources
 3. **Use `module.init.labels`** on all resources for consistent labeling
 4. **Use `module.init.app.project_id`** for the `project` field on all resources
-5. **Use environment-specific tfvars** in `terraform/env/` for per-environment configuration
-6. **Use GCS backend** for remote state storage (configured by the platform)
+5. **Use environment-specific tfvars** in `terraform/env/`
+6. **Use GCS backend** for remote state (configured by platform)
 7. **Only use IAM roles from the [approved list](iam-roles.md)**
-8. **Use Entur modules** for Cloud SQL and Memorystore -- do not create raw `google_sql_*` or `google_redis_*` resources
-9. **Run `terraform plan` in CI** and `terraform apply` in CD using the `gha-terraform` reusable workflows
+8. **Use Entur modules** for Cloud SQL and Memorystore -- no raw `google_sql_*` or `google_redis_*`
+9. **Run `terraform plan` in CI** and `terraform apply` in CD via `gha-terraform` workflows

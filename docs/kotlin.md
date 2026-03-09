@@ -1,6 +1,6 @@
 # Kotlin Standards
 
-Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) first for cross-language standards, and [java.md](java.md) for shared JVM patterns (Spring Boot, testing, dependencies).
+Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) first for cross-language standards, and [java.md](java.md) for shared JVM patterns (Spring Boot, logging, Redis, testing, dependencies, Dockerfile).
 
 ## Runtime and Build
 
@@ -14,8 +14,6 @@ Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.
 - **SQL library**: JetBrains Exposed SQL-DSL (preferred for Kotlin projects)
 
 ### build.gradle.kts
-
-Use version catalog aliases for all plugins and dependencies:
 
 ```kotlin
 plugins {
@@ -36,7 +34,7 @@ java {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.add("-Xjsr305=strict")
+        freeCompilerArgs.add("-Xjsr305=strict")   // strict null-safety with Spring annotations
     }
 }
 
@@ -45,11 +43,9 @@ tasks.withType<Test> {
 }
 ```
 
-The `-Xjsr305=strict` flag enables strict null-safety interop with Spring's nullability annotations.
-
 ### Version Catalog (gradle/libs.versions.toml)
 
-Centralize all dependency versions in the version catalog. Use bundles for related dependencies:
+Centralize all dependency versions. Use bundles for related dependencies:
 
 ```toml
 [versions]
@@ -88,7 +84,7 @@ spring-boot            = { id = "org.springframework.boot", version.ref = "sprin
 
 ### Layered Boot JAR
 
-Configure Spring Boot's layered JAR for optimized Docker image caching:
+Configure for optimized Docker image caching:
 
 ```kotlin
 tasks {
@@ -133,7 +129,7 @@ data class Version(
 
 ### Contract-First REST Controllers
 
-When using OpenAPI Generator, controllers implement generated interfaces:
+With OpenAPI Generator, controllers implement generated interfaces:
 
 ```kotlin
 @RestController
@@ -156,7 +152,7 @@ class VersionController(
 }
 ```
 
-For projects without OpenAPI Generator, use standard Spring annotations:
+Without OpenAPI Generator, use standard Spring annotations:
 
 ```kotlin
 @RestController
@@ -181,17 +177,15 @@ class RouteController(
 
 ### Service Layer
 
-Define service interfaces and implementation classes separately:
+Define service interfaces and implementations separately:
 
 ```kotlin
-// Service interface -- defines the contract and documents behaviour
 interface VersionService {
     fun find(netexId: String): Version
     fun create(version: Version)
     fun update(version: Version)
 }
 
-// Service implementation -- contains business logic
 @Service
 class VersionServiceImpl(private val versionDAO: VersionDAO) : VersionService {
     val logger: Logger = LoggerFactory.getLogger(VersionServiceImpl::class.java)
@@ -218,17 +212,17 @@ class VersionServiceImpl(private val versionDAO: VersionDAO) : VersionService {
 - Use primary constructor injection (not `@Autowired`)
 - Use Kotlin null-safety instead of `Optional` -- return `T?` not `Optional<T>`
 - Use expression-body functions for simple transformations
-- Use trailing commas in parameter lists and collections (improves diffs)
-- Use `val` over `var` wherever possible
-- Use `sealed class` or `sealed interface` for restricted type hierarchies
+- Use trailing commas (improves diffs)
+- Prefer `val` over `var`
+- Use `sealed class`/`sealed interface` for restricted type hierarchies
 - Use `object` for stateless singletons (validators, constants)
-- Use `internal` visibility for implementation details not exposed to other modules
-- Prefer `when` over `if-else` chains for multi-branch logic
+- Use `internal` visibility for implementation details
+- Prefer `when` over `if-else` chains
 - Use scope functions (`let`, `apply`, `run`, `also`) idiomatically
 
 ### Mapper Pattern (DTO to Domain)
 
-Use dedicated `@Component` mapper classes to transform between generated DTOs and domain models. Keep mappers at the API boundary (controller layer):
+Use `@Component` mapper classes at the API boundary:
 
 ```kotlin
 @Component
@@ -236,12 +230,11 @@ class VersionMapper {
 
     fun toDomain(dto: VersionDto): Version {
         return Version(
-            id = 0,                    // Set by database
+            id = 0,
             netexId = dto.id,
             status = dto.status,
             startDate = dto.startDate,
             endDate = dto.endDate,
-            // created/changed NOT set from DTO (read-only fields)
         )
     }
 
@@ -260,7 +253,7 @@ class VersionMapper {
 }
 ```
 
-Alternatively, for simpler projects without OpenAPI Generator, use extension functions:
+For simpler projects without OpenAPI Generator, use extension functions:
 
 ```kotlin
 fun Route.toResponse() = RouteResponse(
@@ -273,11 +266,9 @@ fun Route.toResponse() = RouteResponse(
 
 ### Database Access with Exposed SQL-DSL
 
-Exposed is the preferred SQL library for Kotlin projects. It provides a typesafe DSL without ORM magic.
+Exposed provides a typesafe SQL DSL without ORM magic.
 
 #### Entity Definition
-
-Define database tables as `object` extending `LongIdTable` (or `Table`):
 
 ```kotlin
 object VersionEntity : LongIdTable("version") {
@@ -292,8 +283,6 @@ object VersionEntity : LongIdTable("version") {
 ```
 
 #### DAO Pattern
-
-Use `@Repository`-annotated classes with `transaction { }` blocks:
 
 ```kotlin
 @Repository
@@ -332,7 +321,7 @@ class VersionDAO : BaseDAO<Version> {
 
 #### Joins and Queries
 
-Define reusable join functions as extension functions on `Join`:
+Define reusable join functions as extension functions:
 
 ```kotlin
 object VersionEntity : LongIdTable("version") {
@@ -350,7 +339,7 @@ object VersionEntity : LongIdTable("version") {
 
 ### Input Validation
 
-Use dedicated `object` validators for complex business rules:
+Use `object` validators for complex business rules:
 
 ```kotlin
 internal object VersionInputValidator {
@@ -372,15 +361,13 @@ internal object VersionInputValidator {
 
 ### Exception Handling
 
-Define typed exceptions in a `common/exception/` package and handle them with `@RestControllerAdvice`:
+Define typed exceptions and handle with `@RestControllerAdvice`:
 
 ```kotlin
-// Custom exceptions
 class ElementNotFoundException(message: String) : RuntimeException(message, null, false, false)
 class ElementAlreadyExistException(message: String) : RuntimeException(message)
 class IllegalVersionDatesException(message: String) : RuntimeException(message)
 
-// Global exception handler
 @RestControllerAdvice
 class GlobalExceptionHandler {
     @ExceptionHandler(ElementNotFoundException::class)
@@ -404,7 +391,7 @@ class GlobalExceptionHandler {
 
 ### Coroutines (WebFlux)
 
-If using Spring WebFlux with coroutines:
+Only use if the project already uses WebFlux. Do not mix WebFlux and MVC.
 
 ```kotlin
 @RestController
@@ -420,22 +407,20 @@ class RouteController(
 }
 ```
 
-Only use coroutines if the project already uses WebFlux. Do not mix WebFlux and MVC.
-
 ## Testing in Kotlin
 
 ### Test Libraries
 
-- **JUnit 5**: Test framework (`@Test`, `@Tag`, `@DisplayName`)
-- **Kotest**: Assertions (`shouldBe`, `shouldNotBe`, `shouldHaveSize`, `shouldThrow`)
-- **SpringMockK**: Mocking for Spring and Kotlin (`@MockkBean`)
-- **TestContainers**: Dockerized PostgreSQL for integration tests
+- **JUnit 5**: test framework
+- **Kotest**: assertions (`shouldBe`, `shouldNotBe`, `shouldHaveSize`, `shouldThrow`)
+- **SpringMockK**: mocking for Spring + Kotlin (`@MockkBean`)
+- **TestContainers**: dockerized PostgreSQL for integration tests
 - **Spring Boot Test**: `@SpringBootTest`, `@WebMvcTest`
 - **Entur Auth Test**: `TenantJsonWebToken` for simulating authenticated requests
 
 ### Unit Tests
 
-Use backtick method names for readable test descriptions. Use Kotest assertions:
+Use backtick method names and Kotest assertions:
 
 ```kotlin
 class VersionInputValidatorTests {
@@ -465,8 +450,6 @@ class VersionInputValidatorTests {
 
 ### Controller Tests (WebMvcTest)
 
-Use `@WebMvcTest` for thin controller tests with mocked services:
-
 ```kotlin
 @WebMvcTest(VersionController::class)
 @Import(VersionMapper::class)
@@ -495,10 +478,9 @@ class VersionControllerTests : BaseControllerTest() {
 
 ### Integration Tests (TestContainers)
 
-Use a shared base class for integration tests with TestContainers:
+Shared base class pattern for integration tests:
 
 ```kotlin
-// Test configuration -- reusable PostgreSQL container
 @TestConfiguration(proxyBeanMethods = false)
 class TestContainersConfig {
     @Bean
@@ -509,15 +491,12 @@ class TestContainersConfig {
     }
 }
 
-// Base class for all integration tests
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(TestContainersConfig::class)
 @ExtendWith(TenantJsonWebToken::class)
 @Sql("/test-data/cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 abstract class BaseServiceTest
 
-// Integration test extending the base class
-@DisplayName("VersionService Integration Tests")
 class VersionServiceTests : BaseServiceTest() {
 
     @Autowired
@@ -537,8 +516,6 @@ class VersionServiceTests : BaseServiceTest() {
 
 ### Test Data Builders
 
-Use the builder pattern for constructing test data:
-
 ```kotlin
 class VersionBuilder {
     private var netexId: String = "ENT:Version:1"
@@ -557,7 +534,7 @@ class VersionBuilder {
 
 ### Test Data Files
 
-Use SQL scripts in `src/test/resources/test-data/` for integration test setup. Reference them with `@Sql`:
+Use SQL scripts in `src/test/resources/test-data/` for integration test setup:
 
 ```kotlin
 @Test

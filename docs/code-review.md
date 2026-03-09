@@ -1,6 +1,4 @@
-# Code Review Checklist and Expectations
-
-Guidelines for reviewing and submitting code at Entur.
+# Code Review
 
 ## For Authors
 
@@ -8,11 +6,11 @@ Guidelines for reviewing and submitting code at Entur.
 
 - [ ] Code compiles and all tests pass locally
 - [ ] New code has appropriate test coverage
-- [ ] PR title follows [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) format (validated by CI)
-- [ ] PR description explains **what** changed and **why**
-- [ ] Large changes are broken into smaller, reviewable PRs
-- [ ] No unrelated changes bundled into the PR
-- [ ] Secrets and credentials are not committed
+- [ ] PR title follows [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) (validated by CI)
+- [ ] PR description explains **what** and **why**
+- [ ] Large changes broken into smaller PRs
+- [ ] No unrelated changes bundled
+- [ ] No secrets or credentials committed
 
 ### PR Description Template
 
@@ -32,66 +30,64 @@ How was this tested? Any manual verification steps?
 
 ## For Reviewers
 
-### What to Look For
+### Correctness
 
-#### Correctness
+- Does the code do what it claims?
+- Edge cases handled (null, empty collections, boundaries)?
+- Errors handled properly (not swallowed, logged with context)?
+- Race conditions possible in concurrent code?
 
-- Does the code do what it claims to do?
-- Are edge cases handled (null values, empty collections, boundary conditions)?
-- Are errors handled appropriately (not swallowed, logged with context)?
-- Are race conditions possible in concurrent code?
+### Design
 
-#### Design
+- Follows existing architecture patterns?
+- Right level of abstraction?
+- Clear separation of responsibilities (controller / service / repository)?
+- New dependencies justified?
 
-- Does the change follow the existing architecture patterns in the project?
-- Is the code at the right level of abstraction?
-- Are responsibilities clearly separated (controller / service / repository)?
-- Are new dependencies justified?
-
-#### Security
+### Security
 
 - No hardcoded secrets or credentials
-- Input is validated at boundaries
-- Error responses don't leak internal details
-- IAM roles from the [approved list](terraform/iam-roles.md) only
-- SQL queries use parameterized statements (no string concatenation)
+- Input validated at boundaries
+- Error responses don't leak internals
+- IAM roles from [approved list](terraform/iam-roles.md) only
+- SQL uses parameterized statements (no string concatenation)
 
-#### Entur Platform Compliance
+### Entur Platform Compliance
 
 - Uses Entur shared Terraform modules (not raw GCP resources)
 - Uses Entur common Helm chart
 - Uses Entur reusable GitHub Actions workflows
 - Follows golden path conventions (naming, structure, configuration)
-- Dependencies are pinned
-- Dependabot is configured (`.github/dependabot.yml`)
-- Code health checked with SonarCloud (if enabled for the repository)
+- Dependencies pinned
+- Dependabot configured (`.github/dependabot.yml`)
+- SonarCloud checked (if enabled)
 
-#### Testing
+### Testing
 
 - New functionality has tests
-- Tests are readable and test behavior, not implementation
-- Mocks are used at boundaries, not for internal classes
+- Tests verify behavior, not implementation
+- Mocks at boundaries only, not for internal classes
 - No flaky or non-deterministic tests
 - Integration tests use testcontainers (not external services)
 
-#### Observability
+### Observability
 
-- Appropriate logging with structured context
-- Health checks are configured
+- Structured logging with context
+- Health checks configured
 - Prometheus metrics for key operations
 - No sensitive data in logs
 
 ### Review Etiquette
 
-- Be constructive: suggest improvements, don't just point out problems
-- Distinguish between blocking issues and nitpicks
-- Use prefixes: `nit:` for style suggestions, `question:` for clarifications, `blocker:` for issues that must be fixed
-- Approve with minor comments when the overall approach is sound
-- Review within one business day when possible
+- Suggest improvements, don't just point out problems
+- Distinguish blocking issues from nitpicks
+- Use prefixes: `nit:`, `question:`, `blocker:`
+- Approve with minor comments when overall approach is sound
+- Review within one business day
 
 ## CI Checks
 
-Every PR must pass these automated checks before merge:
+Every PR must pass before merge:
 
 | Check | Workflow | Description |
 |-------|----------|-------------|

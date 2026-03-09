@@ -1,39 +1,36 @@
 # Entur AI Agent Instructions
 
-You are helping develop software at Entur, a Norwegian public transportation company. All code must follow Entur's platform conventions, use shared tooling, and target Google Cloud Platform (GKE).
+Entur is a Norwegian public transportation company. All code targets Google Cloud Platform (GKE), follows Entur platform conventions, and uses shared tooling.
 
 ## Platform Context
 
-- **Cloud**: Google Cloud Platform (GCP)
-- **Orchestration**: Kubernetes on GKE (Google Kubernetes Engine), region `europe-west1`
+- **Cloud**: GCP, region `europe-west1`
+- **Orchestration**: Kubernetes on GKE
 - **CI/CD**: GitHub Actions with Entur reusable workflows
-- **Container Registry**: Google Artifact Registry
-- **Infrastructure as Code**: Terraform with Entur modules
-- **Deployment**: Helm charts using Entur's `common` chart
+- **Registry**: Google Artifact Registry
+- **IaC**: Terraform with Entur modules
+- **Deployment**: Helm charts using Entur `common` chart
 - **Environments**: `dev`, `tst`, `prd`
-- **Primary languages**: Java 21+ / Kotlin (majority), Go, Python
+- **Languages**: Java 21+/Kotlin (majority), Go, Python
 - **Frameworks**: Spring Boot (Java/Kotlin), standard library (Go)
-- **Build tools**: Gradle (Java/Kotlin), Go modules, pip/poetry (Python)
+- **Build**: Gradle (Java/Kotlin), Go modules, pip/poetry (Python)
 - **License**: EUPL v1.2
 
-## Golden Path Conventions
+## Golden Path
 
-Entur follows a "golden path" (convention-over-configuration) approach:
+Repository name = application name = Docker image name = Kubernetes namespace = Helm release name.
 
-- **Repository name = application name = Docker image name = Kubernetes namespace = Helm release name**
-- Terraform files live in `./terraform/` with env-specific configs in `./terraform/env/`
-- Helm chart lives in `./helm/<repo-name>/` with env-specific values in `./helm/<repo-name>/env/`
-- Dockerfile lives at repository root
-- CI workflow is `.github/workflows/ci.yml`, CD workflow is `.github/workflows/cd.yml`
-- Security scan allowlists live in `.entur/security/`
-- Documentation lives in `./docs/`
-- Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for all commit messages
+- Terraform: `./terraform/`, env configs in `./terraform/env/`
+- Helm: `./helm/<repo-name>/`, env values in `./helm/<repo-name>/env/`
+- Dockerfile at repository root
+- CI: `.github/workflows/ci.yml`, CD: `.github/workflows/cd.yml`
+- Security allowlists: `.entur/security/`
+- Documentation: `./docs/`
+- [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ## How to Use This Repository
 
-This repository contains centralized instructions for AI coding agents. Teams reference this repository (or specific files) from their own `AGENTS.md` to inherit shared standards.
-
-**In your project's AGENTS.md**, reference like this:
+Centralized AI agent instructions. Teams reference from their `AGENTS.md`:
 
 ```markdown
 # Project-specific instructions
@@ -46,44 +43,44 @@ See https://github.com/entur/ai for Entur-wide standards.
 
 ## Documentation Map
 
-Read the relevant documents below based on the task at hand. Always read `CONVENTIONS.md` first for cross-cutting standards.
+Always read `CONVENTIONS.md` first for cross-cutting standards.
 
 ### Always Read
 
-- [CONVENTIONS.md](CONVENTIONS.md) -- Cross-language coding conventions, naming, error handling, testing
+- [CONVENTIONS.md](CONVENTIONS.md) -- Cross-language conventions, naming, error handling, testing
 
 ### By Task Type
 
-| Task | Read these documents |
-|------|---------------------|
-| **Java/Kotlin application code** | [docs/java.md](docs/java.md), [docs/kotlin.md](docs/kotlin.md) |
-| **Go application code** | [docs/go.md](docs/go.md) |
-| **API design** | [docs/api-design.md](docs/api-design.md) |
-| **Architecture decisions** | [docs/architecture.md](docs/architecture.md) |
-| **Kafka / event streaming** | [docs/kafka.md](docs/kafka.md) |
-| **Authorization / permissions** | [docs/authorization.md](docs/authorization.md) |
-| **Terraform / GCP infrastructure** | [docs/terraform/modules.md](docs/terraform/modules.md), [docs/terraform/iam-roles.md](docs/terraform/iam-roles.md) |
-| **Helm charts / Kubernetes deploy** | [docs/helm.md](docs/helm.md) |
-| **Docker / containerization** | [docs/docker.md](docs/docker.md) |
-| **CI/CD pipelines** | [docs/cicd/workflows.md](docs/cicd/workflows.md), [docs/cicd/actions.md](docs/cicd/actions.md) |
-| **Self-service provisioning** | [docs/self-service.md](docs/self-service.md) |
-| **Firebase Hosting** | [docs/cicd/workflows.md](docs/cicd/workflows.md) (gha-firebase section) |
-| **Logging** | [docs/logging.md](docs/logging.md) |
-| **Observability** | [docs/observability.md](docs/observability.md) |
-| **Security** | [docs/security.md](docs/security.md) |
-| **Code review** | [docs/code-review.md](docs/code-review.md) |
-| **Markdown / documentation format** | [docs/markdown.md](docs/markdown.md) |
-| **Writing documentation** | [docs/documentation.md](docs/documentation.md), [docs/markdown.md](docs/markdown.md) |
+| Task | Documents |
+|------|-----------|
+| **Java/Kotlin code** | [java.md](docs/java.md), [kotlin.md](docs/kotlin.md) |
+| **Go code** | [go.md](docs/go.md) |
+| **API design** | [api-design.md](docs/api-design.md) |
+| **Architecture** | [architecture.md](docs/architecture.md) |
+| **Kafka** | [kafka.md](docs/kafka.md) |
+| **Authorization** | [authorization.md](docs/authorization.md) |
+| **Terraform / GCP** | [terraform/modules.md](docs/terraform/modules.md), [terraform/iam-roles.md](docs/terraform/iam-roles.md) |
+| **Helm / K8s deploy** | [helm.md](docs/helm.md) |
+| **Docker** | [docker.md](docs/docker.md) |
+| **CI/CD** | [cicd/workflows.md](docs/cicd/workflows.md), [cicd/actions.md](docs/cicd/actions.md) |
+| **Self-service** | [self-service.md](docs/self-service.md) |
+| **Firebase** | [cicd/workflows.md](docs/cicd/workflows.md) (gha-firebase section) |
+| **Logging** | [logging.md](docs/logging.md) |
+| **Observability** | [observability.md](docs/observability.md) |
+| **Security** | [security.md](docs/security.md) |
+| **Code review** | [code-review.md](docs/code-review.md) |
+| **Markdown format** | [markdown.md](docs/markdown.md) |
+| **Writing docs** | [documentation.md](docs/documentation.md), [markdown.md](docs/markdown.md) |
 
 ## Critical Rules
 
-1. **Never hardcode secrets.** Use Google Secret Manager and reference via ExternalSecrets in Helm.
-2. **Never grant IAM roles not in the [allowed list](docs/terraform/iam-roles.md).** Request additions in `#talk-utviklerplattform` on Slack.
-3. **Always use Entur shared Terraform modules** (`terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`) instead of raw `google_*` resources for managed services.
-4. **Always use Entur reusable GitHub Actions workflows** instead of writing custom CI/CD steps for build, test, scan, deploy.
-5. **Always use the Entur `common` Helm chart** as a dependency for Kubernetes deployments.
-6. **Pin all external dependencies** -- Terraform modules (`?ref=TAG`), GitHub Actions (`@vN`), Docker base images (digest or specific tag).
-7. **All services must have health checks**, structured logging, and Prometheus metrics.
-8. **Use `europe-west1`** as the default GCP region.
-9. **Follow conventional commits** -- this enables automated semantic versioning via release-please.
-10. **Every PR must pass**: lint, unit tests, security scan (CodeQL + Docker scan), and Helm lint before merge.
+1. **Never hardcode secrets.** Use Google Secret Manager + ExternalSecrets in Helm.
+2. **Never grant IAM roles outside the [allowed list](docs/terraform/iam-roles.md).** Request additions in `#talk-utviklerplattform`.
+3. **Always use Entur Terraform modules** (`terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`) -- not raw `google_*` resources.
+4. **Always use Entur reusable GitHub Actions workflows** -- not custom CI/CD steps.
+5. **Always use the Entur `common` Helm chart** for K8s deployments.
+6. **Pin all dependencies** -- Terraform (`?ref=TAG`), Actions (`@vN`), Docker images (specific tag).
+7. **All services need** health checks, structured logging, and Prometheus metrics.
+8. **Default region**: `europe-west1`.
+9. **Conventional commits** -- enables automated semver via release-please.
+10. **Every PR must pass**: lint, unit tests, security scan (CodeQL + Docker scan), Helm lint.

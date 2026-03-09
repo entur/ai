@@ -1,6 +1,6 @@
 # Entur Reusable GitHub Actions Workflows
 
-Entur provides reusable GitHub Actions workflows for CI/CD. Always use these instead of writing custom pipeline steps.
+Always use Entur reusable workflows instead of custom pipeline steps.
 
 ## Available Workflows
 
@@ -18,7 +18,7 @@ Entur provides reusable GitHub Actions workflows for CI/CD. Always use these ins
 
 ## CI Pipeline (`.github/workflows/ci.yml`)
 
-The CI pipeline runs on pull requests and pushes to main. It lints, tests, builds, and scans.
+Runs on pull requests and pushes to main. Lints, tests, builds, and scans.
 
 ### Standard CI Pipeline (Spring Boot)
 
@@ -83,25 +83,11 @@ jobs:
       environment: dev
 ```
 
-### Standard CI Pipeline (Go)
+### Go CI Differences
+
+Replace the `test` job with:
 
 ```yaml
-name: CI
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-jobs:
-  docker-lint:
-    uses: entur/gha-docker/.github/workflows/lint.yml@v1
-
-  helm-lint:
-    uses: entur/gha-helm/.github/workflows/lint.yml@v1
-    with:
-      environment: dev
-
   test:
     runs-on: ubuntu-24.04
     steps:
@@ -110,29 +96,13 @@ jobs:
         with:
           go-version-file: go.mod
       - run: go test ./...
-
-  docker-build:
-    needs: [test]
-    uses: entur/gha-docker/.github/workflows/build.yml@v1
-
-  docker-scan:
-    needs: [docker-build]
-    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
-    secrets: inherit
-    with:
-      image_artifact: ${{ needs.docker-build.outputs.image_artifact }}
-
-  docker-push:
-    if: github.event_name != 'pull_request'
-    needs: [docker-build, docker-scan]
-    uses: entur/gha-docker/.github/workflows/push.yml@v1
 ```
+
+All other jobs (docker-lint, docker-build, docker-scan, docker-push) are identical.
 
 ## CD Pipeline (`.github/workflows/cd.yml`)
 
-The CD pipeline deploys to environments in order: dev -> tst -> prd.
-
-### Standard CD Pipeline
+Deploys environments in order: dev → tst → prd. Each environment runs terraform plan/apply then helm deploy.
 
 ```yaml
 name: CD
@@ -216,19 +186,17 @@ jobs:
       image: ${{ needs.docker-push.outputs.image_and_tag }}
 ```
 
-### Important: `has_changes` and Conditional Jobs
+### `has_changes` and Conditional Jobs
 
-When Terraform plan reports no changes, the apply job is skipped. Downstream jobs that depend on apply must use this condition to continue:
+When terraform plan reports no changes, apply is skipped. Downstream jobs must use this condition to continue past skipped apply (but still fail on actual failures):
 
 ```yaml
 if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
 ```
 
-This allows the pipeline to continue when apply is skipped (no changes) but still fails if apply actually fails.
-
 ## Security Scanning (`.github/workflows/codeql.yml`)
 
-This workflow **must** be named `codeql.yml`:
+**Must** be named `codeql.yml`:
 
 ```yaml
 name: CodeQL
@@ -247,23 +215,19 @@ jobs:
     secrets: inherit
 ```
 
-### Configuration Options
+Java projects -- add configuration:
 
 ```yaml
-jobs:
-  code-scan:
-    uses: entur/gha-security/.github/workflows/code-scan.yml@v2
-    secrets: inherit
     with:
-      java_version: "21"             # Default: 21
-      java_distribution: "temurin"   # Default: temurin
-      use_setup_java: true           # Set to true for Java projects
-      codeql_queries: "security-extended"  # Default
+      java_version: "21"
+      java_distribution: "temurin"
+      use_setup_java: true
+      codeql_queries: "security-extended"
 ```
 
 ## PR Verification
 
-Validates that PR titles follow conventional commits:
+Validates PR titles follow conventional commits:
 
 ```yaml
 name: Verify PR
@@ -279,7 +243,7 @@ jobs:
 
 ## Releases (Semantic Versioning)
 
-Automated releases via release-please and conventional commits:
+Automated via release-please and conventional commits:
 
 ```yaml
 name: Release
@@ -299,13 +263,7 @@ jobs:
       issues: write
 ```
 
-Release types:
-
-- `simple` -- standard application (default)
-- `terraform-module` -- Terraform module
-- `helm` -- Helm chart
-- `maven` -- Maven/Gradle library
-- `manifest` -- Multi-component releases (uses `release-please-config.json`)
+Release types: `simple` (default), `terraform-module`, `helm`, `maven`, `manifest` (uses `release-please-config.json`).
 
 ## Firebase Hosting
 
@@ -374,9 +332,7 @@ jobs:
 
 ## Slack Notifications
 
-### Prerequisites
-
-In your Slack channel, run: `/invite @GitHub Actions Slack send`
+Prerequisite: In your Slack channel, run `/invite @GitHub Actions Slack send`
 
 ```yaml
 jobs:
@@ -390,7 +346,7 @@ jobs:
 
 ## Artifactory Publishing (Maven/Gradle)
 
-For publishing shared libraries:
+Requires `gradle.properties` at repo root with a `version` field in semver format.
 
 ```yaml
 jobs:
@@ -404,63 +360,45 @@ jobs:
     uses: entur/gha-artifactory/.github/actions/maven-publish@v1
 ```
 
-Requires `gradle.properties` at repo root with a `version` field in semver format.
+## Workflow Details
 
-## Docker Workflow Details
+Individual workflow steps with optional parameters.
 
-### Lint
+### Docker
 
 ```yaml
+# Lint (optional: ignore specific hadolint rules)
 docker-lint:
   uses: entur/gha-docker/.github/workflows/lint.yml@v1
   with:
-    ignore: "DL3008,DL3015"    # Optional: comma-separated hadolint ignores
-```
+    ignore: "DL3008,DL3015"
 
-### Build
-
-```yaml
+# Build (outputs: image_artifact)
 docker-build:
   uses: entur/gha-docker/.github/workflows/build.yml@v1
   with:
     dockerfile: Dockerfile      # Default
     context: "."                # Default
-```
 
-Outputs: `image_artifact` (used by docker-scan and docker-push)
-
-### Push
-
-```yaml
+# Push (outputs: image_name, image_tag, image_and_tag; tag format: branch_name.date-SHA)
 docker-push:
   uses: entur/gha-docker/.github/workflows/push.yml@v1
 ```
 
-Outputs: `image_name`, `image_tag`, `image_and_tag`
-
-Default image tag format: `branch_name.date-SHA`
-
-## Helm Workflow Details
-
-### Helm Lint
+### Helm
 
 ```yaml
+# Lint
 helm-lint:
   uses: entur/gha-helm/.github/workflows/lint.yml@v1
   with:
     environment: dev
-```
 
-### Unit Test
-
-```yaml
+# Unit test
 helm-unittest:
   uses: entur/gha-helm/.github/workflows/unittest.yml@v1
-```
 
-### Deploy
-
-```yaml
+# Deploy
 helm-deploy:
   uses: entur/gha-helm/.github/workflows/deploy.yml@v1
   with:
@@ -468,29 +406,20 @@ helm-deploy:
     image: ${{ needs.docker-push.outputs.image_and_tag }}
 ```
 
-## Terraform Workflow Details
-
-### Terraform Lint
+### Terraform
 
 ```yaml
+# Lint
 terraform-lint:
   uses: entur/gha-terraform/.github/workflows/lint.yml@v2
-```
 
-### Plan
-
-```yaml
+# Plan (outputs: has_changes, plan_summary)
 terraform-plan:
   uses: entur/gha-terraform/.github/workflows/plan.yml@v2
   with:
     environment: dev
-```
 
-Outputs: `has_changes` (true/false), `plan_summary`
-
-### Apply
-
-```yaml
+# Apply
 terraform-apply:
   uses: entur/gha-terraform/.github/workflows/apply.yml@v2
   with:
@@ -510,14 +439,14 @@ All workflows accept the `environment` input.
 
 ## Preferred CI/CD Structure
 
-The preferred pattern splits CI/CD into multiple focused workflow files instead of a single monolithic pipeline:
+Split into focused workflow files instead of a monolithic pipeline:
 
 | File | Trigger | Purpose |
 |------|---------|---------|
 | `ci.yml` | `workflow_call` | Reusable CI build (lint, build, test, scan, push) |
 | `ci-pr.yml` | `pull_request` to main | PR title lint + CI build |
 | `ci-feature.yml` | Push to non-main branches | CI build if no open PR exists |
-| `deploy.yml` | Push to main | Build + deploy dev -> tst -> prd |
+| `deploy.yml` | Push to main | Build + deploy dev → tst → prd |
 | `codeql.yml` | PR, push to main, schedule | Security code scanning |
 | `lint-api.yml` | PR changes to `specs/` | API spec linting |
 | `lint-helm.yml` | PR changes to `helm/` | Helm chart linting per environment |
@@ -619,7 +548,7 @@ jobs:
 
 ### ci-feature.yml (Feature Branch Build)
 
-Skips CI if there's already an open PR (ci-pr.yml handles it):
+Skips CI if an open PR already exists (ci-pr.yml handles it):
 
 ```yaml
 name: ci-feature
@@ -770,16 +699,14 @@ updates:
 
 ## Best Practices
 
-1. **Always use `secrets: inherit`** for security scanning and docs workflows
-2. **Pin workflow versions** to major tags: `@v1`, `@v2`
-3. **Use `has_changes` output** from terraform-plan to skip unnecessary applies
-4. **Use the conditional if clause** for jobs after skippable terraform-apply
-5. **Run scans on every PR** -- not just on main branch pushes
-6. **Name the CodeQL workflow `codeql.yml`** -- the security tooling depends on this name
-7. **Use GitHub Environments** with protection rules for deployment approvals
-8. **Split workflows into focused files** -- separate CI, deploy, linting, and security scanning
-9. **Use matrix strategy** for deploying to multiple namespaces or environments from a single Helm chart
-10. **Use concurrency groups** with `cancel-in-progress: true` on PR and feature branch workflows
-11. **Pass build secrets via `BUILD_SECRETS`** when using multi-stage Docker builds with Artifactory
-12. **Use `paths` filters** on PR workflows to run linting only when relevant files change
-13. **Upload test reports** using `dorny/test-reporter` for visibility in GitHub PR checks
+1. Use `secrets: inherit` for security scanning and docs workflows
+2. Pin workflow versions to major tags: `@v1`, `@v2`
+3. Use `has_changes` output from terraform-plan to skip unnecessary applies
+4. Name the CodeQL workflow `codeql.yml` -- security tooling depends on this name
+5. Use GitHub Environments with protection rules for deployment approvals
+6. Split workflows into focused files -- separate CI, deploy, linting, and security
+7. Use matrix strategy for multi-namespace/environment deploys
+8. Use concurrency groups with `cancel-in-progress: true` on PR/feature workflows
+9. Pass build secrets via `BUILD_SECRETS` for multi-stage Docker builds with Artifactory
+10. Use `paths` filters on PR workflows to lint only when relevant files change
+11. Upload test reports using `dorny/test-reporter` for PR check visibility

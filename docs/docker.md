@@ -1,17 +1,17 @@
 # Containerization with Docker
 
-All Entur applications deployed to Kubernetes are packaged as Docker container images. This document covers Dockerfile conventions, base images, CI/CD integration, and security best practices.
+All Entur applications deployed to Kubernetes are packaged as Docker images.
 
 ## Conventions
 
-- The Dockerfile lives at the **repository root**
-- The image name follows the golden path convention: **repository name = application name = Docker image name**
-- Images are pushed to **Google Artifact Registry** via the [gha-docker](https://github.com/entur/gha-docker) reusable workflows
-- Dockerfiles are linted with **Hadolint** via the `gha-docker` lint workflow
+- Dockerfile lives at the **repository root**
+- Image name follows golden path: **repository name = application name = Docker image name**
+- Images pushed to **Google Artifact Registry** via [gha-docker](https://github.com/entur/gha-docker) reusable workflows
+- Dockerfiles linted with **Hadolint** via `gha-docker` lint workflow
 
 ## Base Images by Language
 
-Prefer **distroless** or **slim-musl** images over full Alpine when possible. These images have a smaller attack surface (no shell, no package manager), smaller size, and better security. Use Alpine only when you need a shell, package manager, or in-container debugging.
+Prefer **distroless** or **slim-musl** images. Use Alpine only when you need a shell or package manager.
 
 | Language | Recommended | Alternative |
 |----------|------------|-------------|
@@ -20,20 +20,13 @@ Prefer **distroless** or **slim-musl** images over full Alpine when possible. Th
 | Node.js | `gcr.io/distroless/nodejs24-debian12` | `node:24-alpine` |
 | Python | `gcr.io/distroless/python3-debian12` | `python:3.12-slim` |
 
-For Java/Kotlin, the **Liberica Runtime Container with CDS** is preferred because it supports Class Data Sharing for faster startup and is optimized for containerized JVM workloads.
-
-Pin base image versions to a specific tag or digest. Never use `latest`.
+Liberica Runtime Container with CDS is preferred for Java/Kotlin: supports Class Data Sharing for faster startup, optimized for containerized JVM workloads. Pin base image versions -- never use `latest`.
 
 ## Dockerfile Examples
 
 ### Java / Kotlin (Preferred: Multi-Stage with Layered JAR and CDS)
 
-The preferred approach uses four Docker stages for optimal build caching, image size, and startup performance:
-
-1. **Bundler** -- bundle OpenAPI spec (if contract-first)
-2. **Builder** -- compile and package the application
-3. **Layers** -- extract Spring Boot layered JAR
-4. **Run** -- minimal runtime image with CDS support
+Four stages: bundler (OpenAPI spec) → builder (compile) → layers (extract layered JAR) → run (minimal runtime).
 
 ```dockerfile
 # Stage 1: Bundle OpenAPI specification (contract-first only)
@@ -81,17 +74,15 @@ COPY --from=layers /app/my-app/application/ .
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "org.springframework.boot.loader.launch.JarLauncher"]
 ```
 
-Key practices in this approach:
+Key practices:
 
-- **Dependency caching**: Copy build files first, download dependencies, then copy source -- changes to source code don't invalidate the dependency cache layer
-- **Build secrets**: Use `--mount=type=secret` for Artifactory credentials instead of `ARG`/`ENV` (secrets don't persist in image layers)
-- **Layered JAR**: Spring Boot's layered JAR splits the application into dependency layers, so only the changed layer is rebuilt when pushing new images
-- **CDS (Class Data Sharing)**: The Liberica CDS image pre-computes class metadata for faster startup
-- **`-XX:MaxRAMPercentage=75.0`**: Let the JVM use 75% of container memory, leaving room for the OS and native memory
+- **Dependency caching**: Copy build files first, download deps, then copy source -- source changes don't invalidate dependency cache
+- **Build secrets**: Use `--mount=type=secret` instead of `ARG`/`ENV` (secrets don't persist in layers)
+- **Layered JAR**: Only changed layers are rebuilt when pushing new images
+- **CDS**: Liberica CDS image pre-computes class metadata for faster startup
+- **`-XX:MaxRAMPercentage=75.0`**: 75% of container memory for JVM, leaving room for OS and native memory
 
 ### Java / Kotlin (Simple)
-
-For simpler projects without multi-stage builds:
 
 ```dockerfile
 FROM eclipse-temurin:21-jre-alpine
@@ -147,134 +138,43 @@ ENTRYPOINT ["python", "-m", "my_service"]
 
 ## Best Practices
 
-### Use Multi-Stage Builds
-
-Separate the build stage from the runtime stage to exclude build tools, source code, and intermediate artifacts from the final image. This reduces image size and attack surface.
-
-> **Note:** Multi-stage builds in GitHub Actions do not support GitHub caching for the application build step and do not support GitHub secrets injection. If you need these, split your build into separate workflow steps instead of Docker stages.
-
-### Run as Non-Root
-
-All containers must run as a non-root user:
-
-- **Java/Kotlin**: Create a user with `addgroup`/`adduser` and switch with `USER`
-- **Go**: Use the `nonroot` variant of distroless (runs as UID 65532 by default)
-- **Python**: Create a user with `groupadd`/`useradd` and switch with `USER`
-
-The Entur common Helm chart enforces `runAsNonRoot: true` in the pod security context.
-
-### Minimize Image Size
-
-- Use Alpine or slim base images
-- Remove package manager caches (`--no-cache` for apk, `--no-cache-dir` for pip)
-- Avoid installing unnecessary packages
-- Copy only the artifacts needed for runtime
-
-### Do Not Store Secrets in Images
-
-Never include secrets, credentials, or environment-specific configuration in the Docker image. Use:
-
-- **Google Secret Manager** with ExternalSecrets in Helm for runtime secrets
-- **Environment variables** injected via Helm values for non-sensitive configuration
-
-### Pin Dependencies
-
-- Pin base image tags to specific versions (not `latest`)
-- Pin build tool versions in the build stage
-- Use lock files (`go.sum`, `gradle.lockfile`, `requirements.txt` with pinned versions)
-
-### Expose the Correct Port
-
-All Entur applications listen on port `8080` by default. Ensure the `EXPOSE` directive matches and the application binds to that port.
-
-### Health Check Endpoints
-
-The application inside the container must expose liveness and readiness endpoints. The standard paths are:
-
-- `GET /actuator/health/liveness` -- returns HTTP `200` when the process is alive
-- `GET /actuator/health/readiness` -- returns HTTP `200` when the service is ready for traffic
-
-For non-Spring applications, expose equivalent endpoints at these paths or configure custom paths in your Helm values. See [Helm guide](helm.md) for probe configuration and [observability](observability.md) for monitoring details.
+- **Multi-stage builds**: Separate build from runtime to exclude build tools and source from final image
+  > **Note:** Multi-stage builds in GitHub Actions do not support GitHub caching for the build step or GitHub secrets injection. Split into separate workflow steps if needed.
+- **Run as non-root**: All containers must run as non-root. Java/Kotlin: `addgroup`/`adduser` + `USER`. Go: use `nonroot` distroless variant (UID 65532). Python: `groupadd`/`useradd` + `USER`. The common Helm chart enforces `runAsNonRoot: true`.
+- **Minimize image size**: Use Alpine/slim base images, remove caches (`--no-cache`, `--no-cache-dir`), copy only runtime artifacts
+- **No secrets in images**: Use Google Secret Manager + ExternalSecrets for runtime secrets, Helm-injected env vars for non-sensitive config
+- **Pin dependencies**: Pin base image tags, build tool versions, and use lock files (`go.sum`, `gradle.lockfile`, `requirements.txt`)
+- **Port**: All Entur apps default to port `8080`. Ensure `EXPOSE` and application binding match.
+- **Health endpoints**: Expose `GET /actuator/health/liveness` and `GET /actuator/health/readiness` (or equivalent). See [Helm guide](helm.md) for probe config.
 
 ## CI/CD Integration
 
-Docker images are built, scanned, and pushed using Entur's [gha-docker](https://github.com/entur/gha-docker) reusable workflows.
-
-### Dockerfile Linting
+Docker images are built, scanned, and pushed using [gha-docker](https://github.com/entur/gha-docker) reusable workflows.
 
 ```yaml
 docker-lint:
   uses: entur/gha-docker/.github/workflows/lint.yml@v1
-```
 
-Runs Hadolint against the Dockerfile. Fix all warnings before merging.
-
-### Build
-
-```yaml
 docker-build:
   uses: entur/gha-docker/.github/workflows/build.yml@v1
-```
 
-Builds the image and outputs an `image_artifact` for scanning and pushing.
-
-### Security Scan
-
-```yaml
 docker-scan:
   needs: [docker-build]
   uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
   secrets: inherit
   with:
     image_artifact: ${{ needs.docker-build.outputs.image_artifact }}
-```
 
-Scans the built image for known vulnerabilities. See [security](security.md) for allowlist configuration.
-
-### Push
-
-```yaml
 docker-push:
   needs: [docker-build, docker-scan]
   uses: entur/gha-docker/.github/workflows/push.yml@v1
 ```
 
-Pushes the image to Google Artifact Registry. The output `image_and_tag` is used by downstream Helm deploy jobs.
-
-### Full CI Pipeline Example
-
-```yaml
-name: CI
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-jobs:
-  docker-lint:
-    uses: entur/gha-docker/.github/workflows/lint.yml@v1
-
-  docker-build:
-    uses: entur/gha-docker/.github/workflows/build.yml@v1
-
-  docker-scan:
-    needs: [docker-build]
-    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
-    secrets: inherit
-    with:
-      image_artifact: ${{ needs.docker-build.outputs.image_artifact }}
-
-  docker-push:
-    if: github.event_name != 'pull_request'
-    needs: [docker-build, docker-scan]
-    uses: entur/gha-docker/.github/workflows/push.yml@v1
-```
-
-For complete CI/CD pipeline examples including Helm deployment, see [CI/CD workflows](cicd/workflows.md).
+The `docker-push` output `image_and_tag` is used by downstream Helm deploy jobs. For complete CI/CD pipeline examples, see [CI/CD workflows](cicd/workflows.md).
 
 ## Hadolint Configuration
 
-To suppress specific Hadolint rules, create a `.hadolint.yaml` file in the repository root:
+Suppress specific rules in `.hadolint.yaml` at repository root:
 
 ```yaml
 ignored:

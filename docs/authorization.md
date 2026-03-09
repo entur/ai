@@ -1,21 +1,21 @@
 # Authorization with Permission Store
 
-Entur uses a centralized authorization system consisting of **Permission Store** (backend service) and **Permission Client** (Java SDK). This document covers how to integrate authorization into your application, grant access between apps/clients/partners, and configure test users.
+Entur uses **Permission Store** (backend) and **Permission Client** (Java/Node SDK) for centralized authorization.
 
 ## Overview
 
 | Component | Repository | Purpose |
 |-----------|-----------|---------|
-| **Permission Store** | `permission-store` | Central backend that stores and serves authorization data (permissions, agreements, responsibility sets) |
-| **Permission Client** (Java) | `permission-client` | Spring Boot SDK for consuming permissions, caching, and Spring Security integration |
-| **Permission Client** (Node) | `permission-client-node` | Node.js SDK for consuming permissions |
+| **Permission Store** | `permission-store` | Central backend storing permissions, agreements, responsibility sets |
+| **Permission Client** (Java) | `permission-client` | Spring Boot SDK: caching, Spring Security integration |
+| **Permission Client** (Node) | `permission-client-node` | Node.js SDK |
 
 ### How It Works
 
-1. **Applications register** with Permission Store and declare which permissions (business capabilities) they need
-2. **Users authenticate** via OIDC/JWT and receive tokens with tenant information (authority + subject)
-3. **Permission Client** caches permissions from Permission Store and evaluates access locally
-4. **Controllers** use `@PreAuthorize` annotations to enforce access control at the endpoint level
+1. **Applications register** with Permission Store and declare required permissions (business capabilities)
+2. **Users authenticate** via OIDC/JWT with tenant info (authority + subject)
+3. **Permission Client** caches permissions locally and evaluates access
+4. **Controllers** use `@PreAuthorize` annotations for endpoint-level access control
 
 ```text
 User (JWT token)
@@ -31,9 +31,7 @@ User (JWT token)
 
 ### Business Capabilities
 
-Business capabilities are the primary authorization model. They define **what operations** a user can perform on a service.
-
-A business capability is a pair of: **operation** + **access level**
+Primary authorization model: **operation** + **access level**.
 
 | Access Level | Norwegian | Description |
 |-------------|-----------|-------------|
@@ -42,26 +40,21 @@ A business capability is a pair of: **operation** + **access level**
 | `ENDRE` | Endre | Update/modify access |
 | `SLETT` | Slett | Delete access |
 
-Example: A user with business capability `product-api-access` + `LES,ENDRE` can read and modify products but not create or delete them.
+Example: `product-api-access` + `LES,ENDRE` = can read and modify products, but not create or delete.
 
 ### Responsibility Sets
 
-Responsibility sets provide **data-level access control** -- who can access which specific data objects. They combine:
+Data-level access control -- restricts who can access specific data objects. Combines:
 
-- **Operation** (same as business capability)
-- **Responsibility Type** (e.g., `product.organisation`)
-- **Responsibility Key** (e.g., a specific organisation ID)
-- **Access Level** (LES, OPPRETT, ENDRE, SLETT)
+- **Operation** + **Responsibility Type** (e.g., `product.organisation`) + **Responsibility Key** (e.g., org ID) + **Access Level**
 
-Responsibility sets are linked to users via **Agreements** (see below).
-
-Use responsibility sets when you need to restrict access to specific data partitions (e.g., "user X can edit products belonging to organisation Y").
+Linked to users via **Agreements**. Use when restricting access to specific data partitions (e.g., "user X can edit products belonging to organisation Y").
 
 ## Adding Authorization to Your Application
 
 ### Prerequisites
 
-Your application must have Auth0 internal M2M credentials provisioned to authenticate with Permission Store. In your self-service application manifest, ensure:
+Your app needs Auth0 internal M2M credentials. In your self-service manifest:
 
 ```yaml
 spec:
@@ -71,7 +64,7 @@ spec:
       type: m2m
 ```
 
-See [self-service.md](self-service.md) for details on application manifests.
+See [self-service.md](self-service.md) for details.
 
 ### 1. Add Dependencies
 
@@ -107,7 +100,7 @@ entur:
       environment: dev              # dev | tst | prd
       include: internal, partner    # Which tenants to accept tokens from
 
-  # OIDC client credentials for machine-to-machine calls to Permission Store
+  # OIDC client credentials for M2M calls to Permission Store
   clients:
     auth0:
       permission-store:
@@ -155,7 +148,6 @@ class VersionController(
 For responsibility set checks:
 
 ```java
-// Check if user has access to a specific data object
 @PreAuthorize("hasPermission(#organisationId, 'product.organisation', 'endre')")
 public ResponseEntity<?> updateProduct(@PathVariable String organisationId, ...) {
     // Only users with responsibility set access for this organisation
@@ -164,7 +156,7 @@ public ResponseEntity<?> updateProduct(@PathVariable String organisationId, ...)
 
 ### 4. Programmatic Access Checks
 
-Inject `AuthorizeTenant` for programmatic permission checks:
+Inject `AuthorizeTenant`:
 
 ```java
 @Service
@@ -196,7 +188,7 @@ public class MyService {
 
 ### Defining Business Capabilities
 
-In your application's `application.yml`, declare which business capabilities your application uses:
+Declare in `application.yml`:
 
 ```yaml
 entur:
@@ -211,11 +203,9 @@ entur:
         description: "Administrative access to my-app"
 ```
 
-These are registered with Permission Store when your application starts.
+These are registered with Permission Store on application start.
 
 ### Defining Responsibility Types
-
-For data-level access control, define responsibility types:
 
 ```yaml
 entur:
@@ -229,11 +219,7 @@ entur:
         access: LES, OPPRETT, ENDRE, SLETT
 ```
 
-### Setting User Permissions in Permission Store
-
-Permissions are managed through Permission Store's API. When your application registers and posts its permissions, Permission Store tracks which users (identified by authority + subject) have which access levels.
-
-The Permission Store API endpoints:
+### Permission Store API
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
@@ -244,7 +230,7 @@ The Permission Store API endpoints:
 
 ### Managing Agreements (Responsibility Sets)
 
-Agreements link responsibility sets to organisations, enabling data-level access:
+Agreements link responsibility sets to organisations for data-level access:
 
 ```java
 // Programmatic agreement management via AuthorizeTenant
@@ -265,7 +251,7 @@ Set<Agreement> agreements = authorizeTenant.getAgreements(permission);
 authorizeTenant.deleteAgreement(agreementId);
 ```
 
-Agreement management is also available via the Permission Store REST API:
+Agreement REST API:
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
@@ -277,11 +263,12 @@ Agreement management is also available via the Permission Store REST API:
 
 ### IN_MEMORY (Production)
 
-The default production cache. Polls or receives WebSocket push notifications from Permission Store to keep permissions in sync:
+Default production cache. Polls or receives WebSocket push from Permission Store:
 
 ```yaml
 entur:
   permission:
+    scheduler: ws                  # Use WebSocket push (alternative: poll)
     permission-cache:
       type: IN_MEMORY
       url: https://api.dev.entur.io/permission-store/v1
@@ -289,17 +276,9 @@ entur:
       delta-refresh-rate: 60       # Delta refresh every 1 minute (optional)
 ```
 
-For push notifications instead of polling:
-
-```yaml
-entur:
-  permission:
-    scheduler: ws                  # Use WebSocket push
-```
-
 ### LOCAL_TEST_CACHE (Testing)
 
-For integration tests, define test users with specific permissions directly in configuration:
+Define test users with specific permissions directly in config:
 
 ```yaml
 entur:
@@ -332,7 +311,7 @@ entur:
 
 ### FULL_ACCESS (Development)
 
-Grants all permissions to all users. Use only for local development:
+Grants all permissions to all users. Local development only:
 
 ```yaml
 entur:
@@ -345,7 +324,7 @@ entur:
 
 ### Controller Tests
 
-Use Entur's test authentication library with `TenantJsonWebToken`:
+Use Entur's test auth library with `TenantJsonWebToken`:
 
 ```kotlin
 @WebMvcTest(VersionController::class)
@@ -394,7 +373,7 @@ class VersionControllerTests : BaseControllerTest() {
 
 ### Integration Tests
 
-For integration tests with `LOCAL_TEST_CACHE`, define test users in `src/test/resources/application.yml`:
+Use `LOCAL_TEST_CACHE` in `src/test/resources/application.yml`:
 
 ```yaml
 entur:
@@ -421,7 +400,7 @@ entur:
 
 ## Access Aliases
 
-Map Norwegian access names to custom names if your domain uses different terminology:
+Map Norwegian access names to custom names:
 
 ```yaml
 entur:
@@ -445,7 +424,7 @@ entur:
       internalHasFullAccess: true   # Default: false
 ```
 
-When enabled, any token from the `internal` tenant authority is granted full access to all business capabilities. Useful during development or for internal-only services.
+Useful during development or for internal-only services.
 
 ## Environment-Specific Configuration
 
@@ -457,7 +436,7 @@ When enabled, any token from the `internal` tenant authority is granted full acc
 | tst | `http://permission-store.tst.entur.internal` or `https://api.staging.entur.io/permission-store/v1` |
 | prd | `http://permission-store.prd.entur.internal` or `https://api.entur.io/permission-store/v1` |
 
-Use the internal URL (`.entur.internal`) for cluster-internal communication. Set via Helm configmap:
+Use internal URL (`.entur.internal`) for cluster-internal communication. Set via Helm:
 
 ```yaml
 # helm/my-app/env/values-kub-ent-dev.yaml
@@ -475,7 +454,7 @@ common:
 | tst | `internal.staging.entur.org` | `https://api.staging.entur.io` |
 | prd | `internal.entur.org` | `https://api.entur.io` |
 
-Set via Helm configmap:
+Set via Helm:
 
 ```yaml
 # helm/my-app/env/values-kub-ent-tst.yaml
@@ -489,13 +468,11 @@ common:
 
 ## Authentication Modes
 
-Permission Client supports three authentication modes for obtaining tokens to call Permission Store:
-
 | Mode | Config | When to Use |
 |------|--------|-------------|
 | `oidc` | `bean: oidc` | Recommended for production with `oidc-auth-client` |
-| `client` | `bean: client` | Direct client credentials (Auth0 Machine-to-Machine) |
-| `jwt` | `bean: jwt` | When using JWT resource server without OIDC client |
+| `client` | `bean: client` | Direct client credentials (Auth0 M2M) |
+| `jwt` | `bean: jwt` | JWT resource server without OIDC client |
 
 ```yaml
 entur:
@@ -505,13 +482,13 @@ entur:
 
 ## Permission Store Architecture
 
-Permission Store is a Spring Boot application backed by PostgreSQL with:
+Spring Boot application backed by PostgreSQL. Key internals:
 
-- **Hibernate Envers** for full audit trail of all permission changes
-- **WebSocket (STOMP/SockJS)** for push notifications to connected clients
+- **Hibernate Envers** for full audit trail
+- **WebSocket (STOMP/SockJS)** for push notifications
 - **ShedLock** for distributed scheduling
-- **LZ4-compressed Kryo serialization** for efficient permission cache
-- **Apigee API Gateway** for external access with rate limiting (1200 rpm)
+- **LZ4-compressed Kryo serialization** for efficient cache
+- **Apigee API Gateway** for external access (1200 rpm rate limit)
 
 ### Domain Model
 
@@ -528,25 +505,19 @@ Application
 
 ### Automatic Cleanup
 
-Permission Store automatically cleans up unused resources:
-
-- Applications not refreshed in 30 days
-- Permissions not refreshed in 30 days
-- Responsibility sets with no agreements for 30 days
-
-This means applications must regularly refresh their registration with Permission Store (handled automatically by Permission Client).
+Permission Store cleans up resources not refreshed in 30 days (applications, permissions, responsibility sets with no agreements). Permission Client handles automatic refresh.
 
 ## Quick Reference
 
 ### Minimal Setup Checklist
 
-1. Ensure `auth0.internal.enabled: true` and `auth0.internal.type: m2m` in your self-service application manifest
+1. Ensure `auth0.internal.enabled: true` and `auth0.internal.type: m2m` in self-service manifest
 2. Add `permission-client` + `oidc-auth` dependencies
 3. Configure `entur.auth.tenants` in `application.yml`
 4. Configure `entur.clients.auth0.permission-store` credentials
 5. Configure `entur.permission.permission-cache` with URL and application name
 6. Declare `businessCapabilities` used by your application
 7. Add `@PreAuthorize("hasPermission('operation', 'access')")` to protected endpoints
-8. Add `entur-springdoc-starter` to auto-document permissions in the OpenAPI spec (see [api-design.md](api-design.md#x-entur-permissions-extension-automatic))
+8. Add `entur-springdoc-starter` to auto-document permissions in OpenAPI (see [api-design.md](api-design.md#x-entur-permissions-extension-automatic))
 9. Configure `LOCAL_TEST_CACHE` with test users in test `application.yml`
 10. Set environment-specific Permission Store URL and auth config via Helm configmap
