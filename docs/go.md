@@ -4,10 +4,10 @@ Go conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) 
 
 ## Runtime and Build
 
-- **Go version**: latest stable (currently 1.23+)
+- **Go version**: latest stable (currently 1.25+)
 - **Modules**: Go modules (`go.mod`)
 - **Linting**: `golangci-lint`
-- **Framework**: standard library `net/http` (Go 1.22+ routing) or minimal frameworks only
+- **Framework**: standard library `net/http` (Go 1.25+ routing) or minimal frameworks only
 
 ## Project Structure
 
@@ -38,7 +38,7 @@ my-service/
 See [docker.md](docker.md) for Dockerfile conventions and base images. Go-specific example:
 
 ```dockerfile
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download

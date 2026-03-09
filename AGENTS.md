@@ -11,7 +11,7 @@ Entur is a Norwegian public transportation company. All code targets Google Clou
 - **IaC**: Terraform with Entur modules
 - **Deployment**: Helm charts using Entur `common` chart
 - **Environments**: `dev`, `tst`, `prd`
-- **Languages**: Java 21+/Kotlin (majority), Go, Python
+- **Languages**: Java 25+/Kotlin (majority), Go, Python
 - **Frameworks**: Spring Boot (Java/Kotlin), standard library (Go)
 - **Build**: Gradle (Java/Kotlin), Go modules, pip/poetry (Python)
 - **License**: EUPL v1.2

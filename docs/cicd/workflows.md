@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '25'
           distribution: 'temurin'
       - uses: gradle/actions/setup-gradle@v4
       - run: ./gradlew test
@@ -219,7 +219,7 @@ Java projects -- add configuration:
 
 ```yaml
     with:
-      java_version: "21"
+      java_version: "25"
       java_distribution: "temurin"
       use_setup_java: true
       codeql_queries: "security-extended"

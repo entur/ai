@@ -4,7 +4,7 @@ Java conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md
 
 ## Runtime and Build
 
-- **Java version**: 21 or newer (LTS releases, or latest stable like 25)
+- **Java version**: 25 or newer
 - **Build tool**: Gradle with Kotlin DSL (`build.gradle.kts`)
 - **Framework**: Spring Boot 3.x
 - **Dependency management**: Gradle version catalogs (`gradle/libs.versions.toml`)
@@ -23,7 +23,7 @@ plugins {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -37,7 +37,7 @@ tasks.withType<Test> {
 See [docker.md](docker.md) for Dockerfile conventions, base images, and multi-stage builds. Simple example:
 
 ```dockerfile
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 COPY build/libs/*.jar app.jar
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup

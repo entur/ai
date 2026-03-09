@@ -4,7 +4,7 @@
 
 ## What is this?
 
-This repository contains documentation that AI coding agents (Claude Code, GitHub Copilot, Cursor, etc.) consume to generate code that follows Entur's platform conventions. Instead of duplicating standards across every repository, teams reference this shared source.
+This repository contains documentation that AI coding agents (Claude Code, GitHub Copilot, etc.) consume to generate code that follows Entur's platform conventions. Instead of duplicating standards across every repository, teams reference this shared source.
 
 ## Quick Start
 
@@ -13,7 +13,7 @@ Create an `AGENTS.md` file in your repository root that points the AI agent to t
 ```markdown
 # My Application
 
-Java 21 / Spring Boot application that provides the route planning API.
+Java 25 / Spring Boot application that provides the route planning API.
 
 ## Entur Standards
 
@@ -30,7 +30,7 @@ linked from that file (e.g. java.md, helm.md, docker.md).
 - Custom health indicator for external route provider connectivity
 ```
 
-That's it. `AGENTS.md` is read automatically by Claude Code, GitHub Copilot, and Cursor. The agent will fetch the linked URL to get the full platform standards.
+That's it. `AGENTS.md` is read automatically by GitHub Copilot and [many other agents](https://agents.md). Claude Code reads `CLAUDE.md` instead -- see [Agent Compatibility](#agent-compatibility) for details. The agent will fetch the linked URL to get the full platform standards.
 
 ### Tips for a good `AGENTS.md`
 
@@ -44,7 +44,7 @@ That's it. `AGENTS.md` is read automatically by Claude Code, GitHub Copilot, and
 ```markdown
 # My Go Service
 
-Go 1.23 service that processes transit data feeds.
+Go 1.25 service that processes transit data feeds.
 
 ## Entur Standards
 
@@ -60,11 +60,15 @@ https://github.com/entur/ai/blob/main/AGENTS.md
 
 ## Agent Compatibility
 
-| Agent          | Reads `AGENTS.md` | Can fetch URLs | Notes                                                    |
-| -------------- | ----------------- | -------------- | -------------------------------------------------------- |
-| Claude Code    | Yes               | Yes            | Fetches the linked URL and follows the documentation map |
-| GitHub Copilot | Yes               | Limited        | Reads `AGENTS.md`; may not fetch URLs in all modes       |
-| Cursor         | Yes               | Limited        | Reads `AGENTS.md`; may not fetch URLs in all modes       |
+| Agent          | Reads `AGENTS.md`  | Can fetch URLs | Notes                                                                          |
+| -------------- | ------------------- | -------------- | ------------------------------------------------------------------------------ |
+| Claude Code    | No (reads `CLAUDE.md`) | Yes        | Natively reads `CLAUDE.md`; create a symlink or copy for Claude Code support   |
+| GitHub Copilot | Yes                 | Limited        | Reads `AGENTS.md`; may not fetch URLs in all modes                             |
+| opencode       | Yes                 | Unknown        | Reads `AGENTS.md` natively                                                     |
+
+`AGENTS.md` is supported by a [large ecosystem of AI coding agents](https://agents.md) including Codex, Gemini CLI, Jules, Windsurf, Aider, and many more.
+
+Claude Code reads `CLAUDE.md`, not `AGENTS.md`. To support Claude Code alongside other agents, create a symlink: `ln -s AGENTS.md CLAUDE.md`.
 
 For agents that cannot fetch URLs, the most important rules are already inline in your project's `AGENTS.md`. For deeper coverage, you can copy key sections from this repo into your project's instructions.
 

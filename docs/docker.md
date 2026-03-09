@@ -15,8 +15,8 @@ Prefer **distroless** or **slim-musl** images. Use Alpine only when you need a s
 
 | Language | Recommended | Alternative |
 |----------|------------|-------------|
-| Java/Kotlin | `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl` | `eclipse-temurin:21-jre-alpine` |
-| Go | `gcr.io/distroless/static-debian12:nonroot` | `golang:1.23-alpine` (build only) |
+| Java/Kotlin | `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl` | `eclipse-temurin:25-jre-alpine` |
+| Go | `gcr.io/distroless/static-debian12:nonroot` | `golang:1.25-alpine` (build only) |
 | Node.js | `gcr.io/distroless/nodejs24-debian12` | `node:24-alpine` |
 | Python | `gcr.io/distroless/python3-debian12` | `python:3.12-slim` |
 
@@ -85,7 +85,7 @@ Key practices:
 ### Java / Kotlin (Simple)
 
 ```dockerfile
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 WORKDIR /app
 COPY build/libs/*.jar app.jar
 
@@ -101,7 +101,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ```dockerfile
 # Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
