@@ -55,81 +55,17 @@ ENTRYPOINT ["/server"]
 
 ### Main Entry Point
 
-```go
-package main
+The main function should:
 
-import (
-    "context"
-    "net/http"
-    "os"
-    "os/signal"
-    "syscall"
-    "time"
-
-    "github.com/entur/go-logging"
-)
-
-func main() {
-    cfg, err := config.Load()
-    if err != nil {
-        logging.Error().Err(err).Msg("failed to load configuration")
-        os.Exit(1)
-    }
-
-    mux := http.NewServeMux()
-    registerRoutes(mux, cfg)
-
-    server := &http.Server{
-        Addr:         ":" + cfg.Port,
-        Handler:      mux,
-        ReadTimeout:  10 * time.Second,
-        WriteTimeout: 30 * time.Second,
-        IdleTimeout:  60 * time.Second,
-    }
-
-    // Graceful shutdown
-    ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-    defer stop()
-
-    go func() {
-        logging.Info().Msgf("server starting on port %s", cfg.Port)
-        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-            logging.Error().Err(err).Msg("server failed")
-            os.Exit(1)
-        }
-    }()
-
-    <-ctx.Done()
-    logging.Info().Msg("shutting down gracefully")
-
-    shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-    if err := server.Shutdown(shutdownCtx); err != nil {
-        logging.Error().Err(err).Msg("forced shutdown")
-    }
-}
-```
+- Load configuration from environment variables
+- Create `http.ServeMux` and register routes
+- Configure `http.Server` with timeouts (ReadTimeout: 10s, WriteTimeout: 30s, IdleTimeout: 60s)
+- Implement graceful shutdown using `signal.NotifyContext` for SIGINT/SIGTERM
+- Use `server.Shutdown` with a timeout context for clean shutdown
 
 ### Health Checks
 
-```go
-func registerRoutes(mux *http.ServeMux, cfg *config.Config) {
-    mux.HandleFunc("GET /health/liveness", func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte(`{"status":"UP"}`))
-    })
-
-    mux.HandleFunc("GET /health/readiness", func(w http.ResponseWriter, r *http.Request) {
-        if err := cfg.DB.PingContext(r.Context()); err != nil {
-            w.WriteHeader(http.StatusServiceUnavailable)
-            w.Write([]byte(`{"status":"DOWN"}`))
-            return
-        }
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte(`{"status":"UP"}`))
-    })
-}
-```
+Register liveness (`GET /health/liveness`) and readiness (`GET /health/readiness`) endpoints. Liveness returns `200 OK` unconditionally. Readiness checks private dependencies (e.g., DB ping) and returns `503` if unavailable.
 
 Helm values for custom health paths:
 
@@ -145,57 +81,11 @@ common:
 
 ### HTTP Handlers
 
-```go
-type RouteHandler struct {
-    service *RouteService
-    logger  *logging.Logger
-}
-
-func NewRouteHandler(service *RouteService) *RouteHandler {
-    return &RouteHandler{
-        service: service,
-        logger:  logging.New(),
-    }
-}
-
-func (h *RouteHandler) GetRoute(w http.ResponseWriter, r *http.Request) {
-    id := r.PathValue("id")
-
-    route, err := h.service.FindByID(r.Context(), id)
-    if err != nil {
-        h.logger.Error().Err(err).Str("id", id).Msg("failed to find route")
-        http.Error(w, "internal server error", http.StatusInternalServerError)
-        return
-    }
-    if route == nil {
-        http.Error(w, "route not found", http.StatusNotFound)
-        return
-    }
-
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(route)
-}
-```
+Use handler structs with service and logger dependencies, created via constructor functions (`NewXxxHandler`). Use `r.PathValue("id")` for path parameters (Go 1.22+). Return JSON with `json.NewEncoder(w).Encode()`. Handle errors by returning appropriate HTTP status codes -- never expose internal details.
 
 ### Error Handling
 
-```go
-// Define sentinel errors for known conditions
-var (
-    ErrRouteNotFound = errors.New("route not found")
-    ErrInvalidInput  = errors.New("invalid input")
-)
-
-// Wrap errors with context
-func (s *RouteService) FindByID(ctx context.Context, id string) (*Route, error) {
-    route, err := s.repo.GetByID(ctx, id)
-    if err != nil {
-        return nil, fmt.Errorf("finding route %s: %w", id, err)
-    }
-    return route, nil
-}
-```
-
+- Define sentinel errors for known conditions (`var ErrNotFound = errors.New(...)`)
 - Wrap errors with `fmt.Errorf("context: %w", err)` to preserve the chain
 - Use sentinel errors for expected conditions
 - Use `errors.Is()` / `errors.As()` to check error types
@@ -203,52 +93,9 @@ func (s *RouteService) FindByID(ctx context.Context, id string) (*Route, error) 
 
 ### Configuration
 
-```go
-type Config struct {
-    Port        string `env:"PORT" envDefault:"8080"`
-    DatabaseURL string `env:"DATABASE_URL,required"`
-    LogLevel    string `env:"LOG_LEVEL" envDefault:"info"`
-}
-
-func Load() (*Config, error) {
-    cfg := &Config{}
-    if err := env.Parse(cfg); err != nil {
-        return nil, fmt.Errorf("parsing config: %w", err)
-    }
-    return cfg, nil
-}
-```
-
-Use environment variables for all configuration. Use `caarlos0/env` or `os.Getenv`.
+Use environment variables for all configuration. Use `caarlos0/env` struct tags (e.g., `env:"PORT" envDefault:"8080"`) or `os.Getenv`. Create a `Config` struct and a `Load()` function that returns `(*Config, error)`.
 
 ## Testing
-
-```go
-func TestRouteService_FindByID(t *testing.T) {
-    t.Run("returns route when found", func(t *testing.T) {
-        repo := &mockRepo{
-            routes: map[string]*Route{"r1": {ID: "r1", Origin: "Oslo"}},
-        }
-        svc := NewRouteService(repo)
-
-        route, err := svc.FindByID(context.Background(), "r1")
-
-        require.NoError(t, err)
-        assert.Equal(t, "r1", route.ID)
-        assert.Equal(t, "Oslo", route.Origin)
-    })
-
-    t.Run("returns nil when not found", func(t *testing.T) {
-        repo := &mockRepo{routes: map[string]*Route{}}
-        svc := NewRouteService(repo)
-
-        route, err := svc.FindByID(context.Background(), "unknown")
-
-        require.NoError(t, err)
-        assert.Nil(t, route)
-    })
-}
-```
 
 - Use `testing` package with `t.Run` for subtests
 - Use `testify/require` for fatal assertions, `testify/assert` for non-fatal
@@ -264,188 +111,29 @@ For use cases, key naming conventions, and best practices, see [java.md](java.md
 
 ### Client Setup
 
-Use [`go-redis/redis`](https://github.com/redis/go-redis) (v9+):
+Use [`go-redis/redis`](https://github.com/redis/go-redis) (v9+). Create a `NewClient(cfg *Config)` function that configures `redis.Options` with address, password, timeouts (DialTimeout: 1s, ReadTimeout: 2s, WriteTimeout: 2s), and pool settings (PoolSize: 10, MinIdleConns: 2). Verify connectivity with `client.Ping()`.
 
-```go
-package redis
-
-import (
-    "context"
-    "fmt"
-    "time"
-
-    "github.com/redis/go-redis/v9"
-)
-
-func NewClient(cfg *Config) (*redis.Client, error) {
-    client := redis.NewClient(&redis.Options{
-        Addr:         fmt.Sprintf("%s:%s", cfg.RedisHost, cfg.RedisPort),
-        Password:     cfg.RedisPassword,
-        DB:           0,
-        DialTimeout:  1 * time.Second,
-        ReadTimeout:  2 * time.Second,
-        WriteTimeout: 2 * time.Second,
-        PoolSize:     10,
-        MinIdleConns: 2,
-    })
-
-    ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-    defer cancel()
-
-    if err := client.Ping(ctx).Err(); err != nil {
-        return nil, fmt.Errorf("connecting to redis: %w", err)
-    }
-    return client, nil
-}
-```
-
-Configuration:
-
-```go
-type Config struct {
-    RedisHost     string `env:"REDIS_HOST,required"`
-    RedisPort     string `env:"REDIS_PORT" envDefault:"6379"`
-    RedisPassword string `env:"REDIS_PASSWORD,required"`
-}
-```
+Configuration uses `REDIS_HOST` (required), `REDIS_PORT` (default 6379), and `REDIS_PASSWORD` (required) environment variables.
 
 ### Basic Operations
 
-```go
-// SET with TTL
-err := client.Set(ctx, "myapp:route:123", routeJSON, 10*time.Minute).Err()
-
-// GET
-val, err := client.Get(ctx, "myapp:route:123").Result()
-if errors.Is(err, redis.Nil) {
-    // Key does not exist -- cache miss, fall back to database
-} else if err != nil {
-    // Redis error -- log and fall back to database
-}
-
-// DELETE
-err = client.Del(ctx, "myapp:route:123").Err()
-
-// SET if not exists (distributed lock / idempotency)
-ok, err := client.SetNX(ctx, "myapp:lock:import-job", "owner-1", 60*time.Second).Result()
-if ok {
-    // Lock acquired
-}
-
-// Atomic increment (rate limiting)
-count, err := client.Incr(ctx, "myapp:rate:client-xyz").Result()
-if count == 1 {
-    client.Expire(ctx, "myapp:rate:client-xyz", 1*time.Minute)
-}
-```
+Key operations: `Set` (with TTL), `Get` (check `redis.Nil` for cache miss), `Del`, `SetNX` (distributed locks/idempotency), `Incr` with `Expire` (rate limiting). Always handle `redis.Nil` separately from other errors -- fall back to database on cache miss or Redis error.
 
 ### Cache-Aside Pattern
 
-```go
-type RouteCache struct {
-    redis *redis.Client
-    repo  RouteRepository
-    ttl   time.Duration
-}
-
-func (c *RouteCache) GetRoute(ctx context.Context, id string) (*Route, error) {
-    key := "myapp:route:" + id
-
-    // Try cache first
-    val, err := c.redis.Get(ctx, key).Bytes()
-    if err == nil {
-        var route Route
-        if err := json.Unmarshal(val, &route); err == nil {
-            return &route, nil
-        }
-    }
-
-    // Cache miss or error -- fall back to database
-    route, err := c.repo.FindByID(ctx, id)
-    if err != nil {
-        return nil, err
-    }
-    if route == nil {
-        return nil, nil
-    }
-
-    // Store in cache (best-effort)
-    if data, err := json.Marshal(route); err == nil {
-        _ = c.redis.Set(ctx, key, data, c.ttl).Err()
-    }
-
-    return route, nil
-}
-
-func (c *RouteCache) InvalidateRoute(ctx context.Context, id string) {
-    _ = c.redis.Del(ctx, "myapp:route:"+id).Err()
-}
-```
+Implement cache-aside with a struct wrapping both `redis.Client` and a repository. Try cache first (`Get`), fall back to database on miss, then populate cache with TTL (best-effort `Set`). Include an invalidation method using `Del`. Use JSON marshal/unmarshal for serialization.
 
 ### Health Check with Redis
 
-Include Redis in readiness only if it's a **private resource owned by this service** (see [observability.md](observability.md#readiness-probe)):
-
-```go
-mux.HandleFunc("GET /health/readiness", func(w http.ResponseWriter, r *http.Request) {
-    ctx := r.Context()
-
-    if err := db.PingContext(ctx); err != nil {
-        w.WriteHeader(http.StatusServiceUnavailable)
-        w.Write([]byte(`{"status":"DOWN","reason":"database"}`))
-        return
-    }
-
-    if err := redisClient.Ping(ctx).Err(); err != nil {
-        w.WriteHeader(http.StatusServiceUnavailable)
-        w.Write([]byte(`{"status":"DOWN","reason":"redis"}`))
-        return
-    }
-
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte(`{"status":"UP"}`))
-})
-```
+Include Redis in readiness only if it's a **private resource owned by this service** (see [observability.md](observability.md#readiness-probe)). Ping both database and Redis in the readiness handler; return `503` with a `reason` field if either is down.
 
 ### Testing
 
-Use Testcontainers for integration tests:
-
-```go
-import (
-    "github.com/testcontainers/testcontainers-go"
-    "github.com/testcontainers/testcontainers-go/wait"
-)
-
-func setupRedis(t *testing.T) *redis.Client {
-    ctx := context.Background()
-    container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-        ContainerRequest: testcontainers.ContainerRequest{
-            Image:        "redis:7-alpine",
-            ExposedPorts: []string{"6379/tcp"},
-            WaitingFor:   wait.ForListeningPort("6379/tcp"),
-        },
-        Started: true,
-    })
-    require.NoError(t, err)
-    t.Cleanup(func() { container.Terminate(ctx) })
-
-    host, _ := container.Host(ctx)
-    port, _ := container.MappedPort(ctx, "6379")
-
-    return redis.NewClient(&redis.Options{
-        Addr: fmt.Sprintf("%s:%s", host, port.Port()),
-    })
-}
-```
+Use `testcontainers-go` for Redis integration tests. Create a helper `setupRedis(t *testing.T) *redis.Client` that starts a `redis:7-alpine` container, waits for the port, and returns a connected client. Use `t.Cleanup` for container termination.
 
 ## Prometheus Metrics
 
-```go
-import "github.com/prometheus/client_golang/prometheus/promhttp"
-
-mux.Handle("GET /metrics", promhttp.Handler())
-```
+Register the Prometheus HTTP handler at `GET /metrics` using `promhttp.Handler()` from `github.com/prometheus/client_golang`.
 
 Helm values:
 
@@ -469,24 +157,7 @@ go get github.com/entur/go-logging
 
 ### Usage
 
-```go
-import "github.com/entur/go-logging"
-
-// Global logger (includes caller info automatically)
-logging.Info().Msg("request processed")
-logging.Error().Err(err).Str("query", queryName).Msg("database query failed")
-logging.Info().Msgf("processed %d routes in %dms", count, elapsed.Milliseconds())
-
-// Instance logger (for dependency injection)
-logger := logging.New()
-logger.Info().Msg("request processed")
-
-// Instance logger with custom level
-logger = logging.New(logging.WithLevel(logging.DebugLevel))
-
-// Disable caller info when not needed
-logger = logging.New(logging.WithNoCaller())
-```
+Use global functions (`logging.Info()`, `logging.Error()`) or create instance loggers with `logging.New()` for dependency injection. Chain fields with `.Str()`, `.Err()`, `.Msgf()` etc. Options: `logging.WithLevel()`, `logging.WithNoCaller()`.
 
 ### Log Level
 
@@ -504,13 +175,4 @@ common:
 
 ### Errors with Stacktraces
 
-```go
-// New error with stacktrace
-err := logging.NewStackTraceError("route not found: %s", routeID)
-
-// Wrap an existing error with stacktrace
-err = logging.NewStackTraceError("%w", existingErr)
-
-// Log it -- stacktrace is included automatically
-logging.Error().Err(err).Msg("an internal error occurred")
-```
+Use `logging.NewStackTraceError()` to create errors with stacktraces, or wrap existing errors with `logging.NewStackTraceError("%w", existingErr)`. Stacktraces are included automatically when logged with `.Err()`.

@@ -1,10 +1,10 @@
-# Entur AI Agents POC
+# Entur AI Agent Instructions
 
-> Centralized AI agent instructions for generating standardized code with Entur best practices.
+Hey! Welcome to Entur's shared AI agent instructions.
 
-## What is this?
+This is where we keep the documentation that AI coding agents (Claude Code, GitHub Copilot, Cursor, etc.) use to generate code that follows Entur's platform conventions. Instead of every team maintaining their own copy of "how we do things at Entur", we keep it here and everyone points their agents to it.
 
-This repository contains documentation that AI coding agents (Claude Code, GitHub Copilot, etc.) consume to generate code that follows Entur's platform conventions. Instead of duplicating standards across every repository, teams reference this shared source.
+> **Heads up:** The files in `docs/` are written primarily for AI agents to consume, not humans. They're dense, structured for machine readability, and intentionally light on code examples (the AI figures out the implementation from your project's own codebase). This is still very much a work in progress -- things will change, improve, and expand over time. It works well today, but we're iterating!
 
 ## Quick Start
 
@@ -111,15 +111,22 @@ AI agents read `AGENTS.md` first, which routes them to the relevant sub-document
 
 ## Contributing
 
-This is a shared resource for all of Entur, and pull requests are very welcome! Whether it's fixing a typo, improving an example, adding coverage for a new tool, or sharing a pattern that works well for your team -- every contribution helps raise the bar for everyone.
+This is a shared resource for all of Entur, and we'd love your help making it better! Every contribution matters -- whether it's fixing a typo, clarifying a confusing section, adding coverage for a tool you use, or sharing a pattern that works well for your team.
 
-To contribute:
+A few ways to contribute:
 
-1. Open an issue or draft PR describing the change
-2. Follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages
+- **Found something wrong or unclear?** Open an issue or just submit a PR directly
+- **Have a pattern that works great for your team?** Share it! Others will benefit
+- **Not sure if something belongs here?** Open an issue and let's figure it out together
+- **Want to improve the AI output for your stack?** Try tweaking the relevant `docs/` file and see how your agent responds -- that's the fastest feedback loop
+
+When submitting changes:
+
+1. Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages
+2. Keep in mind the audience is AI agents, not humans -- be precise and structured
 3. Get a review from the platform team
 
-Not sure if something belongs here? Open an issue and let's discuss it. For questions or support, reach out in `#talk-utviklerplattform` on Slack.
+For questions, ideas, or just to say hi, find us in `#talk-utviklerplattform` on Slack.
 
 ## License
 

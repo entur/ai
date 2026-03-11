@@ -130,17 +130,7 @@ Ensures contract stays in sync with implementation. See [Contract-First OpenAPI]
 
 #### Code-First (Simpler Projects)
 
-Annotate controllers and let springdoc-openapi generate the spec:
-
-```java
-@Operation(summary = "Find route by ID")
-@ApiResponse(responseCode = "200", description = "Route found")
-@ApiResponse(responseCode = "404", description = "Route not found")
-@GetMapping("/{id}")
-public ResponseEntity<RouteResponse> getRoute(@PathVariable String id) { ... }
-```
-
-Serve at `/api-docs` or `/v3/api-docs` (Spring Boot default).
+Annotate controllers with `@Operation`, `@ApiResponse` and let springdoc-openapi generate the spec. Serve at `/api-docs` or `/v3/api-docs` (Spring Boot default).
 
 ### Entur Springdoc Starter
 
@@ -169,54 +159,9 @@ springdoc:
 
 Every API must declare `x-entur-metadata` on its `info` object to identify the API in the developer portal:
 
-Kotlin:
+Create a `@Configuration` class with a `@Bean` method returning `OpenAPI`. Set `Info` with title, version, description, and attach `EnturMetadata` via the `.enturMetadata()` extension function (Kotlin) or `enturMetadata(info, metadata)` static import (Java). Set a unique `.id()` for the API.
 
-```kotlin
-@Configuration
-class OpenApiConfig {
-    @Bean
-    fun openApi(): OpenAPI {
-        return OpenAPI()
-            .info(Info()
-                .title("Items API")
-                .version("1.0.0")
-                .description("Manage items")
-                .enturMetadata(EnturMetadata()
-                    .id("items")                    // unique API identifier in Entur
-                )
-            )
-    }
-}
-```
-
-Java:
-
-```java
-import static org.entur.openapi.EnturMetadataKt.enturMetadata;
-
-@Configuration
-public class OpenApiConfig {
-    @Bean
-    public OpenAPI openApi() {
-        var info = new Info()
-                .title("Items API")
-                .version("1.0.0")
-                .description("Manage items");
-
-        enturMetadata(info, new EnturMetadata().id("items"));
-
-        return new OpenAPI().info(info);
-    }
-}
-```
-
-Use `parentId` for APIs that should appear under a parent in the portal:
-
-```kotlin
-EnturMetadata()
-    .id("items-subset")
-    .parentId("items")    // content shown under the parent API, not standalone
-```
+Use `.parentId()` for APIs that should appear under a parent in the portal (content shown under the parent API, not standalone).
 
 #### `x-entur-permissions` Extension (Automatic)
 
@@ -227,99 +172,21 @@ Auto-generated from `@PreAuthorize` annotations. No code changes needed. The par
 - `OR` combinations → `any` list
 - Nested `AND`/`OR`; non-permission nodes like `hasAnyAuthority` are skipped
 
-Example:
-
-```kotlin
-@GetMapping("/items")
-@Operation(summary = "Get items")
-@PreAuthorize("hasPermission('items', 'les') || hasPermission('items-global', 'les')")
-fun getItems(): List<Item> { ... }
-```
-
-Produces:
-
-```json
-"x-entur-permissions": {
-  "value": {
-    "any": ["items:les", "items-global:les"]
-  }
-}
-```
+Example: `@PreAuthorize("hasPermission('items', 'les') || hasPermission('items-global', 'les')")` produces `"x-entur-permissions": { "value": { "any": ["items:les", "items-global:les"] } }`.
 
 #### `@EnturPermissions` Override
 
-Override auto-generated permissions when `@PreAuthorize` is insufficient:
-
-```kotlin
-@GetMapping("/items")
-@PreAuthorize("hasPermission('items', 'les') || hasPermission('items-global', 'les')")
-@EnturPermissions(
-    description = "Requires read access to items or global items",
-    value = EnturPermissionsValue(any = [
-        EnturPermissionsValue("items:les"),
-        EnturPermissionsValue("something-else:les"),
-    ])
-)
-fun getItems(): List<Item> { ... }
-```
+Override auto-generated permissions when `@PreAuthorize` is insufficient. Add `@EnturPermissions` with a `description` and optional `value` containing `EnturPermissionsValue` with `any` or `all` lists.
 
 If only `description` is set (without `value`), `@PreAuthorize` is still used for the permission value.
 
 #### `@SchemaExample` Annotation
 
-Generates OpenAPI examples from actual class instances, ensuring examples compile and stay in sync:
-
-Kotlin:
-
-```kotlin
-data class Item(
-    val id: String,
-    val description: String
-) {
-    companion object {
-        @SchemaExample
-        @JvmStatic
-        fun example(): Item = Item("foo", "Foo")
-    }
-}
-```
-
-Java:
-
-```java
-public record Item(String id, String description) {
-    @SchemaExample
-    public static Item example() {
-        return new Item("foo", "Foo");
-    }
-}
-```
-
-Requirements: `static` (`@JvmStatic` in Kotlin), annotated with `@SchemaExample`, returns enclosing class instance. Serialized using the app's `ObjectMapper`.
+Generates OpenAPI examples from actual class instances, ensuring examples compile and stay in sync. Add a `static` method (or `@JvmStatic` in a Kotlin companion object) annotated with `@SchemaExample` that returns an instance of the enclosing class. Serialized using the app's `ObjectMapper`.
 
 #### Custom TypeNameResolver
 
-Control how generic types appear in OpenAPI schema:
-
-```kotlin
-@Bean
-fun customTypeNameResolver(): TypeNameResolver {
-    return object : TypeNameResolver() {
-        override fun nameForGenericType(
-            type: JavaType,
-            options: Set<Options?>?
-        ): String? {
-            val name = super.nameForGenericType(type, options)
-            // "PageDtoItem" becomes "PageItem"
-            return if (type.rawClass?.isAssignableFrom(PageDto::class.java) == true) {
-                name.replaceFirst("PageDto", "Page")
-            } else {
-                name
-            }
-        }
-    }
-}
-```
+Control how generic types appear in OpenAPI schema by providing a `@Bean` of type `TypeNameResolver`. Override `nameForGenericType` to customize schema names (e.g., `PageDtoItem` -> `PageItem`).
 
 ## gRPC APIs
 

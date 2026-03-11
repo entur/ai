@@ -68,20 +68,7 @@ Remove any existing `logback.xml` or `logback-spring.xml` -- cloud-logging provi
 
 ### Usage
 
-Standard SLF4J -- cloud-logging handles JSON formatting, GCP severity mapping, and correlation-id propagation:
-
-```java
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-private static final Logger LOG = LoggerFactory.getLogger(RouteService.class);
-
-LOG.info("Route found for id {}", routeId);
-LOG.warn("Retry attempt {} for route {}", attempt, routeId);
-LOG.error("Failed to fetch route {}", routeId, exception);
-```
-
-Configure levels via Spring properties:
+Standard SLF4J -- cloud-logging handles JSON formatting, GCP severity mapping, and correlation-id propagation. Configure levels via Spring properties:
 
 ```yaml
 logging:
@@ -145,16 +132,7 @@ entur:
 
 ### DevOpsLogger (Additional Severity Levels)
 
-```java
-import no.entur.logging.cloud.api.DevOpsLogger;
-import no.entur.logging.cloud.api.DevOpsLoggerFactory;
-
-private static final DevOpsLogger LOGGER = DevOpsLoggerFactory.getLogger(MyService.class);
-
-LOGGER.errorTellMeTomorrow("Non-urgent error");        // ERROR level
-LOGGER.errorInterruptMyDinner("Critical error");        // CRITICAL level
-LOGGER.errorWakeMeUpRightNow("System down");            // ALERT level
-```
+cloud-logging includes `DevOpsLogger` (from `DevOpsLoggerFactory`) with additional severity methods: `errorTellMeTomorrow` (ERROR), `errorInterruptMyDinner` (CRITICAL), `errorWakeMeUpRightNow` (ALERT).
 
 ## Application Configuration
 
@@ -198,63 +176,6 @@ These are defaults in the Entur common Helm chart. Do not change unless you also
 
 ## Coding Patterns
 
-### REST Controllers
-
-```java
-@RestController
-@RequestMapping("/api/v1/routes")
-public class RouteController {
-
-    private final RouteService routeService;
-
-    public RouteController(RouteService routeService) {
-        this.routeService = routeService;
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<RouteResponse> getRoute(@PathVariable String id) {
-        return routeService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping
-    public ResponseEntity<RouteResponse> createRoute(
-            @Valid @RequestBody CreateRouteRequest request) {
-        RouteResponse created = routeService.create(request);
-        URI location = URI.create("/api/v1/routes/" + created.id());
-        return ResponseEntity.created(location).body(created);
-    }
-}
-```
-
-### Service Layer
-
-```java
-@Service
-public class RouteService {
-
-    private final RouteRepository routeRepository;
-
-    public RouteService(RouteRepository routeRepository) {
-        this.routeRepository = routeRepository;
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<RouteResponse> findById(String id) {
-        return routeRepository.findById(id)
-                .map(RouteMapper::toResponse);
-    }
-
-    @Transactional
-    public RouteResponse create(CreateRouteRequest request) {
-        Route route = RouteMapper.toEntity(request);
-        Route saved = routeRepository.save(route);
-        return RouteMapper.toResponse(saved);
-    }
-}
-```
-
 ### Key Principles
 
 - Use constructor injection (not field injection with `@Autowired`)
@@ -266,90 +187,9 @@ public class RouteService {
 
 ### Exception Handling
 
-```java
-@RestControllerAdvice
-public class GlobalExceptionHandler {
-
-    private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
-        LOG.warn("Resource not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse("NOT_FOUND", ex.getMessage()));
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldErrors().stream()
-                .map(e -> e.getField() + ": " + e.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-        return ResponseEntity.badRequest()
-                .body(new ErrorResponse("VALIDATION_ERROR", message));
-    }
-}
-
-public record ErrorResponse(String code, String message) {}
-```
+Use `@RestControllerAdvice` with `@ExceptionHandler` methods for centralized error handling. Return a structured error response record (e.g., `ErrorResponse(String code, String message)`) with appropriate HTTP status codes. Map domain exceptions to client-friendly responses -- never expose stack traces.
 
 ## Testing
-
-### Unit Tests
-
-```java
-@ExtendWith(MockitoExtension.class)
-class RouteServiceTest {
-
-    @Mock
-    private RouteRepository routeRepository;
-
-    @InjectMocks
-    private RouteService routeService;
-
-    @Test
-    @DisplayName("findById returns route when it exists")
-    void findById_existingRoute_returnsRoute() {
-        Route route = TestFixtures.aRoute().build();
-        when(routeRepository.findById("route-1")).thenReturn(Optional.of(route));
-
-        Optional<RouteResponse> result = routeService.findById("route-1");
-
-        assertThat(result).isPresent();
-        assertThat(result.get().id()).isEqualTo("route-1");
-    }
-}
-```
-
-### Integration Tests
-
-```java
-@SpringBootTest
-@Testcontainers
-class RouteRepositoryIntegrationTest {
-
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16-alpine");
-
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
-
-    @Autowired
-    private RouteRepository routeRepository;
-
-    @Test
-    void savesAndRetrievesRoute() {
-        Route route = new Route("route-1", "Oslo S", "Bergen");
-        routeRepository.save(route);
-
-        Optional<Route> found = routeRepository.findById("route-1");
-        assertThat(found).isPresent();
-    }
-}
-```
 
 ### Test Libraries
 
@@ -405,82 +245,11 @@ spring:
 
 ### Spring Cache Abstraction
 
-Use `@Cacheable` annotations with Redis as the backing store:
-
-```java
-@Configuration
-@EnableCaching
-public class CacheConfig {
-
-    @Bean
-    public RedisCacheConfiguration cacheConfiguration() {
-        return RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofMinutes(10))
-            .disableCachingNullValues()
-            .serializeValuesWith(
-                RedisSerializationContext.SerializationPair
-                    .fromSerializer(new GenericJackson2JsonRedisSerializer())
-            );
-    }
-
-    @Bean
-    public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
-        return RedisCacheManager.builder(factory)
-            .cacheDefaults(cacheConfiguration())
-            .withCacheConfiguration("routes",
-                cacheConfiguration().entryTtl(Duration.ofHours(1)))
-            .withCacheConfiguration("stops",
-                cacheConfiguration().entryTtl(Duration.ofMinutes(30)))
-            .build();
-    }
-}
-```
-
-```java
-@Service
-public class RouteService {
-
-    @Cacheable(value = "routes", key = "#id")
-    public Route findById(String id) {
-        return routeRepository.findById(id).orElseThrow();
-    }
-
-    @CacheEvict(value = "routes", key = "#id")
-    public void update(String id, UpdateRouteRequest request) {
-        // Cache entry is evicted after update
-    }
-
-    @CacheEvict(value = "routes", allEntries = true)
-    public void refreshAll() {
-        // Evict all entries in the "routes" cache
-    }
-}
-```
+Use `@EnableCaching` with `RedisCacheManager` and `@Cacheable`/`@CacheEvict` annotations. Configure per-cache TTLs via `RedisCacheConfiguration`. Serialize with `GenericJackson2JsonRedisSerializer`.
 
 ### Direct RedisTemplate Usage
 
-For counters, locks, sets, hashes:
-
-```java
-@Component
-public class RateLimiter {
-
-    private final StringRedisTemplate redis;
-
-    public RateLimiter(StringRedisTemplate redis) {
-        this.redis = redis;
-    }
-
-    public boolean isAllowed(String clientId, int maxRequests, Duration window) {
-        String key = "rate:" + clientId;
-        Long count = redis.opsForValue().increment(key);
-        if (count == 1) {
-            redis.expire(key, window);
-        }
-        return count <= maxRequests;
-    }
-}
-```
+For counters, locks, sets, and hashes, use `StringRedisTemplate` directly. Use `opsForValue().increment()` with TTL for rate limiting, `opsForSet()` for set operations, etc.
 
 ### Key Naming Conventions
 
@@ -508,38 +277,7 @@ Examples: `products-api:route:ENT:Route:123`, `products-api:rate:partner-xyz`
 
 ### Testing
 
-Use Testcontainers for integration tests:
-
-```java
-@SpringBootTest
-@Testcontainers
-class RedisCacheIntegrationTest {
-
-    @Container
-    static GenericContainer<?> redis = new GenericContainer<>("redis:7-alpine")
-        .withExposedPorts(6379);
-
-    @DynamicPropertySource
-    static void configureRedis(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.redis.host", redis::getHost);
-        registry.add("spring.data.redis.port", () -> redis.getMappedPort(6379));
-        registry.add("spring.data.redis.password", () -> "");
-    }
-}
-```
-
-For unit tests, mock the cache or use `@MockBean` on `RedisTemplate`:
-
-```java
-@WebMvcTest(RouteController.class)
-class RouteControllerTest {
-
-    @MockBean
-    private RouteService routeService;  // caching is transparent
-
-    // Test controller behavior -- caching is an implementation detail
-}
-```
+Use Testcontainers (`GenericContainer` with `redis:7-alpine`) for Redis integration tests. Configure `spring.data.redis.host` and `spring.data.redis.port` via `@DynamicPropertySource`. For unit tests, caching is transparent -- mock the service layer with `@MockBean`.
 
 ## Artifactory (JFrog)
 

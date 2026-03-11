@@ -95,26 +95,7 @@ Benefits: API contracts separated from business logic, API changes don't ripple 
 
 ### Composition Over Inheritance
 
-Prefer constructor injection over inheritance hierarchies:
-
-```kotlin
-@Service
-class VersionServiceImpl(private val versionDAO: VersionDAO) : VersionService {
-    // Business logic delegates to DAO -- composition, not inheritance
-}
-```
-
-Entities compose relationships using extension functions:
-
-```kotlin
-object PriceableObjectEntity : LongIdTable("priceable_object") {
-    fun Join.joinPriceableObjectWithChildren() =
-        Join(this)
-            .joinFarePriceToPriceableObject()
-            .joinLimitingRuleToFarePrice()
-            .withVersionsForPriceableObjects()
-}
-```
+Prefer constructor injection over inheritance hierarchies. Services delegate to DAOs via composition. Entities compose relationships using `Join` extension functions in Exposed.
 
 ## Infrastructure Architecture
 
@@ -173,17 +154,7 @@ Prefer **JetBrains Exposed SQL-DSL** over JPA/Hibernate for Kotlin:
 - Works naturally with immutable `data class` models
 - Better query/join/subquery control; no magic, no lazy loading
 
-```kotlin
-object VersionEntity : LongIdTable("version") {
-    val netexId = varchar("netex_id", 70)
-    val created = timestamp("created")
-    val status = varchar("status", 70)
-    val startDate = date("start_date")
-    val endDate = date("end_date").nullable()
-}
-```
-
-For Java projects, **Spring Data JPA** remains the default.
+Define tables as `object` extending `LongIdTable` with typed columns (`varchar`, `timestamp`, `date`, `.nullable()`). For Java projects, **Spring Data JPA** remains the default.
 
 ### Migration Best Practices
 
@@ -197,15 +168,7 @@ For Java projects, **Spring Data JPA** remains the default.
 
 Use circuit breakers, retry with backoff, and timeouts for external service calls. See [api-design.md](api-design.md#rate-limiting-and-resilience) for details.
 
-```java
-@CircuitBreaker(name = "externalService", fallbackMethod = "fallback")
-public RouteData fetchFromExternalService(String id) { ... }
-
-@Retry(name = "externalService", fallbackMethod = "fallback")
-public RouteData fetchWithRetry(String id) { ... }
-```
-
-Timeout guidelines: connect 5s, read 30s, never infinite. Design for graceful degradation -- return cached or partial data when dependencies are unavailable.
+Use `@CircuitBreaker` and `@Retry` (Resilience4j) annotations with named configurations and fallback methods. Timeout guidelines: connect 5s, read 30s, never infinite. Design for graceful degradation -- return cached or partial data when dependencies are unavailable.
 
 ## Production Hardening
 

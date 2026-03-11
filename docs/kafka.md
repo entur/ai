@@ -147,43 +147,13 @@ Note: DLT functionality requires the producer to be enabled.
 
 ### Standard Producer (Avro, String Keys)
 
-Most common pattern -- Avro values with string keys:
-
-```kotlin
-@Component
-class OrderEventProducer(
-    private val producer: EnturKafkaProducer<OrderEvent>
-) {
-    fun publishOrderCreated(order: OrderEvent) {
-        producer.send(
-            "order-events",              // topic
-            order.orderId.toString(),    // key (determines partition)
-            order,                       // value (Avro SpecificRecord)
-            correlationId(),             // correlation ID (auto-added as header)
-            { result -> log.info("Sent order event: {}", result.recordMetadata) },
-            { error -> log.error("Failed to send order event", error) },
-            listOf(RecordHeader("event-type", "ORDER_CREATED".toByteArray()))  // optional custom headers
-        )
-    }
-}
-```
+Most common pattern -- Avro values with string keys. Inject `EnturKafkaProducer<T>` and call `send()` with topic, key (determines partition), value (Avro `SpecificRecord`), `correlationId()`, success/failure callbacks, and optional custom headers.
 
 The `correlationId` is added as an `X-Correlation-Id` header automatically.
 
 ### Avro-Keyed Producer
 
-For Avro-typed keys (both key and value are `SpecificRecordBase`):
-
-```kotlin
-@Component
-class MyProducer(
-    private val producer: EnturAvroKeyKafkaProducer<MyKeyType, MyEventType>
-) {
-    fun send(key: MyKeyType, event: MyEventType) {
-        producer.send("my-topic", key, event, correlationId())
-    }
-}
-```
+For Avro-typed keys (both key and value are `SpecificRecordBase`), inject `EnturAvroKeyKafkaProducer<K, V>`.
 
 Requires key serializer config:
 
@@ -196,16 +166,7 @@ entur:
 
 ### Protobuf Producer
 
-```kotlin
-@Component
-class ProtobufProducer(
-    private val producer: EnturProtobufKafkaProducer<String, MyProtoMessage>
-) {
-    fun send(message: MyProtoMessage) {
-        producer.send("proto-topic", "my-key", message, correlationId())
-    }
-}
-```
+Inject `EnturProtobufKafkaProducer<K, V>` for Protobuf messages.
 
 Requires value serializer config:
 
@@ -217,18 +178,7 @@ entur:
 
 ### Generic Producer
 
-For schemaless topics (legacy use only):
-
-```kotlin
-@Component
-class GenericProducer(
-    private val producer: EnturGenericKafkaProducer<String, String>
-) {
-    fun send(key: String, value: String) {
-        producer.send("legacy-topic", key, value, correlationId())
-    }
-}
-```
+For schemaless topics (legacy use only). Inject `EnturGenericKafkaProducer<K, V>`.
 
 ### Producer Tuning Options
 
@@ -256,61 +206,23 @@ entur:
       allowNonTransactional: true          # allow producing outside @Transactional (default true)
 ```
 
-Use `@Transactional` on methods that produce messages:
-
-```kotlin
-@Transactional
-fun processAndPublish(event: MyEvent) {
-    producer.send("topic-a", event.id, event, correlationId())
-    producer.send("topic-b", event.id, event.summary, correlationId())
-}
-```
+Use `@Transactional` on methods that produce messages to multiple topics atomically.
 
 ## Consuming Messages
 
 ### Standard Consumer (Avro)
 
-```kotlin
-@Component
-class OrderEventListener {
+Use `@KafkaListener` with `containerFactory = "enturListenerFactory"` (the factory with all Entur defaults). Receive key via `@Header(KafkaHeaders.RECEIVED_KEY)` and value via `@Payload`.
 
-    @KafkaListener(topics = ["order-events"], containerFactory = "enturListenerFactory")
-    fun onOrderEvent(
-        @Header(KafkaHeaders.RECEIVED_KEY) key: String,
-        @Payload event: OrderEvent
-    ) {
-        processOrder(event)
-    }
-}
-```
-
-**Important**: Always use `containerFactory = "enturListenerFactory"` -- the factory with all Entur defaults.
+**Important**: Always use `containerFactory = "enturListenerFactory"`.
 
 ### Avro-Keyed Consumer
 
-```kotlin
-@KafkaListener(topics = ["my-topic"], containerFactory = "enturListenerFactory")
-fun onEvent(
-    @Header(KafkaHeaders.RECEIVED_KEY) key: MyKeyType,
-    @Payload event: MyEventType
-) {
-    process(key, event)
-}
-```
+Same as standard consumer, but the `@Header(KafkaHeaders.RECEIVED_KEY)` parameter is typed to the Avro key type.
 
 ### Protobuf Consumer
 
 Uses a different container factory: `enturSpecificProtobufConsumerFactory`.
-
-```kotlin
-@KafkaListener(topics = ["proto-topic"], containerFactory = "enturSpecificProtobufConsumerFactory")
-fun onProtoEvent(
-    @Header(KafkaHeaders.RECEIVED_KEY) key: String,
-    @Payload message: MyProtoMessage
-) {
-    process(message)
-}
-```
 
 ```yaml
 entur:
@@ -322,15 +234,7 @@ entur:
 
 ### GenericRecord Consumer
 
-For schemaless or dynamically typed topics. Set `useSpecificAvro: false`:
-
-```kotlin
-@KafkaListener(topics = ["generic-topic"], containerFactory = "enturListenerFactory")
-fun onGenericEvent(@Payload message: ConsumerRecord<Any, Any>) {
-    val value = message.value()
-    process(value)
-}
-```
+For schemaless or dynamically typed topics. Receive as `ConsumerRecord<Any, Any>` via `@Payload`. Set `useSpecificAvro: false`:
 
 ```yaml
 entur:
@@ -355,22 +259,7 @@ entur:
 
 ### Standalone Consumer (No Consumer Group)
 
-For consumers that must read all partitions independently:
-
-```kotlin
-@KafkaListener(
-    topicPartitions = [TopicPartition(
-        topic = "my-topic",
-        partitions = ["#{@partitionFinder.allPartitions(\"my-topic\")}"]
-    )]
-)
-fun onEvent(
-    @Header(KafkaHeaders.RECEIVED_KEY) key: String,
-    @Payload message: MyEvent
-) {
-    process(message)
-}
-```
+For consumers that must read all partitions independently. Use `topicPartitions` with `@partitionFinder.allPartitions()` SpEL expression in the `@KafkaListener` annotation instead of `topics`.
 
 ```yaml
 entur:
@@ -441,15 +330,7 @@ entur:
 
 ### DLT Handler
 
-```kotlin
-@Component
-class OrderDltHandler {
-    fun handleDlt(message: OrderEvent) {
-        log.error("Order event failed all retries: {}", message.orderId)
-        alertOpsTeam(message)
-    }
-}
-```
+Create a `@Component` bean with a handler method that receives the failed message. Log the failure and alert as needed.
 
 ```yaml
 entur:
@@ -461,34 +342,11 @@ entur:
 
 ### Manual Retry/DLT with Annotations
 
-If the starter's retry config is insufficient, use Spring Kafka annotations directly (set `entur.kafka.retry.enabled: false`):
-
-```kotlin
-@RetryableTopic(kafkaTemplate = "enturKafkaTemplate")
-@KafkaListener(topics = ["my-topic"], containerFactory = "enturListenerFactory")
-fun onEvent(
-    @Header(KafkaHeaders.RECEIVED_KEY) key: String,
-    @Payload event: MyEvent
-) {
-    processEvent(event)
-}
-
-@DltHandler
-fun onDlt(@Payload event: MyEvent) {
-    handleDeadLetter(event)
-}
-```
+If the starter's retry config is insufficient, use Spring Kafka annotations directly (set `entur.kafka.retry.enabled: false`). Use `@RetryableTopic(kafkaTemplate = "enturKafkaTemplate")` on the listener and `@DltHandler` for dead letter handling.
 
 ### Custom Retry Exception Logging
 
-```kotlin
-@Bean
-fun customRetryExceptionLogger() = CustomRetryExceptionLogger { exception, consumerRecord, nextDestination ->
-    if (nextDestination.isDltTopic) {
-        log.error("Message processing failed after all retries, sending to DLT", exception)
-    }
-}
-```
+Provide a `@Bean` of type `CustomRetryExceptionLogger` to customize logging when messages are retried or sent to DLT. The lambda receives the exception, consumer record, and next destination.
 
 ### Handling Deserialization Errors
 
@@ -506,18 +364,7 @@ This enables a `DelegatingByTypeSerializer` for DLT publishing. **Keep this list
 
 ### Custom Error Handler
 
-Provide a bean named `enturCustomErrorHandler` for fully custom error handling (overrides all defaults including retry topic naming):
-
-```kotlin
-@Bean(name = ["enturCustomErrorHandler"])
-fun enturCustomErrorHandler(): CommonErrorHandler =
-    DefaultErrorHandler(
-        DeadLetterPublishingRecoverer(enturKafkaTemplate()) { record, _ ->
-            TopicPartition("${record.topic()}-dlt", -1)
-        },
-        FixedBackOff(1000L, 2L)
-    )
-```
+Provide a `@Bean` named `enturCustomErrorHandler` of type `CommonErrorHandler` for fully custom error handling (overrides all defaults including retry topic naming). Use `DefaultErrorHandler` with `DeadLetterPublishingRecoverer` and your preferred backoff strategy.
 
 ## Avro Schema Management
 
@@ -554,25 +401,7 @@ Override `bootstrapServer` and `schemaRegistryUrl` directly -- takes precedence 
 
 ### Testcontainers with Kafka
 
-```kotlin
-@SpringBootTest
-@Testcontainers
-class KafkaIntegrationTest {
-
-    companion object {
-        @Container
-        val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.0"))
-
-        @DynamicPropertySource
-        @JvmStatic
-        fun configureProperties(registry: DynamicPropertyRegistry) {
-            registry.add("entur.kafka.bootstrapServer") { kafka.bootstrapServers }
-            registry.add("entur.kafka.schemaRegistryUrl") { "mock://testing" }
-            registry.add("entur.kafka.securityProtocol") { "PLAINTEXT" }
-        }
-    }
-}
-```
+Use `KafkaContainer` (from `confluentinc/cp-kafka` image) with `@Testcontainers` and `@DynamicPropertySource`. Override `entur.kafka.bootstrapServer`, `entur.kafka.schemaRegistryUrl` (`"mock://testing"`), and `entur.kafka.securityProtocol` (`"PLAINTEXT"`).
 
 ## Redis as Kafka State Store
 
@@ -580,71 +409,13 @@ Redis (Memorystore) is commonly paired with Kafka consumers for deduplication, s
 
 ### Idempotent Consumer (Deduplication)
 
-Kafka provides at-least-once delivery. Use Redis `SET NX EX` to deduplicate:
-
-```kotlin
-@Component
-class OrderEventListener(
-    private val redis: StringRedisTemplate,
-    private val orderService: OrderService,
-) {
-    @KafkaListener(topics = ["order-events"], containerFactory = "enturListenerFactory")
-    fun onOrderEvent(
-        @Header(KafkaHeaders.RECEIVED_KEY) key: String,
-        @Header("event-id") eventId: String,
-        @Payload event: OrderEvent,
-    ) {
-        val dedupKey = "myapp:dedup:$eventId"
-
-        // SET NX -- returns true only if key was newly created
-        val isNew = redis.opsForValue()
-            .setIfAbsent(dedupKey, "1", Duration.ofHours(24)) ?: false
-
-        if (!isNew) {
-            log.info("Duplicate event skipped: {}", eventId)
-            return
-        }
-
-        orderService.processOrder(event)
-    }
-}
-```
+Kafka provides at-least-once delivery. Use Redis `SET NX EX` to deduplicate. In the `@KafkaListener`, extract the event ID from a header, build a dedup key (`myapp:dedup:{eventId}`), and use `redis.opsForValue().setIfAbsent(key, "1", ttl)`. Skip processing if the key already exists.
 
 **TTL guidance**: Set dedup key TTL to at least the max expected redelivery window. 24h is a safe default; if retry/DLT retries for at most 2h, 4h TTL suffices.
 
 ### Consumer State Cache
 
-Cache reference data lookups to avoid repeated DB queries:
-
-```kotlin
-@Component
-class EnrichmentListener(
-    private val redis: StringRedisTemplate,
-    private val productRepository: ProductRepository,
-    private val objectMapper: ObjectMapper,
-) {
-    @KafkaListener(topics = ["raw-events"], containerFactory = "enturListenerFactory")
-    fun onEvent(@Payload event: RawEvent) {
-        val product = getCachedProduct(event.productId)
-        val enriched = event.enrich(product)
-        // ... produce enriched event or persist
-    }
-
-    private fun getCachedProduct(productId: String): Product {
-        val key = "myapp:product:$productId"
-        val cached = redis.opsForValue().get(key)
-        if (cached != null) {
-            return objectMapper.readValue(cached, Product::class.java)
-        }
-
-        val product = productRepository.findById(productId)
-            ?: throw IllegalStateException("Product not found: $productId")
-
-        redis.opsForValue().set(key, objectMapper.writeValueAsString(product), Duration.ofMinutes(30))
-        return product
-    }
-}
-```
+Cache reference data lookups to avoid repeated DB queries. Use a cache-aside pattern: check Redis first, fall back to repository, then populate cache with TTL. Use `ObjectMapper` for JSON serialization to/from Redis.
 
 ### Best Practices for Redis + Kafka
 

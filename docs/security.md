@@ -45,16 +45,7 @@ common:
 
 ### Consuming Secrets (Application Code)
 
-```java
-// Java/Kotlin - via Spring property
-@Value("${API_KEY}")
-private String apiKey;
-```
-
-```go
-// Go
-apiKey := os.Getenv("API_KEY")
-```
+Secrets are injected as environment variables. Access them via `@Value("${API_KEY}")` in Spring (Java/Kotlin) or `os.Getenv("API_KEY")` in Go.
 
 ### Local Development
 

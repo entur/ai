@@ -79,75 +79,23 @@ Constants from `org.entur.metrics.config.Defaults`:
 
 Record processing time and consumption delay using standard metric names. Works alongside automatic Micrometer listeners (see [kafka.md](kafka.md#observability)):
 
-```kotlin
-// Processing time -- annotate the listener method
-@Timed(
-    value = KAFKA_CONSUMER_PROCESS_TIME,
-    percentiles = [0.50, 0.75, 0.95, 0.99],
-    extraTags = ["source", "MY_APP"]
-)
-@KafkaListener(topics = ["my-topic"], containerFactory = "enturListenerFactory")
-fun onEvent(@Payload event: MyEvent) {
-    processEvent(event)
-}
-```
-
-```kotlin
-// Consumption delay -- call as the first step in each consumer
-private fun logConsumeDelay(eventTimestamp: String, topicEvent: String, partition: Int) {
-    val timestamp = ZonedDateTime.parse(eventTimestamp)
-    val differenceMs = ChronoUnit.MILLIS.between(timestamp, ZonedDateTime.now())
-    Timer.builder(KAFKA_CONSUMER_CONSUME_DELAY)
-        .tag("eventType", topicEvent)
-        .tag("partition", partition.toString())
-        .publishPercentiles(0.5, 0.75, 0.95, 0.99)
-        .register(meterRegistry)
-        .record(differenceMs, TimeUnit.MILLISECONDS)
-}
-```
+- **Processing time**: Annotate the `@KafkaListener` method with `@Timed(value = KAFKA_CONSUMER_PROCESS_TIME, percentiles = [0.50, 0.75, 0.95, 0.99], extraTags = ["source", "MY_APP"])`
+- **Consumption delay**: As the first step in each consumer, compute the delay between event timestamp and current time, then record it using `Timer.builder(KAFKA_CONSUMER_CONSUME_DELAY)` with `eventType` and `partition` tags
 
 #### Quartz Job Metrics
 
-```kotlin
-@Timed(
-    value = QUARTZ_JOB,
-    percentiles = [0.50, 0.75, 0.95, 0.99],
-    extraTags = ["job", "MyJobName"]
-)
-override fun executeInternal(context: JobExecutionContext) {
-    registerFireDelay(context, "MyJobName", meterRegistry)
-    // ... job logic
-}
-
-private fun registerFireDelay(context: JobExecutionContext, jobName: String, meterRegistry: MeterRegistry) {
-    val scheduleTime = context.scheduledFireTime.time.toDouble()
-    val fireTime = context.fireTime.time
-    DistributionSummary.builder("${QUARTZ_JOB}.fire.delay")
-        .baseUnit("ms")
-        .description("Delay between scheduled fire time and actual fire time")
-        .tag("job", jobName)
-        .register(meterRegistry)
-        .record(fireTime - scheduleTime)
-}
-```
+- Annotate `executeInternal` with `@Timed(value = QUARTZ_JOB, percentiles = [0.50, 0.75, 0.95, 0.99], extraTags = ["job", "MyJobName"])`
+- Record fire delay using `DistributionSummary.builder("${QUARTZ_JOB}.fire.delay")` with the difference between `scheduledFireTime` and `fireTime`
 
 ### Enabling Metrics (Non-Spring-Boot)
 
 #### Go
 
-```go
-import "github.com/prometheus/client_golang/prometheus/promhttp"
-
-mux.Handle("GET /metrics", promhttp.Handler())
-```
+Register `promhttp.Handler()` at `GET /metrics` using `github.com/prometheus/client_golang`.
 
 #### Python
 
-```python
-from prometheus_client import start_http_server, Counter
-
-REQUEST_COUNT = Counter('http_requests_total', 'Total HTTP requests', ['method', 'path', 'status'])
-```
+Use `prometheus_client` package. Define metrics (e.g., `Counter('http_requests_total', ...)`) and expose via `start_http_server`.
 
 ### Metrics Helm Configuration
 
@@ -174,24 +122,8 @@ Follow Prometheus naming conventions:
 - Use labels for dimensions (e.g. `route`, `status`)
 - Keep cardinality low -- avoid high-cardinality labels (user IDs, request IDs)
 
-```java
-// Java/Kotlin
-Counter.builder("routes_processed_total")
-    .description("Total routes processed")
-    .tag("status", "success")
-    .register(meterRegistry)
-    .increment();
-```
-
-```go
-// Go
-routesProcessed := promauto.NewCounterVec(prometheus.CounterOpts{
-    Name: "routes_processed_total",
-    Help: "Total routes processed",
-}, []string{"status"})
-
-routesProcessed.WithLabelValues("success").Inc()
-```
+- **Java/Kotlin**: Use Micrometer `Counter.builder("metric_name").tag("key", "value").register(meterRegistry).increment()`
+- **Go**: Use `promauto.NewCounterVec(prometheus.CounterOpts{Name: "metric_name"}, []string{"label"})` and `.WithLabelValues("value").Inc()`
 
 ## Distributed Tracing
 
@@ -213,13 +145,7 @@ management:
 
 ### Tracing with Go
 
-```go
-import "go.opentelemetry.io/otel"
-
-tracer := otel.Tracer("my-service")
-ctx, span := tracer.Start(ctx, "findRoute")
-defer span.End()
-```
+Use `go.opentelemetry.io/otel` to create a tracer and start spans. Always `defer span.End()`.
 
 ### Trace Propagation
 

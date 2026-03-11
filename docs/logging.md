@@ -25,60 +25,15 @@ All services must produce structured JSON logs to stdout. GCP Cloud Logging auto
 
 ### Java / Kotlin (Spring Boot)
 
-Use [entur/cloud-logging](https://github.com/entur/cloud-logging) -- plug-and-play structured JSON logging for GCP (no manual `logback.xml` needed):
-
-```kotlin
-// build.gradle.kts
-dependencies {
-    implementation(platform("no.entur.logging.cloud:bom:$cloudLoggingVersion"))
-    implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web")
-    testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
-}
-```
-
-```java
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-private static final Logger LOG = LoggerFactory.getLogger(RouteService.class);
-
-LOG.info("Route found for id {}", routeId);
-LOG.error("Failed to fetch route {}", routeId, exception);
-```
-
-Optional starters: `request-response-spring-boot-starter-gcp-web` (Logbook HTTP body logging), `on-demand-spring-boot-starter-gcp-web` (buffer and flush only on failure). See [java.md](java.md) for full details.
+Use [entur/cloud-logging](https://github.com/entur/cloud-logging) -- plug-and-play structured JSON logging for GCP (no manual `logback.xml` needed). Add the BOM and `spring-boot-starter-gcp-web` dependency, then use standard SLF4J (`LoggerFactory.getLogger()`). Optional starters: `request-response-spring-boot-starter-gcp-web` (Logbook HTTP body logging), `on-demand-spring-boot-starter-gcp-web` (buffer and flush only on failure). See [java.md](java.md) for full details.
 
 ### Go
 
-Use [entur/go-logging](https://github.com/entur/go-logging):
-
-```go
-import "github.com/entur/go-logging"
-
-logging.Info().Str("routeId", routeId).Str("origin", origin).Msg("route found")
-logging.Error().Err(err).Str("routeId", routeId).Msg("failed to fetch route")
-```
-
-Handles JSON output, caller location, and GCP-compatible levels. Default level from `LOG_LEVEL` env var (defaults to `warning`). See [go.md](go.md) for full details.
+Use [entur/go-logging](https://github.com/entur/go-logging). Provides JSON output, caller location, and GCP-compatible levels. Use `logging.Info().Str("key", value).Msg("message")` style. Default level from `LOG_LEVEL` env var (defaults to `warning`). See [go.md](go.md) for full details.
 
 ### Python
 
-Use standard `logging` with JSON formatting:
-
-```python
-import logging
-import json_log_formatter
-
-formatter = json_log_formatter.JSONFormatter()
-handler = logging.StreamHandler()
-handler.setFormatter(formatter)
-
-logger = logging.getLogger("my_application")
-logger.addHandler(handler)
-logger.setLevel(logging.INFO)
-
-logger.info("Route found", extra={"route_id": route_id, "origin": origin})
-```
+Use standard `logging` with `json_log_formatter.JSONFormatter()` for structured JSON output. Pass structured fields via the `extra` parameter.
 
 ## Log Levels
 

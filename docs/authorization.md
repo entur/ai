@@ -126,63 +126,17 @@ entur:
 
 Use `@PreAuthorize` with `hasPermission()`:
 
-```kotlin
-@RestController
-class VersionController(
-    private val versionService: VersionService,
-) : VersionApi {
-
-    // Business capability check: operation + access
-    @PreAuthorize("hasPermission('product-api-access', 'endre')")
-    override fun createVersion(request: CreateVersionRequest): ResponseEntity<Version> {
-        // Only users with 'product-api-access' + 'endre' access can reach this
-    }
-
-    @PreAuthorize("hasPermission('product-api-access', 'les')")
-    override fun getVersionById(id: String): ResponseEntity<Version> {
-        // Read-only access
-    }
-}
-```
-
-For responsibility set checks:
-
-```java
-@PreAuthorize("hasPermission(#organisationId, 'product.organisation', 'endre')")
-public ResponseEntity<?> updateProduct(@PathVariable String organisationId, ...) {
-    // Only users with responsibility set access for this organisation
-}
-```
+- Business capability check: `@PreAuthorize("hasPermission('product-api-access', 'endre')")`
+- Read-only access: `@PreAuthorize("hasPermission('product-api-access', 'les')")`
+- Responsibility set check: `@PreAuthorize("hasPermission(#organisationId, 'product.organisation', 'endre')")` (note the `#organisationId` SpEL reference to the path variable)
 
 ### 4. Programmatic Access Checks
 
-Inject `AuthorizeTenant`:
+Inject `AuthorizeTenant` for programmatic checks:
 
-```java
-@Service
-public class MyService {
-    private final AuthorizeTenant authorizeTenant;
-
-    public MyService(AuthorizeTenant authorizeTenant) {
-        this.authorizeTenant = authorizeTenant;
-    }
-
-    public void doSomething(Authentication auth) {
-        // Check business capability
-        boolean canEdit = authorizeTenant.checkBusinessCapabilityPermission(
-            auth.getPrincipal(), "my-operation", "endre"
-        );
-
-        // Get all permissions for a user
-        Set<Permission> permissions = authorizeTenant.getPermissions(auth.getPrincipal());
-
-        // Check responsibility set
-        boolean canAccessOrg = authorizeTenant.checkResponsibilitySetPermission(
-            auth.getPrincipal(), "my-operation", new ObjectId("org-123"), "les"
-        );
-    }
-}
-```
+- `checkBusinessCapabilityPermission(principal, operation, access)` -- check business capability
+- `getPermissions(principal)` -- get all permissions for a user
+- `checkResponsibilitySetPermission(principal, operation, objectId, access)` -- check responsibility set
 
 ## Granting Access Between Apps, Clients, and Partners
 
@@ -230,26 +184,11 @@ entur:
 
 ### Managing Agreements (Responsibility Sets)
 
-Agreements link responsibility sets to organisations for data-level access:
+Agreements link responsibility sets to organisations for data-level access. Use `AuthorizeTenant` programmatically:
 
-```java
-// Programmatic agreement management via AuthorizeTenant
-authorizeTenant.storeAgreement(
-    Agreement.builder()
-        .operation("product")
-        .access(Access.ENDRE)
-        .responsibilityType("organisation")
-        .responsibilityKey("ENT:Organisation:123")
-        .organisationId("org-456")
-        .build()
-);
-
-// Query agreements
-Set<Agreement> agreements = authorizeTenant.getAgreements(permission);
-
-// Delete agreement
-authorizeTenant.deleteAgreement(agreementId);
-```
+- `storeAgreement(Agreement.builder().operation(...).access(...).responsibilityType(...).responsibilityKey(...).organisationId(...).build())`
+- `getAgreements(permission)` -- query agreements
+- `deleteAgreement(agreementId)` -- delete agreement
 
 Agreement REST API:
 
@@ -326,50 +265,11 @@ entur:
 
 Use Entur's test auth library with `TenantJsonWebToken`:
 
-```kotlin
-@WebMvcTest(VersionController::class)
-@Import(VersionMapper::class)
-@ExtendWith(TenantJsonWebToken::class)
-class VersionControllerTests : BaseControllerTest() {
-
-    @MockkBean
-    lateinit var versionService: VersionService
-
-    @Test
-    fun `internal user with full access can read`(
-        @InternalTenant(clientId = "fullAccess") token: String,
-    ) {
-        every { versionService.find("ENT:Version:1") } returns someVersion()
-
-        mockMvc.perform(
-            get("/v3/versions/ENT:Version:1")
-                .header("Authorization", token)
-        ).andExpect(status().isOk)
-    }
-
-    @Test
-    fun `traveller tenant is unauthorized`(
-        @TravellerTenant(clientId = "user") token: String,
-    ) {
-        mockMvc.perform(
-            get("/v3/versions/ENT:Version:1")
-                .header("Authorization", token)
-        ).andExpect(status().isUnauthorized)
-    }
-
-    @Test
-    fun `read-only user cannot create`(
-        @InternalTenant(clientId = "readAccess") token: String,
-    ) {
-        mockMvc.perform(
-            post("/v3/versions")
-                .header("Authorization", token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""{"id": "ENT:Version:001", "status": "DRAFT"}""")
-        ).andExpect(status().isForbidden)
-    }
-}
-```
+- Annotate test class with `@WebMvcTest`, `@ExtendWith(TenantJsonWebToken::class)`
+- Inject tokens as test method parameters: `@InternalTenant(clientId = "fullAccess") token: String`
+- Available tenant annotations: `@InternalTenant`, `@TravellerTenant`, `@PartnerTenant`
+- Pass token via `mockMvc.perform(get(...).header("Authorization", token))`
+- Test scenarios: authorized access (200), unauthorized tenant (401), insufficient permissions (403)
 
 ### Integration Tests
 
