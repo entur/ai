@@ -25,7 +25,7 @@ Repository name = application name = Docker image name = Kubernetes namespace = 
 - Dockerfile at repository root
 - CI: `.github/workflows/ci.yml`, CD: `.github/workflows/cd.yml`
 - Security allowlists: `.entur/security/`
-- Documentation: `./docs/`
+- Documentation: `./guides/`
 - [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ## How to Use This Repository
@@ -53,29 +53,29 @@ Always read `CONVENTIONS.md` first for cross-cutting standards.
 
 | Task | Documents |
 |------|-----------|
-| **Java/Kotlin code** | [java.md](docs/java.md), [kotlin.md](docs/kotlin.md) |
-| **Go code** | [go.md](docs/go.md) |
-| **API design** | [api-design.md](docs/api-design.md) |
-| **Architecture** | [architecture.md](docs/architecture.md) |
-| **Kafka** | [kafka.md](docs/kafka.md) |
-| **Authorization** | [authorization.md](docs/authorization.md) |
-| **Terraform / GCP** | [terraform/modules.md](docs/terraform/modules.md), [terraform/iam-roles.md](docs/terraform/iam-roles.md) |
-| **Helm / K8s deploy** | [helm.md](docs/helm.md) |
-| **Docker** | [docker.md](docs/docker.md) |
-| **CI/CD** | [cicd/workflows.md](docs/cicd/workflows.md), [cicd/actions.md](docs/cicd/actions.md) |
-| **Self-service** | [self-service.md](docs/self-service.md) |
-| **Firebase** | [cicd/workflows.md](docs/cicd/workflows.md) (gha-firebase section) |
-| **Logging** | [logging.md](docs/logging.md) |
-| **Observability** | [observability.md](docs/observability.md) |
-| **Security** | [security.md](docs/security.md) |
-| **Code review** | [code-review.md](docs/code-review.md) |
-| **Markdown format** | [markdown.md](docs/markdown.md) |
-| **Writing docs** | [documentation.md](docs/documentation.md), [markdown.md](docs/markdown.md) |
+| **Java/Kotlin code** | [java.md](guides/java.md), [kotlin.md](guides/kotlin.md) |
+| **Go code** | [go.md](guides/go.md) |
+| **API design** | [api-design.md](guides/api-design.md) |
+| **Architecture** | [architecture.md](guides/architecture.md) |
+| **Kafka** | [kafka.md](guides/kafka.md) |
+| **Authorization** | [authorization.md](guides/authorization.md) |
+| **Terraform / GCP** | [terraform/modules.md](guides/terraform/modules.md), [terraform/iam-roles.md](guides/terraform/iam-roles.md) |
+| **Helm / K8s deploy** | [helm.md](guides/helm.md) |
+| **Docker** | [docker.md](guides/docker.md) |
+| **CI/CD** | [cicd/workflows.md](guides/cicd/workflows.md), [cicd/actions.md](guides/cicd/actions.md) |
+| **Self-service** | [self-service.md](guides/self-service.md) |
+| **Firebase** | [cicd/workflows.md](guides/cicd/workflows.md) (gha-firebase section) |
+| **Logging** | [logging.md](guides/logging.md) |
+| **Observability** | [observability.md](guides/observability.md) |
+| **Security** | [security.md](guides/security.md) |
+| **Code review** | [code-review.md](guides/code-review.md) |
+| **Markdown format** | [markdown.md](guides/markdown.md) |
+| **Writing docs** | [documentation.md](guides/documentation.md), [markdown.md](guides/markdown.md) |
 
 ## Critical Rules
 
 1. **Never hardcode secrets.** Use Google Secret Manager + ExternalSecrets in Helm.
-2. **Never grant IAM roles outside the [allowed list](docs/terraform/iam-roles.md).** Request additions in `#talk-utviklerplattform`.
+2. **Never grant IAM roles outside the [allowed list](guides/terraform/iam-roles.md).** Request additions in `#talk-utviklerplattform`.
 3. **Always use Entur Terraform modules** (`terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`) -- not raw `google_*` resources.
 4. **Always use Entur reusable GitHub Actions workflows** -- not custom CI/CD steps.
 5. **Always use the Entur `common` Helm chart** for K8s deployments.

@@ -1,15 +1,25 @@
-# Entur AI Agent Instructions
+# Entur AI
 
-Hey! Welcome to Entur's shared AI agent instructions.
+Hey! Welcome to Entur's shared AI resources.
 
-This is where we keep the documentation that AI coding agents (Claude Code, GitHub Copilot, Cursor, etc.) use to generate code that follows Entur's platform conventions. Instead of every team maintaining their own copy of "how we do things at Entur", we keep it here and everyone points their agents to it.
+This is where we keep everything that helps AI agents and assistants work better at Entur -- from coding standards that agents use to generate platform-compliant code, to reusable skills that supercharge your day-to-day work.
 
-> **Heads up:** The files in `docs/` are written primarily for AI agents to consume, not humans. They're dense, structured for machine readability, and intentionally light on code examples (the AI figures out the implementation from your project's own codebase). This is still very much a work in progress -- things will change, improve, and expand over time. It works well today, but we're iterating!
+> **Heads up:** The files in `guides/` are written primarily for AI agents to consume, not humans. They're dense, structured for machine readability, and intentionally light on code examples (the AI figures out the implementation from your project's own codebase). This is still very much a work in progress -- things will change, improve, and expand over time. It works well today, but we're iterating!
+
+## What's in this repo
+
+| Folder | Purpose |
+|--------|---------|
+| `guides/` | Coding standards and platform conventions for AI coding agents |
+| `skills/` | Reusable AI skills for day-to-day work across teams |
+
+**Coding agent instructions** help agents like Claude Code, GitHub Copilot, and Cursor generate code that follows Entur's platform conventions. Instead of every team maintaining their own copy of "how we do things at Entur", we keep it here and everyone points their agents to it.
+
+**Skills** are reusable instruction sets that give AI assistants specialized capabilities -- like drafting architecture decision records, summarizing Slack threads, or navigating Entur-specific tooling. See [`skills/README.md`](skills/README.md) for the full catalogue and how to use them.
 
 ## Quick Start
 
 Create an `AGENTS.md` file in your repository root that points the AI agent to this repository:
-
 ```markdown
 # My Application
 
@@ -20,7 +30,7 @@ Java 25 / Spring Boot application that provides the route planning API.
 Read and follow the Entur platform standards at:
 https://github.com/entur/ai/blob/main/AGENTS.md
 
-When working on a specific task, also read the relevant docs
+When working on a specific task, also read the relevant guides
 linked from that file (e.g. java.md, helm.md, docker.md).
 
 ## Project-Specific
@@ -40,7 +50,6 @@ That's it. `AGENTS.md` is read automatically by GitHub Copilot and [many other a
 - **List any overrides** if your project deviates from the shared standards
 
 ### Example for a Go service
-
 ```markdown
 # My Go Service
 
@@ -60,11 +69,11 @@ https://github.com/entur/ai/blob/main/AGENTS.md
 
 ## Agent Compatibility
 
-| Agent          | Reads `AGENTS.md`  | Can fetch URLs | Notes                                                                          |
-| -------------- | ------------------- | -------------- | ------------------------------------------------------------------------------ |
-| Claude Code    | No (reads `CLAUDE.md`) | Yes        | Natively reads `CLAUDE.md`; create a symlink or copy for Claude Code support   |
-| GitHub Copilot | Yes                 | Limited        | Reads `AGENTS.md`; may not fetch URLs in all modes                             |
-| opencode       | Yes                 | Unknown        | Reads `AGENTS.md` natively                                                     |
+| Agent          | Reads `AGENTS.md`       | Can fetch URLs | Notes                                                                        |
+| -------------- | ----------------------- | -------------- | ---------------------------------------------------------------------------- |
+| Claude Code    | No (reads `CLAUDE.md`)  | Yes            | Natively reads `CLAUDE.md`; create a symlink or copy for Claude Code support |
+| GitHub Copilot | Yes                     | Limited        | Reads `AGENTS.md`; may not fetch URLs in all modes                           |
+| opencode       | Yes                     | Unknown        | Reads `AGENTS.md` natively                                                   |
 
 `AGENTS.md` is supported by a [large ecosystem of AI coding agents](https://agents.md) including Codex, Gemini CLI, Jules, Windsurf, Aider, and many more.
 
@@ -73,11 +82,10 @@ Claude Code reads `CLAUDE.md`, not `AGENTS.md`. To support Claude Code alongside
 For agents that cannot fetch URLs, the most important rules are already inline in your project's `AGENTS.md`. For deeper coverage, you can copy key sections from this repo into your project's instructions.
 
 ## Documentation Structure
-
 ```text
 AGENTS.md                       # Top-level agent routing and critical rules
 CONVENTIONS.md                  # Cross-language coding conventions
-docs/
+guides/
   java.md                       # Java standards (Spring Boot, Gradle)
   kotlin.md                     # Kotlin standards
   go.md                         # Go standards
@@ -97,8 +105,11 @@ docs/
   cicd/
     workflows.md                # CI/CD pipeline reference
     actions.md                  # Composite actions reference
+skills/
+  README.md                     # Skill catalogue, usage guide, and how to contribute
+  public/                       # Shared skills available to everyone
+  user/                         # Personal skills (not committed)
 ```
-
 AI agents read `AGENTS.md` first, which routes them to the relevant sub-documents based on the task.
 
 ## Shared Tooling Referenced
@@ -111,14 +122,14 @@ AI agents read `AGENTS.md` first, which routes them to the relevant sub-document
 
 ## Contributing
 
-This is a shared resource for all of Entur, and we'd love your help making it better! Every contribution matters -- whether it's fixing a typo, clarifying a confusing section, adding coverage for a tool you use, or sharing a pattern that works well for your team.
+This is a shared resource for all of Entur, and we'd love your help making it better! Every contribution matters -- whether it's fixing a typo, clarifying a confusing section, adding a new skill, or sharing a pattern that works well for your team.
 
 A few ways to contribute:
 
 - **Found something wrong or unclear?** Open an issue or just submit a PR directly
-- **Have a pattern that works great for your team?** Share it! Others will benefit
+- **Have a pattern or skill that works great for your team?** Share it! Others will benefit
 - **Not sure if something belongs here?** Open an issue and let's figure it out together
-- **Want to improve the AI output for your stack?** Try tweaking the relevant `docs/` file and see how your agent responds -- that's the fastest feedback loop
+- **Want to improve the AI output for your stack?** Try tweaking the relevant `guides/` file and see how your agent responds -- that's the fastest feedback loop
 
 When submitting changes:
 

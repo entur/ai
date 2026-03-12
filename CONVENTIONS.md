@@ -1,6 +1,6 @@
 # General Coding Conventions
 
-Cross-language conventions that apply to all Entur projects. Language-specific additions are in `docs/java.md`, `docs/kotlin.md`, and `docs/go.md`.
+Cross-language conventions that apply to all Entur projects. Language-specific additions are in `guides/java.md`, `guides/kotlin.md`, and `guides/go.md`.
 
 ## Naming Conventions
 
