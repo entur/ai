@@ -8,10 +8,10 @@ This is where we keep everything that helps AI agents and assistants work better
 
 ## What's in this repo
 
-| Folder | Purpose |
-|--------|---------|
+| Folder    | Purpose                                                        |
+|-----------|----------------------------------------------------------------|
 | `guides/` | Coding standards and platform conventions for AI coding agents |
-| `skills/` | Reusable AI skills for day-to-day work across teams |
+| `skills/` | Reusable AI skills for day-to-day work across teams            |
 
 **Coding agent instructions** help agents like Claude Code, GitHub Copilot, and Cursor generate code that follows Entur's platform conventions. Instead of every team maintaining their own copy of "how we do things at Entur", we keep it here and everyone points their agents to it.
 
@@ -20,6 +20,7 @@ This is where we keep everything that helps AI agents and assistants work better
 ## Quick Start
 
 Create an `AGENTS.md` file in your repository root that points the AI agent to this repository:
+
 ```markdown
 # My Application
 
@@ -50,6 +51,7 @@ That's it. `AGENTS.md` is read automatically by GitHub Copilot and [many other a
 - **List any overrides** if your project deviates from the shared standards
 
 ### Example for a Go service
+
 ```markdown
 # My Go Service
 
@@ -82,6 +84,7 @@ Claude Code reads `CLAUDE.md`, not `AGENTS.md`. To support Claude Code alongside
 For agents that cannot fetch URLs, the most important rules are already inline in your project's `AGENTS.md`. For deeper coverage, you can copy key sections from this repo into your project's instructions.
 
 ## Documentation Structure
+
 ```text
 AGENTS.md                       # Top-level agent routing and critical rules
 CONVENTIONS.md                  # Cross-language coding conventions
@@ -110,6 +113,7 @@ skills/
   public/                       # Shared skills available to everyone
   user/                         # Personal skills (not committed)
 ```
+
 AI agents read `AGENTS.md` first, which routes them to the relevant sub-documents based on the task.
 
 ## Shared Tooling Referenced
