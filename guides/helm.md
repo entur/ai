@@ -18,7 +18,7 @@ name: my-application
 version: 0.1.0
 dependencies:
   - name: common
-    version: "1.x.x"
+    version: "1.21.1"
     repository: "https://entur.github.io/helm-charts"
     alias: common
 ```
