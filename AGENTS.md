@@ -84,3 +84,4 @@ Always read `CONVENTIONS.md` first for cross-cutting standards.
 8. **Default region**: `europe-west1`.
 9. **Conventional commits** -- enables automated semver via release-please.
 10. **Every PR must pass**: lint, unit tests, security scan (CodeQL + Docker scan), Helm lint.
+11. **Never create GCP projects directly** (no Terraform `google_project`, no `gcloud projects create`). GCP projects are provisioned via self-service YAML manifests in `.entur/` (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`). See [self-service.md](guides/self-service.md). For help, ask in `#talk-utviklerplattform`.

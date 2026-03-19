@@ -1,5 +1,7 @@
 # Entur Terraform Modules
 
+> **GCP projects are not created via Terraform.** Terraform manages resources _within_ an existing GCP project. To provision a new GCP project, use the self-service YAML manifests in `.entur/` -- see [self-service.md](../self-service.md). For help, ask in `#talk-utviklerplattform`.
+
 Always use Entur shared modules instead of raw `google_*` resources for managed services.
 
 ## Modules
