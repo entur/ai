@@ -35,6 +35,46 @@ The **GitHub manifest** must be applied before any **Application manifest**.
 - One YAML document per file (no multi-doc `---`)
 - Default naming: `.entur/<metadata.id>.yaml`
 
+## GCP Project Naming
+
+The Platform Orchestrator automatically creates GCP projects from your `metadata.id`. You never create GCP projects directly.
+
+| Kind | Project ID Pattern | Example (`metadata.id: myapp`) |
+|------|-------------------|-------------------------------|
+| `GoogleCloudApplication` | `ent-{metadata.id}-{env}` | `ent-myapp-dev`, `ent-myapp-tst`, `ent-myapp-prd` |
+| `GoogleCloudFirebaseApplication` | `ent-{metadata.id}-{env}` | `ent-myapp-dev`, `ent-myapp-prd` |
+| `GoogleCloudDataProject` | `ent-data-{metadata.id}-{int\|ext}-{env}` | `ent-data-myapp-int-dev`, `ent-data-myapp-ext-prd` |
+
+Data projects use a different prefix (`ent-data-`) and include an `int`/`ext` suffix indicating whether the project is for internal or external data sharing. This is controlled by `spec.dataAccess.external` (`true` → `ext`, `false` → `int`).
+
+**This project ID is used everywhere:**
+
+- **Terraform** `app_id` variable → `module.init.app.project_id` resolves to `ent-{metadata.id}-{env}`
+- **Terraform state bucket**: `ent-gcs-tfa-{metadata.id}`
+- **Helm** `shortname` should match `metadata.id`
+- **Secret Manager**: secrets are stored in the application's GCP project (`ent-{metadata.id}-{env}`)
+
+**Constraints on `metadata.id`:**
+
+- 3--10 characters, lowercase alphanumeric only (`^[a-z0-9]+$`)
+- Must NOT start with `ent-` (the platform adds this prefix)
+- Must NOT end with `sbx`, `dev`, `tst`, `test`, `prd`, or `prod` (the platform adds the environment suffix)
+- **Immutable** -- changing it deletes and recreates all GCP projects
+
+**Example identity chains:**
+
+```text
+# Application (GoogleCloudApplication)
+metadata.id: products        → GCP projects: ent-products-dev, ent-products-tst, ent-products-prd
+metadata.name: products-api  → K8s namespace: products-api
+                             → Helm shortname: products
+                             → Terraform app_id: products
+                             → Terraform state: ent-gcs-tfa-products
+
+# Data project (GoogleCloudDataProject, dataAccess.external: true)
+metadata.id: akt             → GCP projects: ent-data-akt-ext-dev, ent-data-akt-ext-prd
+```
+
 ## Getting Started
 
 Common setup: containerized application on Kubernetes in Google Cloud.
@@ -110,42 +150,16 @@ Configures GCP Workload Identity and GitHub environments for CI/CD.
 | `metadata.trigger` | no | integer | Unix timestamp (1--9999999999). Change to force re-apply without other manifest changes. |
 | `spec.environments` | no | array | Values from `dev`, `tst`, `prd` (unique). Default: all three. Must match linked Application manifest. |
 
-### GitHubActions Examples
-
-Minimal (defaults to all three environments):
+### GitHubActions Example
 
 ```yaml
 apiVersion: orchestrator.entur.io/github/v1
 kind: GitHubActions
 metadata:
-  id: my-repo
-```
-
-Dev only:
-
-```yaml
-apiVersion: orchestrator.entur.io/github/v1
-kind: GitHubActions
-metadata:
-  id: my-repo
+  id: my-repo              # Must match GitHub repository name exactly
+  trigger: 1654089480       # Optional: unix timestamp to force re-apply
 spec:
-  environments:
-    - dev
-```
-
-Full with trigger:
-
-```yaml
-apiVersion: orchestrator.entur.io/github/v1
-kind: GitHubActions
-metadata:
-  id: my-repo
-  trigger: 1654089480
-spec:
-  environments:
-    - dev
-    - tst
-    - prd
+  environments: [dev, tst, prd]  # Optional: defaults to all three
 ```
 
 ---
@@ -256,7 +270,7 @@ spec:
     - dev
 ```
 
-### Application Full Example
+### Application Example with Common Options
 
 ```yaml
 apiVersion: orchestrator.entur.io/apps/v1
@@ -274,29 +288,12 @@ spec:
       enabled: true
       denyInternal: true
       denyPublic: true
-      denyEgress: true
-      ingress:
-        allowedNamespaces:
-          - up-k8s
-          - helloworld
-  network:
-    sharedVpcEnabled: true
   terraform:
     createBackend: true
   auth0:
     internal:
-      enabled: false
+      enabled: true
       type: m2m
-  appLogBucket:
-    enabled: true
-    retentionDays: 30
-    disableSink: false
-    logAnalyticsEnabled: true
-  defaultLogBucket:
-    logAnalyticsEnabled: true
-  appEngine:
-    enabled: true
-    databaseType: firestore
   secretManager:
     enabled: true
     serviceAccount: application
@@ -304,21 +301,13 @@ spec:
     - id: application
       additionalRoles:
         - roles/storage.objectCreator
-    - id: "my-custom-account"
-      kubernetesEnabled: true
-      displayName: "MyCustomAccount"
-      description: "A custom account for my app"
-      roles:
-        - roles/bigquery.admin
   organization: entur
   repositories:
     - my-github-repository
   environments:
     - dev
-  quotas:
-    bigQuery:
-      dailyQuotaPerUser: 1.5
-      dailyQuota: 20
+    - tst
+    - prd
 ```
 
 ---

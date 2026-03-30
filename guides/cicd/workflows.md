@@ -16,76 +16,31 @@ Always use Entur reusable workflows instead of custom pipeline steps.
 | [gha-slack](https://github.com/entur/gha-slack) | Slack notifications | `@v2` |
 | [gha-artifactory](https://github.com/entur/gha-artifactory) | Artifactory publishing (Maven/Gradle) | `@v1` |
 
-## CI Pipeline (`.github/workflows/ci.yml`)
+## Pipeline Architecture
 
-Runs on pull requests and pushes to main. Lints, tests, builds, and scans.
+Split CI/CD into focused workflow files. The reusable `ci.yml` is called by both PR and deploy workflows:
 
-### Standard CI Pipeline (Spring Boot)
+```text
+ci.yml           ← reusable build (lint, test, scan, push) via workflow_call
+ci-pr.yml        ← PR: verify title + call ci.yml
+ci-feature.yml   ← feature branch: call ci.yml if no open PR
+deploy.yml       ← main: call ci.yml + deploy dev → tst → prd
+codeql.yml       ← security scanning (must be named codeql.yml)
+lint-api.yml     ← API spec linting on PR (if specs/ changed)
+lint-helm.yml    ← Helm linting on PR (if helm/ changed)
+```
+
+### `has_changes` and Conditional Jobs
+
+When terraform plan reports no changes, apply is skipped. Downstream jobs must use this condition to continue past skipped apply (but still fail on actual failures):
 
 ```yaml
-name: CI
-
-on:
-  pull_request:
-  push:
-    branches: [main]
-
-jobs:
-  # ---- Lint ----
-  docker-lint:
-    uses: entur/gha-docker/.github/workflows/lint.yml@v1
-
-  helm-lint:
-    uses: entur/gha-helm/.github/workflows/lint.yml@v1
-    with:
-      environment: dev
-
-  terraform-lint:
-    uses: entur/gha-terraform/.github/workflows/lint.yml@v2
-
-  # ---- Test ----
-  test:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '25'
-          distribution: 'temurin'
-      - uses: gradle/actions/setup-gradle@v4
-      - run: ./gradlew test
-
-  # ---- Build ----
-  docker-build:
-    needs: [test]
-    uses: entur/gha-docker/.github/workflows/build.yml@v1
-
-  # ---- Scan ----
-  docker-scan:
-    needs: [docker-build]
-    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
-    secrets: inherit
-    with:
-      image_artifact: ${{ needs.docker-build.outputs.image_artifact }}
-
-  # ---- Push (main branch only) ----
-  docker-push:
-    if: github.event_name != 'pull_request'
-    needs: [docker-build, docker-scan]
-    uses: entur/gha-docker/.github/workflows/push.yml@v1
-
-  # ---- Terraform Plan ----
-  terraform-plan-dev:
-    if: github.event_name != 'pull_request'
-    needs: [terraform-lint]
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
-    with:
-      environment: dev
+if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
 ```
 
 ### Go CI Differences
 
-Replace the `test` job with:
+Replace the Java test job with:
 
 ```yaml
   test:
@@ -99,100 +54,6 @@ Replace the `test` job with:
 ```
 
 All other jobs (docker-lint, docker-build, docker-scan, docker-push) are identical.
-
-## CD Pipeline (`.github/workflows/cd.yml`)
-
-Deploys environments in order: dev → tst → prd. Each environment runs terraform plan/apply then helm deploy.
-
-```yaml
-name: CD
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  # ---- Docker ----
-  docker-build:
-    uses: entur/gha-docker/.github/workflows/build.yml@v1
-  docker-push:
-    needs: [docker-build]
-    uses: entur/gha-docker/.github/workflows/push.yml@v1
-
-  # ---- Terraform ----
-  terraform-plan-dev:
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
-    with:
-      environment: dev
-
-  terraform-apply-dev:
-    needs: [terraform-plan-dev]
-    uses: entur/gha-terraform/.github/workflows/apply.yml@v2
-    with:
-      environment: dev
-      has_changes: ${{ needs.terraform-plan-dev.outputs.has_changes }}
-
-  # ---- Deploy Dev ----
-  deploy-dev:
-    needs: [docker-push, terraform-apply-dev]
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
-    uses: entur/gha-helm/.github/workflows/deploy.yml@v1
-    with:
-      environment: dev
-      image: ${{ needs.docker-push.outputs.image_and_tag }}
-
-  # ---- Terraform + Deploy Tst ----
-  terraform-plan-tst:
-    needs: [deploy-dev]
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
-    with:
-      environment: tst
-
-  terraform-apply-tst:
-    needs: [terraform-plan-tst]
-    uses: entur/gha-terraform/.github/workflows/apply.yml@v2
-    with:
-      environment: tst
-      has_changes: ${{ needs.terraform-plan-tst.outputs.has_changes }}
-
-  deploy-tst:
-    needs: [docker-push, terraform-apply-tst]
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
-    uses: entur/gha-helm/.github/workflows/deploy.yml@v1
-    with:
-      environment: tst
-      image: ${{ needs.docker-push.outputs.image_and_tag }}
-
-  # ---- Terraform + Deploy Prd ----
-  terraform-plan-prd:
-    needs: [deploy-tst]
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
-    with:
-      environment: prd
-
-  terraform-apply-prd:
-    needs: [terraform-plan-prd]
-    uses: entur/gha-terraform/.github/workflows/apply.yml@v2
-    with:
-      environment: prd
-      has_changes: ${{ needs.terraform-plan-prd.outputs.has_changes }}
-
-  deploy-prd:
-    needs: [docker-push, terraform-apply-prd]
-    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
-    uses: entur/gha-helm/.github/workflows/deploy.yml@v1
-    with:
-      environment: prd
-      image: ${{ needs.docker-push.outputs.image_and_tag }}
-```
-
-### `has_changes` and Conditional Jobs
-
-When terraform plan reports no changes, apply is skipped. Downstream jobs must use this condition to continue past skipped apply (but still fail on actual failures):
-
-```yaml
-if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
-```
 
 ## Security Scanning (`.github/workflows/codeql.yml`)
 

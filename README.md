@@ -12,6 +12,7 @@ This is where we keep everything that helps AI agents and assistants work better
 |-----------|----------------------------------------------------------------|
 | `guides/` | Coding standards and platform conventions for AI coding agents |
 | `skills/` | Reusable AI skills for day-to-day work across teams            |
+| `tests/`  | Comprehension tests that verify AI agents understand the docs  |
 
 **Coding agent instructions** help agents like Claude Code, GitHub Copilot, and Cursor generate code that follows Entur's platform conventions. Instead of every team maintaining their own copy of "how we do things at Entur", we keep it here and everyone points their agents to it.
 
@@ -110,8 +111,14 @@ guides/
     actions.md                  # Composite actions reference
 skills/
   README.md                     # Skill catalogue, usage guide, and how to contribute
-  public/                       # Shared skills available to everyone
-  user/                         # Personal skills (not committed)
+  entur-project-bootstrap/      # Bootstrap a new app (self-service, Helm, TF, Docker, CI/CD)
+  setup-cicd-workflows/         # Generate CI/CD workflows by language
+tests/
+  README.md                     # Test usage guide and how to add scenarios
+  main.go                       # Test runner (Go, stdlib only)
+  scenario.go                   # Scenario parser and assertion evaluator
+  scenario_test.go              # Unit tests for the parser
+  scenarios/                    # Test scenarios (one .md file per test)
 ```
 
 AI agents read `AGENTS.md` first, which routes them to the relevant sub-documents based on the task.
@@ -139,7 +146,40 @@ When submitting changes:
 
 1. Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages
 2. Keep in mind the audience is AI agents, not humans -- be precise and structured
-3. Get a review from the platform team
+3. **Run the comprehension tests** before opening a PR (see below)
+4. Get a review from the platform team
+
+### Comprehension Tests (required)
+
+The `tests/` directory contains automated tests that verify AI agents correctly understand the documentation. These tests send real prompts to Claude, let it read the docs, and validate that the answers are correct.
+
+**You must run these tests before submitting changes to any guide.** A documentation change that humans can read but AI agents misinterpret is a regression.
+
+```bash
+# Prerequisite: Go 1.25+ and claude CLI installed
+
+# Dry run -- validate scenario syntax, no API calls
+go run ./tests --dry-run
+
+# Full suite -- ~$0.18, ~90 seconds
+go run ./tests --verbose
+
+# Run a single scenario for faster iteration
+go run ./tests --scenario "05-*" --verbose
+```
+
+The tests cover:
+
+| Scenario | What it verifies |
+|----------|-----------------|
+| 01-kotlin-api | Identity chain: metadata.id → GCP projects, Helm shortname, Terraform app_id |
+| 02-go-service | Go-specific: health paths, distroless image, metrics path |
+| 03-data-project | Data project naming: `ent-data-{id}-{int\|ext}-{env}` |
+| 04-firebase-app | Firebase uses standard `ent-{id}-{env}`, not a special prefix |
+| 05-derive-from-manifest | Distinguishes metadata.id from metadata.name (the #1 confusion) |
+| 06-critical-rules | Refuses to create GCP projects via Terraform |
+
+If you change a guide and a test starts failing, either fix the guide or update the test scenario. See [`tests/README.md`](tests/README.md) for how to add new scenarios.
 
 For questions, ideas, or just to say hi, find us in `#talk-utviklerplattform` on Slack.
 

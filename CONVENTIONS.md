@@ -95,6 +95,7 @@ my-application/
   Dockerfile                    # At repository root
   build.gradle.kts              # Gradle build (Java/Kotlin)
   settings.gradle.kts           # Gradle settings
+  CODEOWNERS                    # Code owners
   compose.yaml                  # Docker Compose for local development
   .mise.toml                    # Tool version management (mise)
   README.md                     # Project documentation
@@ -183,34 +184,7 @@ raise Exception("not found")
 - Use `cleanup.sql` scripts to ensure clean state between tests
 - Upload test results in CI using `dorny/test-reporter` for visibility in GitHub
 
-### Test Libraries (Kotlin)
-
-| Library | Purpose |
-|---------|---------|
-| JUnit 5 | Test framework |
-| Kotest | Assertions (`shouldBe`, `shouldThrow`, `shouldHaveSize`) |
-| SpringMockK | Mocking for Spring/Kotlin (`@MockkBean`) |
-| TestContainers | Dockerized PostgreSQL for integration tests |
-| Spring Boot Test | `@SpringBootTest`, `@WebMvcTest` |
-| Entur Auth Test | `TenantJsonWebToken` for OIDC test tokens |
-
-### Test Structure
-
-```text
-src/test/
-  kotlin/org/entur/myapp/
-    config/               # Test configurations (TestContainersConfig)
-    mockdata/             # Enum-based mock data for quick reference
-    testdata/             # Test data builders (VersionBuilder)
-    utils/                # Test base classes (BaseServiceTest, BaseControllerTest)
-    version/              # Feature-specific tests
-  resources/
-    application.yml       # Test Spring configuration
-    test-init.sql         # Database initialization script
-    test-data/
-      cleanup.sql         # Truncate all tables
-      version/            # Feature-specific test data SQL
-```
+For test libraries and test structure conventions, see [kotlin.md](guides/kotlin.md#testing-in-kotlin) and [java.md](guides/java.md#testing).
 
 ## Dependency Management
 
@@ -294,60 +268,9 @@ _.source = 'mise.env.sh'
 enter = 'mise install'
 ```
 
-### Docker Compose for Local Development
+### Docker Compose and Local Spring Profile
 
-Use `compose.yaml` at the repository root for running the full application locally:
-
-```yaml
-services:
-  app:
-    build:
-      context: .
-      secrets:
-        - ARTIFACTORY_AUTH_USER
-        - ARTIFACTORY_AUTH_TOKEN
-    ports:
-      - "8086:8086"
-    volumes:
-      - ${HOME}/.config/gcloud/application_default_credentials.json:/gcp/creds.json:ro
-    environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/gcp/creds.json
-
-secrets:
-  ARTIFACTORY_AUTH_USER:
-    environment: ARTIFACTORY_AUTH_USER
-  ARTIFACTORY_AUTH_TOKEN:
-    environment: ARTIFACTORY_AUTH_TOKEN
-```
-
-### Local Spring Profile
-
-Use `application-local.yml` for local development overrides:
-
-```yaml
-entur:
-  logging:
-    style: humanReadablePlain
-  auth:
-    authorization:
-      permit-all:
-        matcher:
-          patterns:
-            - /v3/api-docs/**
-            - /swagger-ui/**
-
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/myapp
-    username: myapp
-    password: myapp
-
-springdoc:
-  api-docs:
-    enabled: true
-  swagger-ui:
-    enabled: true
-```
+Use `compose.yaml` at the repository root for running the full application locally. Use `application-local.yml` for local development overrides (human-readable logging, local database URL, Swagger UI enabled). See [docker.md](guides/docker.md) for Dockerfile conventions and [java.md](guides/java.md) for Spring Boot configuration.
 
 ## Architecture Decision Records (ADRs)
 
@@ -446,5 +369,6 @@ Fixes <JIRA ticket number>.
 
 - `README.md` at repository root: what the project does, how to run it locally, how to deploy
 - `AGENTS.md` at repository root: AI agent instructions (reference `entur/ai` plus project-specific overrides)
+- `CLAUDE.md` always a symlink to `AGENTS.md`
 - `docs/` directory: detailed documentation, published via `gha-docs`
 - API documentation: OpenAPI/Swagger for REST APIs, protobuf definitions for gRPC

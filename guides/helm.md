@@ -49,11 +49,13 @@ Every deployment must set these:
 # values.yaml
 common:
   app: my-application
-  shortname: myapp          # Max 10 characters, used for GCP 2.0 app ID
+  shortname: myapp          # Must match self-service metadata.id (max 10 chars)
   team: my-team             # Team name without "team-" prefix
   container:
     image: my-application   # Docker image name (without registry/tag)
 ```
+
+> **`shortname` must match your self-service `metadata.id`**. The platform creates GCP projects as `ent-{shortname}-{env}`. This is used for Secret Manager project references and other GCP resource lookups. See [self-service.md](self-service.md#gcp-project-naming).
 
 ```yaml
 # env/dev.yaml
@@ -291,7 +293,6 @@ helm lint helm/my-application/ -f helm/my-application/env/dev.yaml
 helm template my-application helm/my-application/ -f helm/my-application/env/dev.yaml
 ```
 
-## ConfigMap with Environment Variables
 
 ```yaml
 # values.yaml
@@ -299,12 +300,11 @@ common:
   configmap:
     enabled: true
 
-# env/dev.yaml
+# env/dev.yaml -- "ent-myapp-dev" = ent-{metadata.id}-{env}
 common:
   configmap:
     data:
       SPRING_PROFILES_ACTIVE: "dev"
-      SPRING_CLOUD_GCP_SECRETMANAGER_PROJECTID: "ent-myapp-dev"
       ENTUR_PERMISSION_PERMISSIONCACHE_URL: "http://permission-store.dev.entur.internal"
 ```
 
@@ -386,7 +386,6 @@ common:
   configmap:
     data:
       SPRING_PROFILES_ACTIVE: "dev"
-      SPRING_CLOUD_GCP_SECRETMANAGER_PROJECTID: "ent-products-dev"
 ```
 
 ```yaml
@@ -404,7 +403,6 @@ common:
     data:
       SPRING_PROFILES_ACTIVE: "prd"
       LOG_LEVEL: "INFO"
-      SPRING_CLOUD_GCP_SECRETMANAGER_PROJECTID: "ent-products-prd"
 ```
 
 ## Complete Example (Go Service)

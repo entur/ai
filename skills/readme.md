@@ -63,6 +63,14 @@ Installing skills differs for different agents. This example is for Claude Code,
 2. Using Claude Code as an example, select Customize -> Skills -> + Upload a skill.
 3. Drag and drop the folder or select the skills you would like to add.
 
+## Available Skills
+
+| Skill | Purpose |
+|-------|---------|
+| [entur-project-bootstrap](entur-project-bootstrap/) | Bootstrap a new Entur app: self-service manifests, Helm, Terraform, Docker, CI/CD |
+| [setup-cicd-workflows](setup-cicd-workflows/) | Generate CI/CD GitHub Actions workflows using Entur reusable workflows |
+| [scr-situation-complication-resolution](scr-situation-complication-resolution/) | Structure problems and decisions in SCR format for leadership |
+
 ## 🤝 Contributing
 
 We encourage you to share skills that provide value across Entur! Follow the repo guidelines for contribution.

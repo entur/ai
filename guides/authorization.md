@@ -380,32 +380,9 @@ entur:
     bean: client    # or oidc, jwt
 ```
 
-## Permission Store Architecture
+## Permission Store Details
 
-Spring Boot application backed by PostgreSQL. Key internals:
-
-- **Hibernate Envers** for full audit trail
-- **WebSocket (STOMP/SockJS)** for push notifications
-- **ShedLock** for distributed scheduling
-- **LZ4-compressed Kryo serialization** for efficient cache
-- **Apigee API Gateway** for external access (1200 rpm rate limit)
-
-### Domain Model
-
-```text
-Application
-  └── ApplicationInstance
-        ├── BusinessCapability (operation + access)
-        │     └── BusinessCapabilityPermission (tenant binding)
-        └── Responsibility (operation + responsibilityType)
-              └── ResponsibilitySet (+ objectKey)
-                    ├── ResponsibilityPermission (tenant binding)
-                    └── Agreement (+ organisationId)
-```
-
-### Automatic Cleanup
-
-Permission Store cleans up resources not refreshed in 30 days (applications, permissions, responsibility sets with no agreements). Permission Client handles automatic refresh.
+Permission Store automatically cleans up resources not refreshed in 30 days (applications, permissions, responsibility sets with no agreements). Permission Client handles automatic refresh. External access is via Apigee API Gateway (1200 rpm rate limit).
 
 ## Quick Reference
 

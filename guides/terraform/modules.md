@@ -31,10 +31,12 @@ terraform/
 
 Data-only module that discovers GCP platform and application attributes. All other Entur modules depend on it.
 
+The `app_id` variable **must match your self-service manifest `metadata.id`**. The init module uses it to discover the GCP project (`ent-{app_id}-{env}`) provisioned by the Platform Orchestrator. See [self-service.md](../self-service.md#gcp-project-naming).
+
 ```hcl
 module "init" {
   source      = "github.com/entur/terraform-google-init//modules/init?ref=v1"
-  app_id      = var.app_id
+  app_id      = var.app_id       # Must match metadata.id from .entur/<appid>.yaml
   environment = var.environment
 }
 ```
@@ -43,7 +45,7 @@ Standard variables:
 
 ```hcl
 variable "app_id" {
-  description = "Application ID"
+  description = "Application ID (must match self-service metadata.id)"
   type        = string
 }
 
@@ -54,8 +56,8 @@ variable "environment" {
 ```
 
 ```hcl
-# env/dev.tfvars
-app_id      = "my-application"
+# env/dev.tfvars -- app_id must match metadata.id from self-service manifest
+app_id      = "products"
 environment = "dev"
 ```
 
@@ -316,12 +318,12 @@ module "postgresql" {
 
 ## Backend State
 
-State stored in GCS bucket auto-created by the platform (naming: `ent-gcs-tfa-<appId>`):
+State stored in GCS bucket auto-created by the platform. The bucket name uses your self-service `metadata.id`:
 
 ```hcl
 terraform {
   backend "gcs" {
-    bucket = "ent-gcs-tfa-<appId>"
+    bucket = "ent-gcs-tfa-<metadata.id>"  # e.g. "ent-gcs-tfa-products"
   }
 }
 ```

@@ -16,6 +16,12 @@ Entur is a Norwegian public transportation company. All code targets Google Clou
 - **Build**: Gradle (Java/Kotlin), Go modules, pip/poetry (Python)
 - **License**: EUPL v1.2
 
+## Key Concepts
+
+- **App ID** (`metadata.id` in self-service manifest): 3--10 char alphanumeric identifier, unique across Entur. The Platform Orchestrator creates GCP projects named `ent-{appid}-{env}` (e.g. `metadata.id: products` → `ent-products-dev`, `ent-products-prd`). Data projects use `ent-data-{appid}-{int|ext}-{env}`. Used as Helm `shortname`, Terraform `app_id`, and Terraform state bucket `ent-gcs-tfa-{appid}`. See [self-service.md](guides/self-service.md#gcp-project-naming).
+- **App Name** (`metadata.name` in self-service manifest): Becomes the Kubernetes namespace. Typically matches the repository name. Different from App ID.
+- **Environments**: `dev`, `tst`, `prd` -- each gets its own GCP project (`ent-{appid}-dev`, `ent-{appid}-tst`, `ent-{appid}-prd`).
+
 ## Golden Path
 
 Repository name = application name = Docker image name = Kubernetes namespace = Helm release name.
