@@ -44,7 +44,7 @@ Before proceeding, validate:
 
 Before generating files, print the identity chain for the user to confirm:
 
-```
+```text
 Identity Chain:
   metadata.id:        {appId}
   metadata.name:      {repoName}       (K8s namespace)
@@ -275,6 +275,7 @@ Select the Dockerfile template based on language:
 ### Kotlin/Java
 
 Use multi-stage with layered JAR and CDS:
+
 - Build stage: `gradle:9.3.1-jdk25-alpine`
 - Layers stage: `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl`
 - Runtime stage: `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl`

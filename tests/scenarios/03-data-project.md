@@ -1,12 +1,15 @@
 # Scenario: Data Project Naming
 
 ## Description
+
 Verifies the special naming convention for GoogleCloudDataProject with external data access: ent-data-{id}-{int|ext}-{env}.
 
 ## Prompt
+
 You are setting up a new data project at Entur for the analytics team.
 
 Details:
+
 - Team: team-analyse
 - App ID (metadata.id): akt
 - Kind: GoogleCloudDataProject
@@ -24,6 +27,7 @@ Output each answer in `key: value` format on its own line, then show the full ma
 Then show the complete self-service manifest YAML.
 
 ## Assertions
+
 ```json
 {
   "must_contain": [
@@ -46,4 +50,5 @@ Then show the complete self-service manifest YAML.
 ```
 
 ## Budget
+
 0.10

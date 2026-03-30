@@ -342,7 +342,7 @@ Add language-specific ecosystems:
 
 List all generated files and their purpose:
 
-```
+```text
 Generated CI/CD workflows:
   .github/workflows/ci.yml          - Reusable build (lint, test, scan, push)
   .github/workflows/ci-pr.yml       - PR verification + CI build
@@ -361,8 +361,10 @@ Generated CI/CD workflows:
 - **Use `secrets: inherit`** for security scanning and docs workflows
 - **Use `has_changes` output** from terraform-plan to skip unnecessary applies
 - **Use the conditional pattern** for jobs after terraform-apply:
+
   ```yaml
   if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
   ```
+
 - **Use concurrency groups** with `cancel-in-progress: true` on PR workflows
 - **Upload test reports** using `dorny/test-reporter` for PR check visibility

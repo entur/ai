@@ -1,12 +1,15 @@
 # Scenario: Go Service Conventions
 
 ## Description
+
 Verifies that the agent uses Go-specific conventions (health paths, Docker images, metrics) and does NOT use Spring Boot patterns for a Go service.
 
 ## Prompt
+
 You are setting up a new Go service at Entur.
 
 Details:
+
 - Repository name: stop-lookup
 - Team: team-data-platform
 - App ID (metadata.id): stoplkup
@@ -25,6 +28,7 @@ Output each answer in `key: value` format on its own line:
 - helm_shortname: <Helm shortname value>
 
 ## Assertions
+
 ```json
 {
   "must_contain": [
@@ -50,4 +54,5 @@ Output each answer in `key: value` format on its own line:
 ```
 
 ## Budget
+
 0.10

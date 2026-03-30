@@ -1,12 +1,15 @@
 # Scenario: Kotlin API Identity Chain
 
 ## Description
+
 Verifies the full identity chain for a standard Kotlin Spring Boot API: metadata.id maps to GCP project names, Helm shortname, Terraform app_id, state bucket, and Docker base image.
 
 ## Prompt
+
 You are setting up a new Kotlin Spring Boot REST API service at Entur.
 
 Details:
+
 - Repository name: journey-planner-api
 - Team: team-reise
 - App ID (metadata.id for self-service): jpapi
@@ -26,6 +29,7 @@ Output each answer in `key: value` format on its own line:
 - secret_manager_project_dev: <SPRING_CLOUD_GCP_SECRETMANAGER_PROJECTID for dev>
 
 ## Assertions
+
 ```json
 {
   "must_contain": [
@@ -50,4 +54,5 @@ Output each answer in `key: value` format on its own line:
 ```
 
 ## Budget
+
 0.10

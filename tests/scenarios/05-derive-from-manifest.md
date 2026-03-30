@@ -1,9 +1,11 @@
 # Scenario: Derive Config from Existing Manifest
 
 ## Description
+
 The core confusion test: given a self-service manifest, can the agent correctly distinguish metadata.id from metadata.name and derive the right Helm shortname, Terraform app_id, and GCP project IDs?
 
 ## Prompt
+
 An Entur team has the following self-service manifest in `.entur/products.yaml`:
 
 ```yaml
@@ -37,6 +39,7 @@ Output each answer in `key: value` format on its own line:
 - k8s_namespace: <Kubernetes namespace>
 
 ## Assertions
+
 ```json
 {
   "must_contain": [
@@ -60,4 +63,5 @@ Output each answer in `key: value` format on its own line:
 ```
 
 ## Budget
+
 0.10

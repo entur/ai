@@ -33,7 +33,7 @@ go run ./tests --model sonnet
 
 ## CLI Options
 
-```
+```text
 go run ./tests [OPTIONS]
 
   --scenario PATTERN   Glob pattern to filter scenarios (e.g. "01-*")
@@ -64,28 +64,32 @@ go run ./tests [OPTIONS]
 
 Create a markdown file in `tests/scenarios/` following this format:
 
-```markdown
+````markdown
 # Scenario: My Test Name
 
 ## Description
+
 What this test verifies (human-readable, not used by runner).
 
 ## Prompt
+
 The exact prompt sent to Claude. Tell it to read the docs
 and ask specific, answerable questions.
 
 ## Assertions
- ```json
+
+```json
 {
   "must_contain": ["exact strings that must appear"],
   "must_not_contain": ["strings that must NOT appear"],
   "must_match": ["regex.*patterns"]
 }
- ```
+```
 
 ## Budget
+
 0.10
-```
+````
 
 ### Assertion Types
 

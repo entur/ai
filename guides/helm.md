@@ -293,7 +293,6 @@ helm lint helm/my-application/ -f helm/my-application/env/dev.yaml
 helm template my-application helm/my-application/ -f helm/my-application/env/dev.yaml
 ```
 
-
 ```yaml
 # values.yaml
 common:

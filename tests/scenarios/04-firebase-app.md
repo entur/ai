@@ -1,12 +1,15 @@
 # Scenario: Firebase Application
 
 ## Description
+
 Verifies that Firebase applications use GoogleCloudFirebaseApplication kind and follow the standard ent-{id}-{env} naming (not a special prefix like data projects).
 
 ## Prompt
+
 You are setting up a new Firebase web application at Entur.
 
 Details:
+
 - Team: team-partner
 - App ID (metadata.id): prtnrprt
 - Kind: GoogleCloudFirebaseApplication
@@ -22,6 +25,7 @@ Output each answer in `key: value` format on its own line:
 Then show the complete self-service application manifest YAML.
 
 ## Assertions
+
 ```json
 {
   "must_contain": [
@@ -45,4 +49,5 @@ Then show the complete self-service application manifest YAML.
 ```
 
 ## Budget
+
 0.10
