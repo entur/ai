@@ -18,16 +18,18 @@ Always use Entur reusable workflows instead of custom pipeline steps.
 
 ## Pipeline Architecture
 
-Split CI/CD into focused workflow files. The reusable `ci.yml` is called by both PR and deploy workflows:
+Split CI/CD into focused workflow files. Uses the image promotion model: PRs build and push images, merges resolve the PR-built image via git tag and deploy it.
 
 ```text
-ci.yml           ← reusable build (lint, test, scan, push) via workflow_call
-ci-pr.yml        ← PR: verify title + call ci.yml
-ci-feature.yml   ← feature branch: call ci.yml if no open PR
-deploy.yml       ← main: call ci.yml + deploy dev → tst → prd
-codeql.yml       ← security scanning (must be named codeql.yml)
-lint-api.yml     ← API spec linting on PR (if specs/ changed)
-lint-helm.yml    ← Helm linting on PR (if helm/ changed)
+ci.yaml                        ← Reusable CI (lint, test, Docker build/scan/push) via workflow_call
+build.yaml                     ← PR: calls ci.yaml
+cd.yaml                        ← Deploy: resolve PR-built image, deploy dev → tst → prd
+pr.yaml                        ← PR verification (title/body validation)
+codeql.yaml                    ← Security code scanning
+dependabot-pr.yaml             ← CI for Dependabot PRs after human approval
+terraform.yaml                 ← Terraform lint/plan/apply (if terraform/ exists)
+terraform-drift-detection.yaml ← Weekly Terraform drift check (if terraform/ exists)
+lint-api.yaml                  ← API spec linting on PR (if specs/ changed)
 ```
 
 ### `has_changes` and Conditional Jobs
@@ -40,7 +42,7 @@ if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') }}
 
 ### Go CI Differences
 
-Replace the Java test job with:
+Replace the Java test job in `ci.yaml` with:
 
 ```yaml
   test:
@@ -55,9 +57,7 @@ Replace the Java test job with:
 
 All other jobs (docker-lint, docker-build, docker-scan, docker-push) are identical.
 
-## Security Scanning (`.github/workflows/codeql.yml`)
-
-**Must** be named `codeql.yml`:
+## Security Scanning (`.github/workflows/codeql.yaml`)
 
 ```yaml
 name: CodeQL
@@ -76,14 +76,14 @@ jobs:
     secrets: inherit
 ```
 
-Java projects -- add configuration:
+Java/Kotlin projects -- add configuration:
 
 ```yaml
     with:
-      java_version: "25"
-      java_distribution: "temurin"
+      java_version: '25'
+      java_distribution: 'liberica'
       use_setup_java: true
-      codeql_queries: "security-extended"
+      codeql_queries: 'security-extended'
 ```
 
 ## PR Verification
@@ -304,18 +304,22 @@ Split into focused workflow files instead of a monolithic pipeline:
 
 | File | Trigger | Purpose |
 |------|---------|---------|
-| `ci.yml` | `workflow_call` | Reusable CI build (lint, build, test, scan, push) |
-| `ci-pr.yml` | `pull_request` to main | PR title lint + CI build |
-| `ci-feature.yml` | Push to non-main branches | CI build if no open PR exists |
-| `deploy.yml` | Push to main | Build + deploy dev → tst → prd |
-| `codeql.yml` | PR, push to main, schedule | Security code scanning |
-| `lint-api.yml` | PR changes to `specs/` | API spec linting |
-| `lint-helm.yml` | PR changes to `helm/` | Helm chart linting per environment |
+| `ci.yaml` | `workflow_call` | Reusable CI build (lint, test, Docker build/scan/push) |
+| `build.yaml` | `pull_request` to main | PR build trigger (calls ci.yaml) |
+| `cd.yaml` | Push to main, `workflow_dispatch` | Deploy: resolve PR-built image, deploy dev → tst → prd |
+| `pr.yaml` | `pull_request` to main | PR verification (title/body validation) |
+| `codeql.yaml` | PR, push to main, schedule | Security code scanning (CodeQL) |
+| `dependabot-pr.yaml` | `pull_request_review` submitted | CI for Dependabot PRs after human approval |
+| `terraform.yaml` | PR/push changes to `terraform/` | Terraform lint/plan/apply |
+| `terraform-drift-detection.yaml` | Weekly schedule, `workflow_dispatch` | Terraform drift detection with issue creation |
+| `lint-api.yaml` | PR changes to `specs/` | API spec linting |
 
-### ci.yml (Reusable Build Workflow)
+### ci.yaml (Reusable Build Workflow)
+
+Called by `build.yaml` (PRs) and `cd.yaml` (workflow_dispatch). Helm linting runs inside this workflow so charts are validated on every build, not only when `helm/**` files change.
 
 ```yaml
-name: ci
+name: CI
 on:
   workflow_call:
     outputs:
@@ -326,27 +330,34 @@ on:
 jobs:
   docker-lint:
     uses: entur/gha-docker/.github/workflows/lint.yml@v1
-    with:
-      ignore: DL3059
 
-  docker-build:
-    needs: [docker-lint]
-    uses: entur/gha-docker/.github/workflows/build.yml@v1
-    secrets:
-      BUILD_SECRETS: |
-        "ARTIFACTORY_AUTH_USER=${{ secrets.ARTIFACTORY_AUTH_USER }}"
-        "ARTIFACTORY_AUTH_TOKEN=${{ secrets.ARTIFACTORY_AUTH_TOKEN }}"
+  helm-lint:
+    uses: entur/gha-helm/.github/workflows/lint.yml@v1
+    strategy:
+      matrix:
+        environment: [dev, tst, prd]
+    with:
+      chart: helm/{repoName}
+      environment: ${{ matrix.environment }}
+      values: values-kub-ent-${{ matrix.environment }}.yaml
 
   test:
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      checks: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
           distribution: liberica
-          java-version: 25
-      - uses: gradle/actions/setup-gradle@v5
-      - run: ./gradlew test --no-daemon
+          java-version: "25"
+      - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
+        with:
+          cache-provider: basic
+      - name: Build and test
+        run: ./gradlew build
         env:
           ARTIFACTORY_AUTH_USER: ${{ secrets.ARTIFACTORY_AUTH_USER }}
           ARTIFACTORY_AUTH_TOKEN: ${{ secrets.ARTIFACTORY_AUTH_TOKEN }}
@@ -354,149 +365,173 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: build/test-results/test/*.xml
+          path: app/build/test-results/test/*.xml
           reporter: java-junit
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: app/build/distributions/app.tar
+          retention-days: 4
+
+  docker:
+    needs: [test, docker-lint, helm-lint]
+    uses: entur/gha-docker/.github/workflows/build.yml@v1
+    with:
+      build_artifact_name: build
+      build_artifact_path: app/build/distributions
 
   docker-scan:
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-    needs: [docker-build, test]
+    needs: [docker]
     uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
-    with:
-      image_artifact: ${{ needs.docker-build.outputs.image_artifact }}
     secrets: inherit
+    with:
+      image_artifact: ${{ needs.docker.outputs.image_artifact }}
 
   docker-push:
-    if: github.ref == 'refs/heads/main'
-    needs: [docker-scan]
+    needs: [docker]
     uses: entur/gha-docker/.github/workflows/push.yml@v1
-    with:
-      extra_image_tags: "latest"
     secrets: inherit
 ```
 
-### ci-pr.yml (PR Verification)
+### build.yaml (PR Build Trigger)
 
-Validates PR titles follow conventional commits with JIRA ticket scopes:
+Runs CI on every pull request. The built image is pushed so it can be resolved by `cd.yaml` after merge.
 
 ```yaml
-name: ci-pr
+name: Build
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - 'terraform/**'
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: build-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  pr-lint:
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-    steps:
-      - uses: amannn/action-semantic-pull-request@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          scopes: ETU-\d+                    # Require JIRA ticket in scope
-          ignoreLabels: dependencies          # Skip for Dependabot PRs
-          validateSingleCommit: true
-
   build:
-    needs: [pr-lint]
-    uses: ./.github/workflows/ci.yml
+    uses: ./.github/workflows/ci.yaml
     secrets: inherit
 ```
 
-### ci-feature.yml (Feature Branch Build)
+### pr.yaml (PR Verification)
 
-Skips CI if an open PR already exists (ci-pr.yml handles it):
+Validates PR metadata against Entur conventions using the reusable verification workflow:
 
 ```yaml
-name: ci-feature
+name: PR Verification
 on:
-  push:
-    branches-ignore: [main]
-    paths:
-      - 'src/**'
-      - 'Dockerfile'
-      - '.dockerignore'
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, edited]
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  pr-check:
-    runs-on: ubuntu-24.04
-    steps:
-      - id: pr-check
-        run: |
-          if gh pr list --state open --head "${{ github.ref_name }}" --json number --jq 'length > 0'; then
-            echo "skip_build=true" >> $GITHUB_OUTPUT
-          else
-            echo "skip_build=false" >> $GITHUB_OUTPUT
-          fi
+  verify-pr:
+    name: Verify PR
+    if: ${{ github.event_name == 'pull_request' }}
+    uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
+```
 
-  build:
-    needs: [pr-check]
-    if: needs.pr-check.outputs.skip_build == 'false'
-    uses: ./.github/workflows/ci.yml
+### dependabot-pr.yaml (Dependabot Approval Gate)
+
+Dependabot PRs do not receive repository secrets by default. This workflow runs CI only after a human has approved the PR:
+
+```yaml
+name: on-pull_request_review-submitted
+on:
+  pull_request_review:
+    types: [submitted]
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    if: github.event.review.state == 'approved' && github.event.pull_request.user.login == 'dependabot[bot]'
+    uses: ./.github/workflows/ci.yaml
     secrets: inherit
 ```
 
-### deploy.yml (Multi-Environment Matrix Deploy)
+### cd.yaml (Continuous Deployment)
 
-Use a **matrix strategy** for deploying to multiple environments or namespaces:
+Uses image promotion: on merge to main, resolves the image built during the PR (via git tag) and deploys it. Also supports manual deployment via `workflow_dispatch`.
 
 ```yaml
-name: deploy
+name: Deploy
 on:
   push:
     branches: [main]
     paths-ignore:
       - '**/*.md'
-      - '**/*.adoc'
+      - 'terraform/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment to deploy to
+        default: dev
+        options: [dev, tst, prd]
+      image:
+        description: Docker image tag (image_name:image_tag). Leave empty to build new.
+        required: false
+        type: string
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   build:
-    uses: ./.github/workflows/ci.yml
+    if: github.event_name == 'workflow_dispatch' && inputs.image == ''
+    uses: ./.github/workflows/ci.yaml
     secrets: inherit
 
-  helm-deploy-dev:
-    needs: [build]
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - environment: dev
-            namespace: products
-            release_name: products-api
-            values: values-kub-ent-dev.yaml
-          - environment: dev
-            namespace: products-ep
-            release_name: products-api-ep
-            values: values-kub-ent-dev-ep.yaml
+  resolve-image:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      image: ${{ steps.resolve.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Resolve image from merged PR git tag
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # ... resolves PR branch name, finds matching git tag, outputs image reference
+
+  deploy-dev:
+    needs: [build, resolve-image]
+    if: >-
+      always() && !cancelled() && !contains(needs.*.result, 'failure')
+      && (needs.resolve-image.outputs.image != '' || inputs.image != '' || needs.build.outputs.image_and_tag != '')
     uses: entur/gha-helm/.github/workflows/deploy.yml@v1
+    concurrency:
+      group: cd-deploy-dev
+      cancel-in-progress: false
     with:
-      environment: ${{ matrix.environment }}
-      chart: helm/products-api
-      namespace: ${{ matrix.namespace }}
-      release_name: ${{ matrix.release_name }}
-      image: ${{ needs.build.outputs.image_and_tag }}
-      values: ${{ matrix.values }}
+      environment: dev
+      image: ${{ needs.resolve-image.outputs.image || inputs.image || needs.build.outputs.image_and_tag }}
     secrets: inherit
 
-  helm-deploy-tst:
-    needs: [helm-deploy-dev, build]
-    if: ${{ success() }}
-    # ... same matrix pattern for tst environments
+  deploy-tst:
+    needs: [build, resolve-image, deploy-dev]
+    # ... same pattern, depends on deploy-dev
 
-  helm-deploy-prd:
-    needs: [helm-deploy-tst, build]
-    if: ${{ success() }}
-    # ... same matrix pattern for prd environments
+  deploy-prd:
+    needs: [build, resolve-image, deploy-tst]
+    # ... same pattern, depends on deploy-tst
 ```
 
-### lint-api.yml (API Spec Linting)
+### lint-api.yaml (API Spec Linting)
 
 ```yaml
 name: lint-api
@@ -510,25 +545,6 @@ jobs:
     secrets: inherit
     with:
       spec: specs/*.yaml
-```
-
-### lint-helm.yml (Helm Linting per Environment)
-
-```yaml
-name: lint-helm
-on:
-  pull_request:
-    paths: ['helm/**']
-jobs:
-  helm-lint:
-    uses: entur/gha-helm/.github/workflows/lint.yml@v1
-    strategy:
-      matrix:
-        environment: [dev, dev-ep, tst, tst-ep, prd]
-    with:
-      chart: helm/my-app
-      environment: ${{ matrix.environment }}
-      values: values-kub-ent-${{ matrix.environment }}.yaml
 ```
 
 ### Dependabot Configuration
@@ -563,11 +579,16 @@ updates:
 1. Use `secrets: inherit` for security scanning and docs workflows
 2. Pin workflow versions to major tags: `@v1`, `@v2`
 3. Use `has_changes` output from terraform-plan to skip unnecessary applies
-4. Name the CodeQL workflow `codeql.yml` -- security tooling depends on this name
+4. Name the CodeQL workflow `codeql.yaml`
 5. Use GitHub Environments with protection rules for deployment approvals
 6. Split workflows into focused files -- separate CI, deploy, linting, and security
 7. Use matrix strategy for multi-namespace/environment deploys
 8. Use concurrency groups with `cancel-in-progress: true` on PR/feature workflows
 9. Pass build secrets via `BUILD_SECRETS` for multi-stage Docker builds with Artifactory
-10. Use `paths` filters on PR workflows to lint only when relevant files change
-11. Upload test reports using `dorny/test-reporter` for PR check visibility
+10. Use `paths-ignore` on build and cd workflows to skip Terraform-only and docs-only changes
+11. Use `paths` triggers on Terraform workflows to only run on infrastructure changes
+12. Upload test reports using `dorny/test-reporter` for PR check visibility
+13. Upload build artifacts for Docker builds that need compiled output (Java/Kotlin)
+14. Image promotion model: PRs build and push images; merges resolve the PR-built image via git tag -- never rebuild on merge
+15. Deploy concurrency uses `cancel-in-progress: false` -- never cancel an in-progress deploy
+16. Dependabot PRs need human approval before CI runs with secrets (`dependabot-pr.yaml`)

@@ -30,6 +30,15 @@ go run ./tests --model sonnet
 | 04-firebase-app | Firebase naming: standard `ent-{id}-{env}`, not special prefix |
 | 05-derive-from-manifest | Core test: distinguish metadata.id from metadata.name |
 | 06-critical-rules | Never create GCP projects via Terraform |
+| 07-cicd-file-structure | CI/CD pipeline file naming and architecture (all 8+ workflow files) |
+| 08-cicd-ci-workflow | ci.yaml reusable workflow: lint, test (Java 25/Gradle), Docker build/scan/push |
+| 09-cicd-build-workflow | build.yaml PR trigger and pr.yaml verification workflow |
+| 10-cicd-cd-workflow | cd.yaml image promotion model: resolve-image via git tag, deploy chain |
+| 11-cicd-security-workflows | codeql.yaml (CodeQL + Java config) and dependabot-pr.yaml (approval gate) |
+| 12-cicd-terraform-workflows | terraform.yaml (lint/plan/apply) and drift detection (weekly schedule) |
+| 13-cicd-dependabot-config | dependabot.yml: correct ecosystems for Kotlin (github-actions, docker, gradle) |
+| 14-cicd-go-variant | Go CI: setup-go, go test, no artifact upload, no test-reporter, gomod dependabot |
+| 15-cicd-no-helm | No Helm: ci.yaml omits helm-lint, cd.yaml omits deploy jobs |
 
 ## CLI Options
 
@@ -109,8 +118,8 @@ and ask specific, answerable questions.
 
 ## Cost
 
-Each scenario costs ~$0.03-0.08 with Haiku. Full suite of 6 scenarios: ~$0.35.
-With retries (worst case): ~$0.70. Well within the $1.00 default budget cap.
+Each scenario costs ~$0.03-0.08 with Haiku. Full suite of 15 scenarios: ~$0.95.
+With retries (worst case): ~$1.90. Increase budget cap with `--budget 2.00` if running all.
 
 ## Unit Tests
 
