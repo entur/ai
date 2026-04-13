@@ -39,6 +39,7 @@ go run ./tests --model sonnet
 | 13-cicd-dependabot-config | dependabot.yml: correct ecosystems for Kotlin (github-actions, docker, gradle) |
 | 14-cicd-go-variant | Go CI: setup-go, go test, no artifact upload, no test-reporter, gomod dependabot |
 | 15-cicd-no-helm | No Helm: ci.yaml omits helm-lint, cd.yaml omits deploy jobs |
+| 16-cicd-python-variant | Python CI: setup-python, pytest, no artifact upload, pip dependabot |
 
 ## CLI Options
 
@@ -118,8 +119,8 @@ and ask specific, answerable questions.
 
 ## Cost
 
-Each scenario costs ~$0.03-0.08 with Haiku. Full suite of 15 scenarios: ~$0.95.
-With retries (worst case): ~$1.90. Increase budget cap with `--budget 2.00` if running all.
+Each scenario costs ~$0.03-0.08 with Haiku. Full suite of 16 scenarios: ~$1.00.
+With retries (worst case): ~$2.00. Increase budget cap with `--budget 2.50` if running all.
 
 ## Unit Tests
 
