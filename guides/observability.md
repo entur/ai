@@ -11,7 +11,7 @@ Every service must expose liveness and readiness probes for Kubernetes pod lifec
 Answers "is the process running and not deadlocked?"
 
 - Return `200 OK` if alive
-- Do NOT check external dependencies -- a slow database should not cause restarts
+- ALWAYS verify only the process itself -- checking external dependencies causes unnecessary restarts
 - Default path: `/actuator/health/liveness` (Spring Boot) or custom path for Go/Python
 
 ### Readiness Probe
@@ -20,7 +20,7 @@ Answers "is the application ready to serve traffic?"
 
 - Return `200 OK` if ready, `503` if a private dependency is down
 - Check only **private resources** (own DB connection pool, internal cache)
-- **Never check shared/external services** -- all pods removed from routing simultaneously if shared service is down
+- **ALWAYS check only private resources** (own DB, internal cache) -- shared service failures would remove all pods simultaneously
 - Default path: `/actuator/health/readiness` (Spring Boot) or custom path for Go/Python
 
 For Helm probe configuration, see [helm.md](helm.md#health-probes).
@@ -29,7 +29,7 @@ For Helm probe configuration, see [helm.md](helm.md#health-probes).
 
 ### Entur Metrics Starter (Spring Boot)
 
-Use `org.entur.metrics:metrics-spring-boot-starter`. Provides autoconfiguration for Prometheus with Entur defaults assumed by [Grafana dashboards](https://grafana.entur.org). **Do not change default metric names** -- dashboards depend on them.
+Use `org.entur.metrics:metrics-spring-boot-starter`. Provides autoconfiguration for Prometheus with Entur defaults assumed by [Grafana dashboards](https://grafana.entur.org). **ALWAYS keep default metric names** -- Grafana dashboards depend on them.
 
 #### Setup
 

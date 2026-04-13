@@ -589,6 +589,6 @@ updates:
 11. Use `paths` triggers on Terraform workflows to only run on infrastructure changes
 12. Upload test reports using `dorny/test-reporter` for PR check visibility
 13. Upload build artifacts for Docker builds that need compiled output (Java/Kotlin)
-14. Image promotion model: PRs build and push images; merges resolve the PR-built image via git tag -- never rebuild on merge
-15. Deploy concurrency uses `cancel-in-progress: false` -- never cancel an in-progress deploy
+14. Image promotion model: PRs build and push images; merges ALWAYS resolve the PR-built image via git tag
+15. Deploy concurrency ALWAYS uses `cancel-in-progress: false` to protect running deployments
 16. Dependabot PRs need human approval before CI runs with secrets (`dependabot-pr.yaml`)

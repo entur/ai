@@ -422,7 +422,7 @@ Cache reference data lookups to avoid repeated DB queries. Use a cache-aside pat
 - **Always use TTLs** -- Kafka consumer patterns generate large volumes of keys
 - **Handle Redis failures gracefully** -- if Redis is down, either process (risking duplicates) or throw to trigger Kafka retry, based on idempotency requirements
 - **Use event ID or Kafka offset as dedup key** -- `{topic}:{partition}:{offset}` is naturally unique
-- **Do not use Redis as a Kafka replacement** -- Redis Pub/Sub has no persistence, no consumer groups, no delivery guarantees
+- **ALWAYS use Kafka for event streaming** -- Redis Pub/Sub lacks persistence, consumer groups, and delivery guarantees
 - **Namespace keys** with app name to avoid collisions: `myapp:dedup:`, `myapp:cache:`
 
 ## Observability

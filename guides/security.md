@@ -56,7 +56,7 @@ APP_PASSWORD=$(gcloud secrets versions access latest --secret <secret-name> --pr
 export APP_PASSWORD
 ```
 
-Do not store secrets locally in files.
+ALWAYS access secrets via `gcloud` commands; keep them out of local files.
 
 ### Secret Rotation
 
@@ -73,7 +73,7 @@ Rotate secrets at least every 90 days (excludes OAuth tokens which should have s
 
 - Use OAuth 2.0 / OpenID Connect for user-facing APIs
 - Validate JWT tokens at API gateway or in application
-- Never build custom authentication -- use established libraries
+- ALWAYS use established authentication libraries (Entur OIDC libraries)
 - Use Entur OIDC libraries: `oidc-auth-resource-server` (validation), `oidc-auth-client` (token acquisition)
 
 ### Authorization
@@ -103,9 +103,9 @@ For web applications (not REST APIs), also set:
 ## Input Validation
 
 - Validate all input at API boundaries using allow lists when possible
-- Use **DTOs** to prevent mass parameter assignment -- never bind input directly to domain objects
+- ALWAYS use **DTOs** for input binding to prevent mass parameter assignment
 - Only accept HTTP methods actually used; log unexpected methods
-- Do not use `Origin` header for auth or access control
+- ALWAYS use established auth mechanisms for access control (the `Origin` header is unreliable)
 - Validate URL redirects using an allow list
 - Enforce strongly typed schemas: allowed characters, length, pattern
 
@@ -211,8 +211,8 @@ Kubernetes security:
 
 - Pods run as non-root by default (enforced by common Helm chart)
 - Use network policies for pod-to-pod restriction where appropriate
-- Use Workload Identity -- never mount service account keys
-- Never mount default K8s service account token unless required
+- ALWAYS use Workload Identity for service authentication
+- ALWAYS disable default K8s service account token mounting unless explicitly required
 
 ## IAM and Permissions
 
@@ -258,4 +258,4 @@ Before submitting a PR:
 - [ ] Input validation at API boundaries
 - [ ] Error responses don't leak internals (stack traces, DB errors)
 - [ ] Auth and authorization properly configured
-- [ ] CORS configured restrictively (not `*` in production)
+- [ ] CORS configured with explicit allowed origins in production

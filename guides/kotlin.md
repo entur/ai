@@ -171,7 +171,7 @@ Define typed exception classes extending `RuntimeException`. Handle with a `@Res
 
 ### Coroutines (WebFlux)
 
-Only use if the project already uses WebFlux. Do not mix WebFlux and MVC. Use `suspend` functions in controllers for coroutine-based handlers.
+Only use if the project already uses WebFlux. ALWAYS use either WebFlux or MVC consistently throughout a project. Use `suspend` functions in controllers for coroutine-based handlers.
 
 ## Testing in Kotlin
 

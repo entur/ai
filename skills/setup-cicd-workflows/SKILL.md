@@ -913,12 +913,12 @@ Generated CI/CD workflows:
 
 ## Critical Rules
 
-- **Always use Entur reusable workflows** -- never write custom CI/CD steps
+- **ALWAYS use Entur reusable workflows** for all CI/CD steps
 - **Pin workflow versions** to major tags: `@v1`, `@v2`
 - **Use `secrets: inherit`** for security scanning and deploy workflows
-- **Image promotion model**: PRs build and push images; merges resolve the PR-built image via git tag and deploy it -- never rebuild on merge
-- **Terraform is a separate workflow** -- never mix Terraform jobs into `cd.yaml`
-- **Deploy concurrency uses `cancel-in-progress: false`** -- never cancel an in-progress deploy
+- **Image promotion model**: PRs build and push images; merges ALWAYS resolve the PR-built image via git tag
+- **Terraform ALWAYS runs in a separate workflow** from `cd.yaml`
+- **Deploy concurrency ALWAYS uses `cancel-in-progress: false`** to protect running deployments
 - **Plan concurrency uses `cancel-in-progress: true`** -- only the latest plan matters
 - **Use `has_changes` output** from terraform-plan to skip unnecessary applies
 - **Use the conditional pattern** for deploy jobs with multiple dependency paths:

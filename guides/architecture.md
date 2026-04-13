@@ -7,7 +7,7 @@ Guidelines for application architecture at Entur. All services run on GKE in `eu
 Entur combines **Domain-Driven Design (DDD)** with **Hexagonal Architecture**:
 
 - **DDD**: common language between technical and domain experts, testable code by design, implies SOLID principles
-- **Hexagonal Architecture** (ports and adapters): domain core independent of frameworks/databases/external services -- outer layers depend on inner layers, never the reverse
+- **Hexagonal Architecture** (ports and adapters): domain core independent of frameworks/databases/external services -- outer layers depend on inner layers (dependency inversion)
 - **Reactive Systems** principles: responsive, elastic, resilient, event-driven
 
 ## Service Architecture
@@ -46,8 +46,8 @@ Key rules:
 - **DAOs**: data persistence (Exposed or Spring Data)
 - **Entities**: database table structure
 - **Domain Models**: plain data classes, no framework dependencies
-- Depend inward; keep controllers thin; never leak entities into API responses
-- Service layer works exclusively with domain models, never DTOs
+- Depend inward; keep controllers thin; ALWAYS return DTOs from API responses
+- Service layer ALWAYS works exclusively with domain models
 
 ### Package-by-Feature
 
@@ -160,7 +160,7 @@ Define tables as `object` extending `LongIdTable` with typed columns (`varchar`,
 
 - Migrations must be backward-compatible (rolling deployments)
 - Separate schema changes from data migrations
-- Never modify applied migrations
+- ALWAYS treat applied migrations as immutable
 - Test against production data copy before deploying
 - Use `baseline-on-migrate` in test configuration
 
@@ -168,7 +168,7 @@ Define tables as `object` extending `LongIdTable` with typed columns (`varchar`,
 
 Use circuit breakers, retry with backoff, and timeouts for external service calls. See [api-design.md](api-design.md#rate-limiting-and-resilience) for details.
 
-Use `@CircuitBreaker` and `@Retry` (Resilience4j) annotations with named configurations and fallback methods. Timeout guidelines: connect 5s, read 30s, never infinite. Design for graceful degradation -- return cached or partial data when dependencies are unavailable.
+Use `@CircuitBreaker` and `@Retry` (Resilience4j) annotations with named configurations and fallback methods. Timeout guidelines: connect 5s, read 30s; ALWAYS set explicit timeouts. Design for graceful degradation -- return cached or partial data when dependencies are unavailable.
 
 ## Production Hardening
 

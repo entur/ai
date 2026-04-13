@@ -35,8 +35,8 @@ Ask the user for the following. If not provided, suggest sensible defaults:
 Before proceeding, validate:
 
 - `metadata.id` is 3-10 chars, `^[a-z0-9]+$`
-- `metadata.id` does NOT start with `ent-`
-- `metadata.id` does NOT end with `sbx`, `dev`, `tst`, `test`, `prd`, `prod`
+- `metadata.id` ALWAYS uses bare identifiers (the platform adds the `ent-` prefix)
+- `metadata.id` ALWAYS uses base identifiers (the platform adds environment suffixes)
 - Repository name is valid kebab-case
 - Team starts with `team-`
 

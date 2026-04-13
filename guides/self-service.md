@@ -32,12 +32,12 @@ The **GitHub manifest** must be applied before any **Application manifest**.
 ### File Conventions
 
 - Manifests live in `.entur/` at repository root
-- One YAML document per file (no multi-doc `---`)
+- ALWAYS use one YAML document per file (single document, no `---` separator)
 - Default naming: `.entur/<metadata.id>.yaml`
 
 ## GCP Project Naming
 
-The Platform Orchestrator automatically creates GCP projects from your `metadata.id`. You never create GCP projects directly.
+The Platform Orchestrator ALWAYS creates GCP projects automatically from your `metadata.id`.
 
 | Kind | Project ID Pattern | Example (`metadata.id: myapp`) |
 |------|-------------------|-------------------------------|
@@ -57,8 +57,8 @@ Data projects use a different prefix (`ent-data-`) and include an `int`/`ext` su
 **Constraints on `metadata.id`:**
 
 - 3--10 characters, lowercase alphanumeric only (`^[a-z0-9]+$`)
-- Must NOT start with `ent-` (the platform adds this prefix)
-- Must NOT end with `sbx`, `dev`, `tst`, `test`, `prd`, or `prod` (the platform adds the environment suffix)
+- ALWAYS use bare identifiers -- the platform adds the `ent-` prefix automatically
+- ALWAYS use base identifiers -- the platform adds the environment suffix automatically
 - **Immutable** -- changing it deletes and recreates all GCP projects
 
 **Example identity chains:**

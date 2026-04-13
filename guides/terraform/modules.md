@@ -1,6 +1,6 @@
 # Entur Terraform Modules
 
-> **GCP projects are not created via Terraform.** Terraform manages resources _within_ an existing GCP project. To provision a new GCP project, use the self-service YAML manifests in `.entur/` -- see [self-service.md](../self-service.md). For help, ask in `#talk-utviklerplattform`.
+> **GCP projects are ALWAYS provisioned through self-service manifests in `.entur/`.** Terraform manages resources _within_ an existing GCP project. See [self-service.md](../self-service.md). For help, ask in `#talk-utviklerplattform`.
 
 Always use Entur shared modules instead of raw `google_*` resources for managed services.
 
@@ -342,12 +342,12 @@ terraform workspace select dev
 
 ## Best Practices
 
-1. **Pin module versions** with `?ref=TAG` -- never use unversioned references
+1. **ALWAYS pin module versions** with `?ref=TAG`
 2. **Always use the init module** as base for all other modules and resources
 3. **Use `module.init.labels`** on all resources for consistent labeling
 4. **Use `module.init.app.project_id`** for the `project` field on all resources
 5. **Use environment-specific tfvars** in `terraform/env/`
 6. **Use GCS backend** for remote state (configured by platform)
 7. **Only use IAM roles from the [approved list](iam-roles.md)**
-8. **Use Entur modules** for Cloud SQL and Memorystore -- no raw `google_sql_*` or `google_redis_*`
+8. **ALWAYS use Entur modules** for Cloud SQL and Memorystore
 9. **Run `terraform plan` in CI** and `terraform apply` in CD via `gha-terraform` workflows

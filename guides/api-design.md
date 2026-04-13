@@ -76,7 +76,7 @@ https://<service>.entur.org/api/v{version}/{resource}
 
 - Always return structured error body for 4xx/5xx responses
 - Include machine-readable `code` and human-readable `message`
-- Never expose stack traces, SQL, or internal details
+- ALWAYS return client-safe error bodies (exclude stack traces, SQL, and internal details)
 
 ### Pagination
 

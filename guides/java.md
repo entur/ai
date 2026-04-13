@@ -180,14 +180,14 @@ These are defaults in the Entur common Helm chart. Do not change unless you also
 
 - Use constructor injection (not field injection with `@Autowired`)
 - Use Java records for DTOs and value objects
-- Use `Optional` for return types that may be absent -- never return null
+- ALWAYS use `Optional` for return types that may be absent
 - Use `@Transactional(readOnly = true)` for read operations
 - Validate inputs at the controller boundary with `@Valid`
 - Use a mapper layer to convert between entities and DTOs
 
 ### Exception Handling
 
-Use `@RestControllerAdvice` with `@ExceptionHandler` methods for centralized error handling. Return a structured error response record (e.g., `ErrorResponse(String code, String message)`) with appropriate HTTP status codes. Map domain exceptions to client-friendly responses -- never expose stack traces.
+Use `@RestControllerAdvice` with `@ExceptionHandler` methods for centralized error handling. Return a structured error response record (e.g., `ErrorResponse(String code, String message)`) with appropriate HTTP status codes. ALWAYS map domain exceptions to client-friendly responses with safe error messages.
 
 ## Testing
 
@@ -269,11 +269,11 @@ Examples: `products-api:route:ENT:Route:123`, `products-api:rate:partner-xyz`
 - **Keep values small** -- JSON, aim for < 100 KB per key
 - **Use `NX` (set-if-not-exists)** for distributed locks and idempotency
 - **Handle failures gracefully** -- Redis is a cache, not primary store. Fall back to DB on failure
-- **Avoid `KEYS *`** in production -- blocks Redis. Use `SCAN` instead
+- **ALWAYS use `SCAN`** for key iteration in production (it is non-blocking, unlike `KEYS *`)
 - **Use pipelining** for batch operations
 - **Namespace keys** with app name to avoid collisions
 - **Monitor memory** -- alert on `used_memory` vs `maxmemory` (see [observability.md](observability.md))
-- **Do not use Redis as a message queue** -- use Kafka. Redis Pub/Sub has no persistence
+- **ALWAYS use Kafka for messaging** -- Redis Pub/Sub lacks persistence and delivery guarantees
 
 ### Testing
 

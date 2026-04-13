@@ -20,7 +20,7 @@ Prefer **distroless** or **slim-musl** images. Use Alpine only when you need a s
 | Node.js | `gcr.io/distroless/nodejs24-debian12` | `node:24-alpine` |
 | Python | `gcr.io/distroless/python3-debian12` | `python:3.12-slim` |
 
-Liberica Runtime Container with CDS is preferred for Java/Kotlin: supports Class Data Sharing for faster startup, optimized for containerized JVM workloads. Pin base image versions -- never use `latest`.
+Liberica Runtime Container with CDS is preferred for Java/Kotlin: supports Class Data Sharing for faster startup, optimized for containerized JVM workloads. ALWAYS pin base image versions to specific tags.
 
 ## Dockerfile Examples
 

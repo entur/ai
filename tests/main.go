@@ -22,6 +22,11 @@ specific guides referenced for your task. Pay close attention to:
 - Language-specific conventions (health paths, Docker images, metrics paths)
 Do not make assumptions. If the documentation specifies a pattern, use it exactly.`
 
+var (
+	activeSysPrompt string
+	activeTools     string
+)
+
 // claudeResponse is the JSON structure returned by claude --output-format json.
 type claudeResponse struct {
 	Type       string  `json:"type"`
@@ -41,7 +46,27 @@ func main() {
 	strict := flag.Bool("strict", false, "require 100% assertion pass rate")
 	noRetry := flag.Bool("no-retry", false, "disable retry on failure")
 	scenarioDir := flag.String("dir", "", "scenario directory (default: ./scenarios relative to binary)")
+	sysPromptOverride := flag.String("system-prompt", "", "override default system prompt ('none' to omit)")
+	allowedToolsFlag := flag.String("allowed-tools", "", "override allowed tools ('none' to omit, default: Read,Grep,Glob)")
 	flag.Parse()
+
+	// Apply system prompt and tools configuration
+	activeSysPrompt = systemPrompt
+	if *sysPromptOverride != "" {
+		if *sysPromptOverride == "none" {
+			activeSysPrompt = ""
+		} else {
+			activeSysPrompt = *sysPromptOverride
+		}
+	}
+	activeTools = "Read,Grep,Glob"
+	if *allowedToolsFlag != "" {
+		if *allowedToolsFlag == "none" {
+			activeTools = ""
+		} else {
+			activeTools = *allowedToolsFlag
+		}
+	}
 
 	dir := *scenarioDir
 	if dir == "" {
@@ -239,15 +264,20 @@ func discoverScenarios(dir, filter string) ([]Scenario, error) {
 }
 
 func buildCommand(s Scenario, model, repoRoot string) []string {
-	return []string{
+	cmd := []string{
 		"claude",
 		"-p", s.Prompt,
 		"--output-format", "json",
 		"--model", model,
-		"--allowedTools", "Read,Grep,Glob",
 		"--max-budget-usd", fmt.Sprintf("%.2f", s.Budget),
-		"--append-system-prompt", systemPrompt,
 	}
+	if activeTools != "" {
+		cmd = append(cmd, "--allowedTools", activeTools)
+	}
+	if activeSysPrompt != "" {
+		cmd = append(cmd, "--append-system-prompt", activeSysPrompt)
+	}
+	return cmd
 }
 
 func runScenario(s Scenario, model string, strict bool, repoRoot string) ScenarioResult {

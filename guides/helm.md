@@ -81,7 +81,7 @@ common:
     memoryLimit: 256   # Set equal to memory request
 ```
 
-- **CPU limit**: Do not set. CPU is compressible -- pods throttled, not killed. Allow bursting.
+- **CPU limit**: ALWAYS leave unset. CPU is compressible -- pods are throttled, not killed. Allow bursting.
 - **Memory limit**: Set equal to request. Memory is incompressible -- exceeding limit causes OOM kills.
 - Start small, let VPA recommend optimal settings.
 
@@ -120,8 +120,8 @@ common:
 
 **Probe rules:**
 
-- **Liveness**: Verify app responds within reasonable time. Do NOT check external deps -- failing liveness causes restarts.
-- **Readiness**: Check only **private resources** (own DB, internal cache). Never check shared/external services -- all pods removed from routing simultaneously if shared service is down.
+- **Liveness**: ALWAYS verify only the app process itself -- checking external deps causes unnecessary restarts.
+- **Readiness**: ALWAYS check only **private resources** (own DB, internal cache) -- shared service failures would remove all pods simultaneously.
 
 For non-Spring-Boot (Go, Python):
 

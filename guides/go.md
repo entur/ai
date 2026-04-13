@@ -81,7 +81,7 @@ common:
 
 ### HTTP Handlers
 
-Use handler structs with service and logger dependencies, created via constructor functions (`NewXxxHandler`). Use `r.PathValue("id")` for path parameters (Go 1.22+). Return JSON with `json.NewEncoder(w).Encode()`. Handle errors by returning appropriate HTTP status codes -- never expose internal details.
+Use handler structs with service and logger dependencies, created via constructor functions (`NewXxxHandler`). Use `r.PathValue("id")` for path parameters (Go 1.22+). Return JSON with `json.NewEncoder(w).Encode()`. Handle errors by returning appropriate HTTP status codes -- ALWAYS return client-safe error responses.
 
 ### Error Handling
 
@@ -89,7 +89,7 @@ Use handler structs with service and logger dependencies, created via constructo
 - Wrap errors with `fmt.Errorf("context: %w", err)` to preserve the chain
 - Use sentinel errors for expected conditions
 - Use `errors.Is()` / `errors.As()` to check error types
-- Never ignore errors
+- ALWAYS handle errors explicitly
 
 ### Configuration
 

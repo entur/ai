@@ -109,7 +109,7 @@ my-application/
 - Applications must be real microservices with clear, standalone functionality -- not distributed monoliths
 - All versions must support rollback to the previous version
 - Maintain backwards compatibility so consumers can update at their own pace
-- Applications must start even when dependencies are unavailable -- never crash because a dependency is missing
+- Applications ALWAYS start gracefully when dependencies are unavailable
 - All APIs must be documented using OpenAPI (REST) or protobuf definitions (gRPC)
 - Application setup and how-to-run instructions must be in the repository's `README.md`
 - Non-compliant applications may receive remarks that must be resolved to continue running on the platform
@@ -121,7 +121,7 @@ my-application/
 - Fail fast: validate inputs at the boundary, reject invalid data early
 - Use typed exceptions/errors -- avoid generic `Exception` or `error` strings
 - Log errors with context: include request IDs, correlation IDs, and relevant parameters
-- Never swallow exceptions silently -- always log or propagate
+- ALWAYS log or propagate exceptions -- handle errors explicitly at every level
 - Distinguish between client errors (4xx) and server errors (5xx) in APIs
 
 ### Java/Kotlin
@@ -179,7 +179,7 @@ raise Exception("not found")
 - Each test should test one behavior
 - Use Arrange-Act-Assert (AAA) pattern
 - Integration tests should use testcontainers for databases and message brokers
-- Never commit tests that are `@Disabled` or `@Ignore` without a linked issue
+- ALWAYS link a tracking issue when committing tests with `@Disabled` or `@Ignore`
 - Use `@Sql` annotations to load test data from SQL scripts before integration tests
 - Use `cleanup.sql` scripts to ensure clean state between tests
 - Upload test results in CI using `dorny/test-reporter` for visibility in GitHub
@@ -330,8 +330,7 @@ Fixes <JIRA ticket number>.
 
 - Use environment variables for environment-specific values
 - Spring Boot: `application.yml` for defaults, `application-{profile}.yml` for overrides
-- Never commit environment-specific secrets or credentials
-- Use Google Secret Manager for secrets, referenced via ExternalSecrets in Helm
+- ALWAYS use Google Secret Manager for secrets, referenced via ExternalSecrets in Helm
 
 ### Configuration Hierarchy (Spring Boot)
 

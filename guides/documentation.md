@@ -24,7 +24,7 @@ State up front in every document:
 - **Intent** -- what will the reader accomplish?
 - **Scope** -- what is/isn't covered; link out for other topics
 - **Prerequisites** -- required knowledge or setup, with links
-- **Outcome-oriented headings** -- Do: "Get started with the common Helm chart" / Don't: "Copy `./helm` from helm-charts"
+- **Outcome-oriented headings** -- prefer: "Get started with the common Helm chart" over: "Copy `./helm` from helm-charts"
 - **Further reading** -- list next documents at the end
 
 ## When to Write Documentation
@@ -93,7 +93,7 @@ Place in README or `docs/configuration.md`.
 ### Language and Tone
 
 - English, plain and direct
-- Active voice, present tense -- Do: "The service validates the token." / Don't: "The token is validated by the service."
+- Active voice, present tense -- prefer: "The service validates the token." over: "The token is validated by the service."
 - Strong verbs -- "generates", not "is responsible for generating"
 - One sentence per thought
 - Consistent abbreviations -- always `PaaS`, never `Paas` or `PAAS`

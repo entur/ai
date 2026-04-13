@@ -9,8 +9,8 @@
 - [ ] PR title follows [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) (validated by CI)
 - [ ] PR description explains **what** and **why**
 - [ ] Large changes broken into smaller PRs
-- [ ] No unrelated changes bundled
-- [ ] No secrets or credentials committed
+- [ ] All changes relate to the PR purpose
+- [ ] Verified free of secrets and credentials
 
 ### PR Description Template
 
@@ -46,9 +46,9 @@ How was this tested? Any manual verification steps?
 
 ### Security
 
-- No hardcoded secrets or credentials
+- All secrets managed via Secret Manager, no hardcoded credentials
 - Input validated at boundaries
-- Error responses don't leak internals
+- Error responses return only client-safe information
 - IAM roles from [approved list](terraform/iam-roles.md) only
 - SQL uses parameterized statements (no string concatenation)
 
@@ -67,19 +67,19 @@ How was this tested? Any manual verification steps?
 - New functionality has tests
 - Tests verify behavior, not implementation
 - Mocks at boundaries only, not for internal classes
-- No flaky or non-deterministic tests
-- Integration tests use testcontainers (not external services)
+- All tests are deterministic and reproducible
+- Integration tests use testcontainers for all external dependencies
 
 ### Observability
 
 - Structured logging with context
 - Health checks configured
 - Prometheus metrics for key operations
-- No sensitive data in logs
+- All log output is free of sensitive data
 
 ### Review Etiquette
 
-- Suggest improvements, don't just point out problems
+- ALWAYS suggest improvements alongside identified issues
 - Distinguish blocking issues from nitpicks
 - Use prefixes: `nit:`, `question:`, `blocker:`
 - Approve with minor comments when overall approach is sound

@@ -49,11 +49,11 @@ Use standard `logging` with `json_log_formatter.JSONFormatter()` for structured 
 - Production runs at `INFO` by default
 - **Never log** secrets, tokens, passwords, or PII
 - **Never log** payment details (PCI-DSS)
-- **Never log** request/response bodies at INFO -- use DEBUG
-- **Log at boundaries**: entering/exiting the system (HTTP requests, message consumption), not inside every method
-- **Include context**: enough to trace back to a specific request or operation
-- **Don't log and throw**: either log or propagate, not both
-- **Prevent log injection**: encode user-supplied data to prevent log forging
+- **ALWAYS use DEBUG level** for request/response body logging
+- **ALWAYS log at boundaries**: entering/exiting the system (HTTP requests, message consumption)
+- **ALWAYS include context**: enough to trace back to a specific request or operation
+- **ALWAYS choose one**: either log the error or propagate it -- handling at both levels creates noise
+- **ALWAYS encode user-supplied data** in logs to prevent log injection/forging
 - Session tokens in logs only in irreversible hashed form
 
 ### Security Events to Log
