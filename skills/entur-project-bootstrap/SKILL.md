@@ -166,11 +166,11 @@ If database is needed, add:
     connectionConfig: {repoName}
 ```
 
-If secrets are needed, add:
+If secrets are needed (do NOT add `PG_USER`/`PG_PASSWORD` here — those are already provided by `postgres.enabled`), add:
 
 ```yaml
   secrets:
-    psql-credentials: [PG_USER, PG_PASSWORD]
+    my-app-secrets: [MY_APP_API_KEY, EXTERNAL_SERVICE_KEY]
 ```
 
 ### `helm/{repoName}/env/dev.yaml`

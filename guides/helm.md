@@ -212,7 +212,7 @@ common:
     enabled: true
 ```
 
-Injects a Cloud SQL proxy sidecar. Application connects to `localhost:5432`. Credentials provided as env vars from K8s secrets (created by `terraform-google-sql-db` module): `PG_USER`, `PG_PASSWORD`. Database name configured via application config.
+Injects a Cloud SQL proxy sidecar. Application connects to `localhost:5432`. Credentials provided as env vars from K8s secrets (created by `terraform-google-sql-db` module): `PG_USER`, `PG_PASSWORD`. Database name configured via application config. Do NOT add `PG_USER`/`PG_PASSWORD` to ExternalSecrets — they are already injected automatically.
 
 ## Secrets (ExternalSecrets)
 
@@ -222,11 +222,10 @@ Sync secrets from Google Secret Manager to Kubernetes:
 common:
   secrets:
     my-app-secrets:           # K8s Secret name
-      - API_KEY               # Secret Manager secret -> env var name
+      - MY_APP_API_KEY        # Secret Manager secret -> env var name
       - EXTERNAL_SERVICE_KEY
-    database-credentials:     # Another K8s Secret
-      - PG_USER
-      - PG_PASSWORD
+    some-service:             # Another K8s Secret
+      - X_API_KEY
 ```
 
 Each entry creates an ExternalSecret syncing named secrets from Secret Manager into a K8s Secret mounted as env vars.
