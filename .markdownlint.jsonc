@@ -12,5 +12,7 @@
   // Allow inline HTML
   "MD033": false,
   // Allow bare URLs
-  "MD034": false
+  "MD034": false,
+  // Allow missing space to the left in tables
+  "MD060": false
 }
