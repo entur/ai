@@ -7,7 +7,7 @@ Guidelines for application architecture at Entur. All services run on GKE in `eu
 - Keep business logic independent of frameworks, databases, and external services
 - Outer layers depend on inner layers (dependency inversion)
 - Design for testability -- business logic should be testable without infrastructure
-- Build responsive, resilient, and event-driven systems
+- Build responsive and resilient systems
 
 ## Service Architecture
 
