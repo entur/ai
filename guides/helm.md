@@ -2,7 +2,7 @@
 
 Reference: [entur/helm-charts](https://github.com/entur/helm-charts)
 
-The Entur `common` Helm chart is the standard base chart for deploying applications to Kubernetes. It provides sensible defaults for Spring Boot and can be configured for Go, Python, or any containerized service.
+The Entur `common` Helm chart is the standard base chart for deploying applications to Kubernetes. **ALWAYS use the `common` chart for all Kubernetes deployments** -- do not create custom charts from scratch. It provides sensible defaults for Spring Boot and can be configured for Go, Python, or any containerized service.
 
 ## Naming Convention
 
