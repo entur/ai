@@ -6,7 +6,13 @@
 
 Entur's authoritative rules for designing RESTful APIs. Covers HTTP method and status code usage, JSON conventions, HTTPS, error formats, pagination, and versioning. Mandates OpenAPI 3.x documentation with an `info.x-entur-metadata` block (required fields: `id`, `owner`, `audience` — one of `open`, `partner`, or `internal`). Specifies JWT authentication for partner/internal endpoints and the `x-entur-permissions` extension for documenting required permissions. Rules are tagged to indicate which are automatically enforced by the linter versus requiring manual review.
 
-## Linting, validating, and publishing OpenAPI specs
+## Linting with Spectral (local, IDE, git hooks)
+
+<https://github.com/entur/api-guidelines/blob/main/README.md>
+
+Describes how to run the Entur Spectral ruleset outside of CI. Two rulesets are published: `.spectral.yml` (full guideline checks) and `.spectral-required.yml` (minimum rules that must pass to publish to the developer portal). Reference them by tag, e.g. `--ruleset https://raw.githubusercontent.com/entur/api-guidelines/refs/tags/v2/.spectral.yml`. Covers Spectral CLI install, the VS Code extension, and a Husky pre-commit/pre-push hook example. Use this when validating a spec locally before a PR; use the `gha-api` workflows (below) for CI enforcement.
+
+## Linting, validating, and publishing OpenAPI specs in CI/CD
 
 <https://github.com/entur/gha-api/blob/main/.github/README.md>
 
