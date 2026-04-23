@@ -1,0 +1,20 @@
+{
+  "name": "entur",
+  "interface": {
+    "displayName": "Entur"
+  },
+  "plugins": [
+    {
+      "name": "entur-bootstrap",
+      "source": {
+        "source": "local",
+        "path": "./plugins/entur-bootstrap"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Scaffolding"
+    }
+  ]
+}
