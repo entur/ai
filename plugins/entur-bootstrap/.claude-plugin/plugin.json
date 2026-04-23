@@ -1,0 +1,21 @@
+{
+  "name": "entur-bootstrap",
+  "version": "0.1.0",
+  "description": "Bootstrap a new Entur app: self-service manifests, Helm, Terraform, Docker, and CI/CD wired together with consistent identifiers.",
+  "author": {
+    "name": "Team Plattform",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "bootstrap",
+    "scaffold",
+    "gcp",
+    "helm",
+    "terraform",
+    "cicd"
+  ]
+}

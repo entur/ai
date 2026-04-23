@@ -1,0 +1,29 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "entur",
+  "description": "Entur platform AI toolbox: reusable skills, agents, and hooks for Entur developers",
+  "owner": {
+    "name": "Team Plattform",
+    "email": "support@entur.org"
+  },
+  "metadata": {
+    "description": "Coding agent skills and tools for building on the Entur platform",
+    "pluginRoot": "./plugins"
+  },
+  "plugins": [
+    {
+      "name": "entur-bootstrap",
+      "source": "./plugins/entur-bootstrap",
+      "description": "Bootstrap a new Entur app: self-service manifests, Helm, Terraform, Docker, and CI/CD wired together with consistent identifiers.",
+      "category": "scaffolding",
+      "keywords": ["entur", "bootstrap", "scaffold", "gcp", "helm", "terraform", "cicd"],
+      "author": {
+        "name": "Team Plattform",
+        "email": "support@entur.org"
+      },
+      "homepage": "https://github.com/entur/ai",
+      "repository": "https://github.com/entur/ai",
+      "license": "EUPL-1.2"
+    }
+  ]
+}
