@@ -27,6 +27,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Writing"
+    },
+    {
+      "name": "cicd-workflows",
+      "source": {
+        "source": "local",
+        "path": "./plugins/cicd-workflows"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "DevOps"
     }
   ]
 }

@@ -1,0 +1,34 @@
+{
+  "name": "cicd-workflows",
+  "version": "0.1.0",
+  "description": "Generate Entur-standard CI/CD GitHub Actions workflows (ci, build, cd, pr, codeql) for Kotlin/Java, Go, or Python projects.",
+  "author": {
+    "name": "Team Plattform",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "cicd",
+    "github-actions",
+    "workflows",
+    "kotlin",
+    "java",
+    "go",
+    "python"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "CI/CD Workflows",
+    "shortDescription": "Generate Entur-standard CI/CD GitHub Actions workflows.",
+    "longDescription": "Detects project language (Kotlin/Java, Go, Python) and generates required workflow files: ci.yaml, build.yaml, cd.yaml, pr.yaml, codeql.yaml using Entur reusable workflows.",
+    "developerName": "Team Plattform",
+    "category": "DevOps",
+    "capabilities": [
+      "Write"
+    ],
+    "websiteURL": "https://github.com/entur/ai"
+  }
+}
