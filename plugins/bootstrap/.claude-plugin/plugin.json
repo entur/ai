@@ -1,5 +1,5 @@
 {
-  "name": "entur-bootstrap",
+  "name": "bootstrap",
   "version": "0.1.0",
   "description": "Bootstrap a new Entur app: self-service manifests, Helm, Terraform, Docker, and CI/CD wired together with consistent identifiers.",
   "author": {

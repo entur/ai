@@ -5,10 +5,10 @@
   },
   "plugins": [
     {
-      "name": "entur-bootstrap",
+      "name": "bootstrap",
       "source": {
         "source": "local",
-        "path": "./plugins/entur-bootstrap"
+        "path": "./plugins/bootstrap"
       },
       "policy": {
         "installation": "AVAILABLE",

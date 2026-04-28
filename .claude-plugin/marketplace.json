@@ -12,8 +12,8 @@
   },
   "plugins": [
     {
-      "name": "entur-bootstrap",
-      "source": "./plugins/entur-bootstrap",
+      "name": "bootstrap",
+      "source": "./plugins/bootstrap",
       "description": "Bootstrap a new Entur app: self-service manifests, Helm, Terraform, Docker, and CI/CD wired together with consistent identifiers.",
       "category": "scaffolding",
       "keywords": ["entur", "bootstrap", "scaffold", "gcp", "helm", "terraform", "cicd"],
