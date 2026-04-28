@@ -57,11 +57,43 @@ skills/
 
 ## 🚀 Installation Guide
 
-Installing skills differs for different agents. This example is for Claude Code, but similar approaches will work for other agents.
+There are several ways to install skills from this repository, depending on which agent or tooling you use. All skills below live in `skills/` at the repo root and are also exposed as Claude Code / Codex plugins (one plugin per skill).
 
-1. Download the skills folder.
-2. Using Claude Code as an example, select Customize -> Skills -> + Upload a skill.
-3. Drag and drop the folder or select the skills you would like to add.
+### Option 1 — Claude Code plugin marketplace
+
+```shell
+claude plugin marketplace add entur/ai
+claude # then run /plugin to browse
+```
+
+### Option 2 — Codex CLI plugin marketplace
+
+```shell
+codex plugin marketplace add entur/ai
+codex # then run /plugins to browse
+```
+
+### Option 3 — `npx skills` (any agent)
+
+[`skills`](https://github.com/vercel-labs/skills) is a Vercel Labs CLI that pulls skills from a GitHub repo into your local agent skill folder. Walks `skills/` only, lets you select which to install.
+
+```shell
+npx skills add entur/ai
+```
+
+### Option 4 — `gh skill install` (any agent)
+
+[`gh skill`](https://cli.github.com/manual/gh_skill_install) is a part of the `gh` CLI that walks the repo for `SKILL.md` files (recursively) and allows you to select which to install.
+
+```shell
+gh skill install entur/ai
+```
+
+### Option 5 — Manual upload (Claude Code UI)
+
+1. Clone or download this repo.
+2. In Claude Code, open Customize → Skills → + Upload a skill.
+3. Drag the skill folder (e.g. `skills/scr-situation-complication-resolution/`) into the upload area.
 
 ## Available Skills
 
