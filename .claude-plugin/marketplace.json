@@ -24,6 +24,20 @@
       "homepage": "https://github.com/entur/ai",
       "repository": "https://github.com/entur/ai",
       "license": "EUPL-1.2"
+    },
+    {
+      "name": "scr",
+      "source": "./plugins/scr",
+      "description": "Structure problems and decisions in SCR format (Situation, Complication, Resolution).",
+      "category": "writing",
+      "keywords": ["entur", "scr", "writing", "communication", "leadership"],
+      "author": {
+        "name": "Team Plattform",
+        "email": "support@entur.org"
+      },
+      "homepage": "https://github.com/entur/ai",
+      "repository": "https://github.com/entur/ai",
+      "license": "EUPL-1.2"
     }
   ]
 }

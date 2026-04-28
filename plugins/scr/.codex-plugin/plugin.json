@@ -1,0 +1,31 @@
+{
+  "name": "scr",
+  "version": "0.1.0",
+  "description": "Structure problems and decisions in SCR format (Situation, Complication, Resolution).",
+  "author": {
+    "name": "Team Plattform",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "scr",
+    "writing",
+    "communication",
+    "leadership"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Situation Complication Resolution",
+    "shortDescription": "Structure problems and decisions in SCR format.",
+    "longDescription": "Helps create, refine, and structure content in SCR (Situation, Complication, Resolution) format. Useful for executive communication, decision memos, and incident write-ups.",
+    "developerName": "Team Plattform",
+    "category": "Writing",
+    "capabilities": [
+      "Write"
+    ],
+    "websiteURL": "https://github.com/entur/ai"
+  }
+}
