@@ -1,5 +1,7 @@
 # Entur AI Agent Instructions
 
+> **Audience:** AI coding agents. Entur employees using or contributing to this repo should start at [README.md](README.md).
+
 Entur is a Norwegian public transportation company. All code targets Google Cloud Platform (GKE), follows Entur platform conventions, and uses shared tooling.
 
 ## Platform Context

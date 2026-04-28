@@ -1,5 +1,7 @@
 # Entur AI
 
+> **Audience:** Entur employees using or contributing to this repo. AI coding agents should start at [AGENTS.md](AGENTS.md).
+
 Hey! Welcome to Entur's shared AI resources.
 
 This is where we keep everything that helps AI agents and assistants work better at Entur -- from coding standards that agents use to generate platform-compliant code, to reusable skills that supercharge your day-to-day work.
