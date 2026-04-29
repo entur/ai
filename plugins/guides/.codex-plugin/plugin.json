@@ -1,0 +1,36 @@
+{
+  "name": "guides",
+  "version": "0.1.0",
+  "description": "Routes Entur platform conventions to AI agents on demand. The skill fetches the matching guide from the entur/ai repo.",
+  "author": {
+    "name": "Team Plattform",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "guides",
+    "conventions",
+    "kotlin",
+    "java",
+    "go",
+    "helm",
+    "terraform",
+    "kafka",
+    "security"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Entur Guides",
+    "shortDescription": "On-demand router that fetches Entur platform conventions from the entur/ai repo.",
+    "longDescription": "Single skill that routes any Entur task to the matching guide in the entur/ai repository.",
+    "developerName": "Team Plattform",
+    "category": "Documentation",
+    "capabilities": [
+      "WebFetch"
+    ],
+    "websiteURL": "https://github.com/entur/ai"
+  }
+}
