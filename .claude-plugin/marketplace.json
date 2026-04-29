@@ -7,8 +7,7 @@
     "email": "support@entur.org"
   },
   "metadata": {
-    "description": "Coding agent skills and tools for building on the Entur platform",
-    "pluginRoot": "./plugins"
+    "description": "Coding agent skills and tools for building on the Entur platform"
   },
   "plugins": [
     {
