@@ -32,6 +32,7 @@
   --site-sidebar-width: 288px;
   --site-topbar-height: 64px;
   --site-toc-width: 240px;
+  --site-toc-rail-min: 1280px;
 }
 
 html,
@@ -59,7 +60,7 @@ main:focus {
   outline: none;
 }
 
-/* Topbar — fixed full-width at top */
+/* Topbar — fixed full-width at top, layout only */
 .app-topbar {
   position: fixed;
   inset: 0 0 auto 0;
@@ -73,6 +74,11 @@ main:focus {
   z-index: 50;
 }
 
+/* Topbar in contrast mode — Contrast component paints its own bg/color */
+.app-topbar--contrast {
+  border-bottom-color: transparent;
+}
+
 .app-topbar__brand {
   display: flex;
   align-items: center;
@@ -83,12 +89,30 @@ main:focus {
   flex-shrink: 0;
 }
 
-.app-topbar__brand-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: var(--basecolors-shape-accent);
-  display: inline-block;
+.app-topbar__brand-logo {
+  height: 24px;
+  width: auto;
+  display: block;
+}
+
+.app-topbar__brand-logo--dark {
+  display: none;
+}
+
+/* Dark mode (page-wide) → white logo */
+[data-color-mode='dark'] .app-topbar__brand-logo--light {
+  display: none;
+}
+[data-color-mode='dark'] .app-topbar__brand-logo--dark {
+  display: block;
+}
+
+/* Contrast topbar (homepage) → white logo */
+.app-topbar--contrast .app-topbar__brand-logo--light {
+  display: none;
+}
+.app-topbar--contrast .app-topbar__brand-logo--dark {
+  display: block;
 }
 
 .app-topbar__nav {
@@ -106,7 +130,7 @@ main:focus {
   flex-shrink: 0;
 }
 
-/* Sidebar — fixed left, below topbar */
+/* Sidebar — fixed left, below topbar (layout only, internals from Linje) */
 .app-sidebar-wrap {
   position: fixed;
   top: var(--site-topbar-height);
@@ -128,6 +152,13 @@ main:focus {
 
 .app-content--prose {
   max-width: calc(var(--site-content-max-width) + 96px);
+}
+
+.app-content--full-bleed {
+  max-width: none;
+  margin-left: 0;
+  margin-top: var(--site-topbar-height);
+  padding: 0;
 }
 
 .app-content__body {
@@ -288,24 +319,32 @@ main:focus {
   text-align: left;
 }
 
-.hero {
-  padding: 96px 24px;
-  border-radius: 16px;
-  background: var(--basecolors-frame-contrast);
-  color: var(--basecolors-text-light);
+/* Homepage — full-bleed contrast */
+.home {
+  min-height: calc(100vh - var(--site-topbar-height));
 }
 
-.hero a,
-.hero h1,
-.hero h2,
-.hero h3,
-.hero p {
-  color: var(--basecolors-text-light);
+.home__hero {
+  padding: 96px 48px 80px;
 }
 
-.hero__inner {
-  max-width: var(--site-max-width);
+.home__hero-inner {
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+.home__band {
+  padding: 64px 48px;
+  background: var(--basecolors-frame-contrastalt-2, var(--basecolors-frame-contrast));
+}
+
+.home__band-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.home__cards {
+  margin-top: 40px;
 }
 
 .card-grid {
@@ -338,5 +377,8 @@ main:focus {
   .app-content {
     margin-left: 0;
     padding: 24px;
+  }
+  .app-content--full-bleed {
+    padding: 0;
   }
 }

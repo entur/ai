@@ -1,34 +1,64 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { Contrast, NavigationCard } from '@entur/layout';
-import { Heading1, Heading2, LeadParagraph, Paragraph } from '@entur/typography';
+import { PrimaryButton, SecondaryButton } from '@entur/button';
+import {
+  Heading1,
+  Heading2,
+  LeadParagraph,
+  Paragraph,
+} from '@entur/typography';
 ---
 
-<BaseLayout title="Entur AI" description="Entur AI agent skills, plugins, and platform guides.">
-  <Contrast as="section" className="hero">
-    <div class="hero__inner">
-      <Heading1 margin="none">Entur AI</Heading1>
-      <LeadParagraph>
-        Skills, plugins, and platform guides for Entur AI agents. Built on the Linje design system.
-      </LeadParagraph>
-      <Paragraph>
-        Use these to bootstrap services, scaffold workflows, and follow Entur platform conventions.
-      </Paragraph>
-    </div>
-  </Contrast>
+<BaseLayout
+  title="Entur AI"
+  description="Entur AI agent skills, plugins, and platform guides."
+  fullBleed
+>
+  <Contrast data-color-mode="contrast" className="home">
+    <section class="home__hero">
+      <div class="home__hero-inner">
+        <Heading1 margin="none">Entur AI</Heading1>
+        <LeadParagraph>
+          Skills, plugins, and platform guides for Entur AI agents. Built on the
+          Linje design system.
+        </LeadParagraph>
+        <Paragraph>
+          Use these to bootstrap services, scaffold workflows, and follow Entur
+          platform conventions.
+        </Paragraph>
+        <div style="display:flex; gap:12px; margin-top:24px;">
+          <PrimaryButton as="a" href="/getting-started">
+            Get started
+          </PrimaryButton>
+          <SecondaryButton as="a" href="/skills">Browse skills</SecondaryButton>
+        </div>
 
-  <section style="margin-top: 48px;">
-    <Heading2>Browse</Heading2>
-    <div class="card-grid">
-      <NavigationCard as="a" href="/skills" title="Skills">
-        Reusable agent skills, organised by domain.
-      </NavigationCard>
-      <NavigationCard as="a" href="/plugins" title="Plugins">
-        Curated bundles of skills installed together.
-      </NavigationCard>
-      <NavigationCard as="a" href="/guides" title="Guides">
-        Cross-cutting platform conventions and standards.
-      </NavigationCard>
-    </div>
-  </section>
+        <div class="card-grid home__cards">
+          <NavigationCard as="a" href="/skills" title="Skills">
+            Reusable agent skills, organised by domain.
+          </NavigationCard>
+          <NavigationCard as="a" href="/plugins" title="Plugins">
+            Curated bundles of skills installed together.
+          </NavigationCard>
+          <NavigationCard as="a" href="/guides" title="Guides">
+            Cross-cutting platform conventions and standards.
+          </NavigationCard>
+        </div>
+      </div>
+    </section>
+
+    <section class="home__band">
+      <div class="home__band-inner">
+        <Heading2>Want to contribute?</Heading2>
+        <Paragraph>
+          Entur AI is maintained alongside the platform. Add skills, refine
+          plugins, or improve the guides.
+        </Paragraph>
+        <SecondaryButton as="a" href="https://github.com/entur/ai">
+          See the repository
+        </SecondaryButton>
+      </div>
+    </section>
+  </Contrast>
 </BaseLayout>
