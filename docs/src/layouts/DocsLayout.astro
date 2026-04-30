@@ -1,0 +1,56 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import TableOfContents from '../components/TableOfContents.tsx';
+import type { TocHeading } from '../components/TableOfContents.tsx';
+
+interface Props {
+  title: string;
+  description?: string;
+  breadcrumbs?: { label: string; href?: string }[];
+  prose?: boolean;
+  headings?: TocHeading[];
+}
+
+const {
+  title,
+  description,
+  breadcrumbs = [],
+  prose = true,
+  headings = [],
+} = Astro.props;
+
+const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+const showToc = tocHeadings.length >= 2;
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  proseWidth={prose}
+  withToc={showToc}
+>
+  {breadcrumbs.length > 0 && (
+    <nav aria-label="Breadcrumb" class="docs-breadcrumbs">
+      <ol>
+        {breadcrumbs.map((b, i) => (
+          <li>
+            {b.href ? <a href={b.href}>{b.label}</a> : <span>{b.label}</span>}
+            {i < breadcrumbs.length - 1 && <span aria-hidden="true"> / </span>}
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )}
+  {prose ? (
+    <article class="docs-prose">
+      <slot />
+    </article>
+  ) : (
+    <slot />
+  )}
+  {showToc && (
+    <Fragment slot="aside">
+      <TableOfContents client:load headings={tocHeadings} />
+    </Fragment>
+  )}
+</BaseLayout>

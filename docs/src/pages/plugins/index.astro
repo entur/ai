@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import { Heading1, Paragraph } from '@entur/typography';
+import { NavigationCard } from '@entur/layout';
+import { firstSentence } from '../../lib/text.ts';
+
+const plugins = (await getCollection('plugins')).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title),
+);
+---
+
+<DocsLayout
+  title="Plugins"
+  prose={false}
+  breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Plugins' }]}
+>
+  <Heading1>Plugins</Heading1>
+  <Paragraph>Curated bundles of skills, sourced from <code>/plugins</code>.</Paragraph>
+  <div class="card-grid">
+    {plugins.map((p) => (
+      <NavigationCard as="a" href={`/plugins/${p.id}`} title={p.data.title}>
+        {firstSentence(p.data.description) || `${p.data.skills?.length ?? 0} skills`}
+      </NavigationCard>
+    ))}
+  </div>
+</DocsLayout>

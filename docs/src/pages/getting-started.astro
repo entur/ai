@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Heading1, Heading2, Paragraph, PreformattedText } from '@entur/typography';
+---
+
+<BaseLayout title="Getting started" description="Install and use Entur AI as a Claude Code marketplace.">
+  <Heading1>Getting started</Heading1>
+  <Paragraph>
+    Entur AI is a Claude Code plugin marketplace. Install via the marketplace command, then enable individual plugins.
+  </Paragraph>
+
+  <Heading2>Add the marketplace</Heading2>
+  <PreformattedText>
+{`/plugin marketplace add entur/ai`}
+  </PreformattedText>
+
+  <Heading2>Install a plugin</Heading2>
+  <PreformattedText>
+{`/plugin install bootstrap@entur
+/plugin install scr@entur
+/plugin install cicd-workflows@entur`}
+  </PreformattedText>
+
+  <Heading2>Use a skill</Heading2>
+  <Paragraph>
+    Skills auto-trigger from natural language. Bootstrap a new app: ask the agent to "scaffold a new Entur service".
+    See the <a href="./skills">Skills</a> index for all available skills.
+  </Paragraph>
+</BaseLayout>

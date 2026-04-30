@@ -1,0 +1,27 @@
+---
+import { getCollection } from 'astro:content';
+import DocsLayout from '../../layouts/DocsLayout.astro';
+import { Heading1, Paragraph } from '@entur/typography';
+import { NavigationCard } from '@entur/layout';
+import { firstSentence } from '../../lib/text.ts';
+
+const skills = (await getCollection('skills')).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title),
+);
+---
+
+<DocsLayout
+  title="Skills"
+  prose={false}
+  breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Skills' }]}
+>
+  <Heading1>Skills</Heading1>
+  <Paragraph>Reusable agent skills, sourced from <code>/skills</code>.</Paragraph>
+  <div class="card-grid">
+    {skills.map((s) => (
+      <NavigationCard as="a" href={`/skills/${s.id}`} title={s.data.title}>
+        {firstSentence(s.data.description)}
+      </NavigationCard>
+    ))}
+  </div>
+</DocsLayout>

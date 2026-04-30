@@ -1,0 +1,9 @@
+node_modules
+dist
+.astro
+.env
+.env.production
+.DS_Store
+src/content/skills
+src/content/plugins
+src/content/guides

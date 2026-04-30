@@ -1,0 +1,56 @@
+{
+  "name": "entur-ai-docs",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "tsx scripts/sync-content.ts",
+    "dev": "astro dev",
+    "prebuild": "tsx scripts/sync-content.ts",
+    "build": "astro build",
+    "preview": "astro preview",
+    "sync-content": "tsx scripts/sync-content.ts",
+    "astro": "astro",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/check": "0.9.9",
+    "@astrojs/mdx": "5.0.4",
+    "@astrojs/react": "5.0.4",
+    "@astrojs/sitemap": "3.7.2",
+    "@entur/a11y": "0.2.109",
+    "@entur/alert": "0.18.10",
+    "@entur/button": "4.0.5",
+    "@entur/chip": "0.10.10",
+    "@entur/datepicker": "11.5.10",
+    "@entur/dropdown": "8.1.2",
+    "@entur/expand": "3.7.6",
+    "@entur/fileupload": "0.5.7",
+    "@entur/form": "9.3.2",
+    "@entur/grid": "0.3.75",
+    "@entur/icons": "8.4.5",
+    "@entur/layout": "3.6.1",
+    "@entur/loader": "0.6.6",
+    "@entur/menu": "6.1.5",
+    "@entur/modal": "1.8.10",
+    "@entur/tab": "0.6.6",
+    "@entur/table": "4.10.10",
+    "@entur/tokens": "3.22.4",
+    "@entur/tooltip": "5.3.10",
+    "@entur/travel": "6.5.10",
+    "@entur/typography": "2.1.6",
+    "astro": "6.1.10",
+    "gray-matter": "4.0.3",
+    "react": "19.2.5",
+    "react-dom": "19.2.5",
+    "typescript": "5.9.3"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "tsx": "4.21.0"
+  },
+  "overrides": {
+    "yaml": "^2.8.3"
+  }
+}

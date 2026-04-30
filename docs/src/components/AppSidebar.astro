@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import { SideNavigation, SideNavigationItem, SideNavigationGroup } from '@entur/menu';
+
+const skills = (await getCollection('skills')).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title),
+);
+const plugins = (await getCollection('plugins')).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title),
+);
+const guides = (await getCollection('guides'))
+  .filter((g) => g.id !== 'about')
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+
+const here = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isActive = (href: string) => {
+  const norm = href.replace(/\/+$/, '') || '/';
+  return here === norm;
+};
+
+type Section = { title: string; items: { label: string; href: string }[] };
+
+const sections: Section[] = [
+  {
+    title: 'Get started',
+    items: [
+      { label: 'Overview', href: '/' },
+      { label: 'Getting started', href: '/getting-started' },
+      { label: 'About', href: '/about' },
+    ],
+  },
+  {
+    title: 'Skills',
+    items: [
+      { label: 'All skills', href: '/skills' },
+      ...skills.map((s) => ({ label: s.data.title, href: `/skills/${s.id}` })),
+    ],
+  },
+  {
+    title: 'Plugins',
+    items: [
+      { label: 'All plugins', href: '/plugins' },
+      ...plugins.map((p) => ({ label: p.data.title, href: `/plugins/${p.id}` })),
+    ],
+  },
+  {
+    title: 'Guides',
+    items: [
+      { label: 'All guides', href: '/guides' },
+      ...guides.map((g) => ({ label: g.data.title, href: `/guides/${g.id}` })),
+    ],
+  },
+];
+---
+
+<SideNavigation>
+  {sections.map((section) => (
+    <SideNavigationGroup title={section.title} defaultOpen>
+      {section.items.map((item) => (
+        <SideNavigationItem as="a" href={item.href} active={isActive(item.href)}>
+          {item.label}
+        </SideNavigationItem>
+      ))}
+    </SideNavigationGroup>
+  ))}
+</SideNavigation>

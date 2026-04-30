@@ -1,0 +1,16 @@
+---
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Heading1 } from '@entur/typography';
+
+const about = await getEntry('guides', 'about');
+if (!about) throw new Error('about entry missing — run npm run sync-content');
+const { Content } = await render(about);
+---
+
+<BaseLayout title="About" description={about.data.description} proseWidth>
+  <article class="docs-prose">
+    <Heading1>{about.data.title}</Heading1>
+    <Content />
+  </article>
+</BaseLayout>

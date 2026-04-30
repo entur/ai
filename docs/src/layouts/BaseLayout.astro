@@ -1,0 +1,109 @@
+---
+import '../styles/global.css';
+import ThemeToggle from '../components/ThemeToggle.tsx';
+import AppSidebar from '../components/AppSidebar.astro';
+import { TopNavigationItem } from '@entur/menu';
+
+interface Props {
+  title: string;
+  description?: string;
+  proseWidth?: boolean;
+  withToc?: boolean;
+}
+
+const {
+  title,
+  description,
+  proseWidth = false,
+  withToc = false,
+} = Astro.props;
+
+const contentClass = [
+  'app-content',
+  proseWidth ? 'app-content--prose' : '',
+  withToc ? 'app-content--with-toc' : '',
+]
+  .filter(Boolean)
+  .join(' ');
+
+const here = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const sectionActive = (prefix: string) => {
+  if (prefix === '/') return here === '/' || here === '/getting-started';
+  return here === prefix || here.startsWith(`${prefix}/`);
+};
+
+const primaryNav = [
+  { label: 'Overview', href: '/', match: '/' },
+  { label: 'Skills', href: '/skills', match: '/skills' },
+  { label: 'Plugins', href: '/plugins', match: '/plugins' },
+  { label: 'Guides', href: '/guides', match: '/guides' },
+  { label: 'About', href: '/about', match: '/about' },
+];
+---
+
+<!doctype html>
+<html lang="en" data-color-mode="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — Entur AI</title>
+    {description && <meta name="description" content={description} />}
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem('entur-ai:color-mode');
+          var mode =
+            stored === 'light' || stored === 'dark'
+              ? stored
+              : window.matchMedia &&
+                window.matchMedia('(prefers-color-scheme: dark)').matches
+                ? 'dark'
+                : 'light';
+          document.documentElement.setAttribute('data-color-mode', mode);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="app-topbar">
+      <a class="app-topbar__brand" href="/">
+        <span class="app-topbar__brand-mark" aria-hidden="true"></span>
+        <span class="app-topbar__brand-name">Entur AI</span>
+      </a>
+      <nav class="app-topbar__nav" aria-label="Primary">
+        {primaryNav.map((item) => (
+          <TopNavigationItem
+            as="a"
+            href={item.href}
+            active={sectionActive(item.match)}
+          >
+            {item.label}
+          </TopNavigationItem>
+        ))}
+      </nav>
+      <div class="app-topbar__actions">
+        <ThemeToggle client:only="react" />
+      </div>
+    </header>
+
+    <aside class="app-sidebar-wrap">
+      <AppSidebar />
+    </aside>
+
+    <main id="main-content" class={contentClass}>
+      <div class="app-content__body">
+        <slot />
+        <footer class="app-footer">
+          <small>Built with Entur Linje. EUPL-1.2.</small>
+        </footer>
+      </div>
+      {withToc && (
+        <aside class="app-content__aside" aria-label="Table of contents">
+          <slot name="aside" />
+        </aside>
+      )}
+    </main>
+  </body>
+</html>
