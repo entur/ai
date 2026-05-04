@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { IconButton } from '@entur/button';
+import { Tooltip } from '@entur/tooltip';
+import { SunIcon, NightIcon } from '@entur/icons';
 
 type Mode = 'light' | 'dark';
 
@@ -28,13 +30,14 @@ export function ThemeToggle() {
     window.localStorage.setItem(STORAGE_KEY, next);
   };
 
-  const label = mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-  const glyph = mode === 'dark' ? 'light' : 'dark';
+  const label = mode === 'light' ? 'Switch to dark mode' : 'Switch to light mode';
 
   return (
-    <IconButton aria-label={label} onClick={toggle} type="button">
-      <span aria-hidden="true">{glyph === 'dark' ? '◐' : '☀'}</span>
-    </IconButton>
+    <Tooltip content={label} placement="bottom">
+      <IconButton aria-label={label} onClick={toggle} type="button">
+        {mode === 'light' ? <SunIcon aria-hidden /> : <NightIcon aria-hidden />}
+      </IconButton>
+    </Tooltip>
   );
 }
 

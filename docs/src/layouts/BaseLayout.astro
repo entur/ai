@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import ThemeToggle from '../components/ThemeToggle.tsx';
+import GithubLink from '../components/GithubLink.tsx';
 import AppSidebar from '../components/AppSidebar.astro';
 import { TopNavigationItem } from '@entur/menu';
 import { Contrast } from '@entur/layout';
@@ -50,7 +51,7 @@ const primaryNav = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} — Entur AI</title>
+    <title>{title} | Entur AI</title>
     {description && <meta name="description" content={description} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script is:inline>
@@ -69,7 +70,7 @@ const primaryNav = [
       })();
     </script>
   </head>
-  <body>
+  <body class={fullBleed ? 'page--contrast' : ''}>
     <a class="skip-link" href="#main-content">Skip to content</a>
 
     {fullBleed ? (
@@ -102,6 +103,7 @@ const primaryNav = [
           ))}
         </nav>
         <div class="app-topbar__actions">
+          <GithubLink client:only="react" />
           <ThemeToggle client:only="react" />
         </div>
       </Contrast>
@@ -135,6 +137,7 @@ const primaryNav = [
           ))}
         </nav>
         <div class="app-topbar__actions">
+          <GithubLink client:only="react" />
           <ThemeToggle client:only="react" />
         </div>
       </header>
@@ -149,9 +152,6 @@ const primaryNav = [
     <main id="main-content" class={contentClass}>
       <div class="app-content__body">
         <slot />
-        <footer class="app-footer">
-          <small>Built with Entur Linje. EUPL-1.2.</small>
-        </footer>
       </div>
       {withToc && (
         <aside class="app-content__aside" aria-label="Table of contents">
