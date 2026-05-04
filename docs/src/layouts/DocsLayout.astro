@@ -2,11 +2,12 @@
 import BaseLayout from './BaseLayout.astro';
 import TableOfContents from '../components/TableOfContents.tsx';
 import type { TocHeading } from '../components/TableOfContents.tsx';
+import { Label } from '@entur/typography';
 
 interface Props {
   title: string;
   description?: string;
-  breadcrumbs?: { label: string; href?: string }[];
+  sectionLabel?: string;
   prose?: boolean;
   headings?: TocHeading[];
 }
@@ -14,7 +15,7 @@ interface Props {
 const {
   title,
   description,
-  breadcrumbs = [],
+  sectionLabel,
   prose = true,
   headings = [],
 } = Astro.props;
@@ -29,18 +30,7 @@ const showToc = tocHeadings.length >= 2;
   proseWidth={prose}
   withToc={showToc}
 >
-  {breadcrumbs.length > 0 && (
-    <nav aria-label="Breadcrumb" class="docs-breadcrumbs">
-      <ol>
-        {breadcrumbs.map((b, i) => (
-          <li>
-            {b.href ? <a href={b.href}>{b.label}</a> : <span>{b.label}</span>}
-            {i < breadcrumbs.length - 1 && <span aria-hidden="true"> / </span>}
-          </li>
-        ))}
-      </ol>
-    </nav>
-  )}
+  {sectionLabel && <Label style={{ textTransform: 'uppercase' }}>{sectionLabel}</Label>}
   {prose ? (
     <article class="docs-prose">
       <slot />

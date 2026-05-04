@@ -20,11 +20,7 @@ const showToc = !entry.data.removeToc;
   title={entry.data.title}
   description={entry.data.description}
   headings={showToc ? headings : []}
-  breadcrumbs={[
-    { label: 'Home', href: `/` },
-    { label: 'Guides', href: `/guides` },
-    { label: entry.data.title },
-  ]}
+  sectionLabel="Guides"
 >
   <Heading1>{entry.data.title}</Heading1>
   <Content />
