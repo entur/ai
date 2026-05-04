@@ -1,6 +1,7 @@
 # Skills
 
-> **Audience:** Entur employees installing or contributing skills. AI agents should follow [AGENTS.md](../AGENTS.md) instead.
+> **Audience:** Entur employees installing or contributing skills.
+> **AI agents:** Stop. Read [AGENTS.md](../AGENTS.md) instead of this file.
 
 This is a centralized collection of reusable skills designed to enhance our AI agents and streamline development across Entur.
 
