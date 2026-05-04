@@ -8,10 +8,18 @@ import {
   LeadParagraph,
   Paragraph,
 } from '@entur/typography';
+import {
+  LinkedinIcon,
+  InstagramIcon,
+  FacebookIcon,
+  GithubIcon,
+} from '@entur/icons';
+
+const year = new Date().getFullYear();
 ---
 
 <BaseLayout
-  title="Entur AI"
+  title="Welcome"
   description="Entur AI agent skills, plugins, and platform guides."
   fullBleed
 >
@@ -60,5 +68,71 @@ import {
         </SecondaryButton>
       </div>
     </section>
+
+    <footer class="home-footer">
+      <div class="home-footer__grid">
+        <div class="home-footer__brand">
+          <img src="/logo-dark.svg" alt="Entur AI" class="home-footer__logo" />
+          <p class="home-footer__tagline">
+            Agent skills, plugins, and platform guides for Entur AI agents.
+          </p>
+        </div>
+
+        <div>
+          <p class="home-footer__col-heading">Explore</p>
+          <ul class="home-footer__links">
+            <li><a class="home-footer__link" href="/getting-started">Getting started</a></li>
+            <li><a class="home-footer__link" href="/skills">Skills</a></li>
+            <li><a class="home-footer__link" href="/plugins">Plugins</a></li>
+            <li><a class="home-footer__link" href="/guides">Guides</a></li>
+            <li><a class="home-footer__link" href="/about">About</a></li>
+          </ul>
+        </div>
+
+        <div class="home-footer__col-group">
+          <div>
+            <p class="home-footer__col-heading">Contribute</p>
+            <ul class="home-footer__links">
+              <li>
+                <a class="home-footer__link" href="https://github.com/entur/ai" target="_blank" rel="noopener noreferrer">
+                  <GithubIcon aria-hidden="true" />
+                  GitHub
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p class="home-footer__col-heading">Legal</p>
+            <ul class="home-footer__links">
+              <li>
+                <a class="home-footer__link" href="https://uustatus.no/nb/erklaringer/publisert/5aa4d523-635f-41a3-9a9e-f794e8404777" target="_blank" rel="noopener noreferrer">
+                  Accessibility statement
+                </a>
+              </li>
+              <li>
+                <a class="home-footer__link" href="https://data.norge.no/nlod/no/1.0" target="_blank" rel="noopener noreferrer">
+                  Terms of service
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-footer__bottom">
+        <p class="home-footer__copyright">© {year} Entur AS | Entur.no</p>
+        <div class="home-footer__social">
+          <a class="home-footer__social-link" href="https://www.facebook.com/entur.org" target="_blank" rel="noopener noreferrer" aria-label="Entur on Facebook">
+            <FacebookIcon aria-hidden="true" />
+          </a>
+          <a class="home-footer__social-link" href="https://www.instagram.com/entur_as/" target="_blank" rel="noopener noreferrer" aria-label="Entur on Instagram">
+            <InstagramIcon aria-hidden="true" />
+          </a>
+          <a class="home-footer__social-link" href="https://www.linkedin.com/company/entur-as/" target="_blank" rel="noopener noreferrer" aria-label="Entur on LinkedIn">
+            <LinkedinIcon aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+    </footer>
   </Contrast>
 </BaseLayout>
