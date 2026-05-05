@@ -2,7 +2,7 @@
 import BaseLayout from './BaseLayout.astro';
 import TableOfContents from '../components/TableOfContents.tsx';
 import type { TocHeading } from '../components/TableOfContents.tsx';
-import { Label } from '@entur/typography';
+import { Heading1, Label, LeadParagraph } from '@entur/typography';
 
 interface Props {
   title: string;
@@ -31,6 +31,8 @@ const showToc = tocHeadings.length >= 2;
   withToc={showToc}
 >
   {sectionLabel && <Label style={{ textTransform: 'uppercase' }}>{sectionLabel}</Label>}
+  <Heading1>{title}</Heading1>
+  {description && <LeadParagraph>{description}</LeadParagraph>}
   {prose ? (
     <article class="docs-prose">
       <slot />

@@ -1,7 +1,6 @@
 ---
 import { getEntry, render } from 'astro:content';
 import DocsLayout from '../layouts/DocsLayout.astro';
-import { Heading1 } from '@entur/typography';
 import { MdxComponents } from '../components/MdxComponents';
 
 const entry = await getEntry('pages', 'getting-started');
@@ -15,6 +14,5 @@ const { Content, headings } = await render(entry);
   headings={headings}
   sectionLabel="Get started"
 >
-  <Heading1>{entry.data.title}</Heading1>
   <Content components={MdxComponents} />
 </DocsLayout>
