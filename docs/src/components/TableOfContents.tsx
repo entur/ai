@@ -45,8 +45,8 @@ export function TableOfContents({ headings, minDepth = 2, maxDepth = 3 }: Props)
   if (filtered.length < 2) return null;
 
   return (
-    <nav className="toc" aria-label="Innhold">
-      <h2 className="toc__title">Innhold</h2>
+    <nav className="toc" aria-label="On this page">
+      <h2 className="toc__title">On this page</h2>
       <ul className="toc__list">
         {filtered.map((h) => (
           <li
