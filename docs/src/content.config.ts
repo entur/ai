@@ -29,4 +29,9 @@ const guides = defineCollection({
   schema: baseFrontmatter,
 });
 
-export const collections = { skills, plugins, guides };
+const pages = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/pages' }),
+  schema: baseFrontmatter,
+});
+
+export const collections = { skills, plugins, guides, pages };

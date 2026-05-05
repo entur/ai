@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
 import { Heading1 } from '@entur/typography';
+import { MdxComponents } from '../../components/MdxComponents';
 
 export async function getStaticPaths() {
   const entries = await getCollection('guides');
@@ -23,5 +24,5 @@ const showToc = !entry.data.removeToc;
   sectionLabel="Guides"
 >
   <Heading1>{entry.data.title}</Heading1>
-  <Content />
+  <Content components={MdxComponents} />
 </DocsLayout>
