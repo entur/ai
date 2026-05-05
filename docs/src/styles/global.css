@@ -266,20 +266,22 @@ main:focus {
 
 .docs-prose h1,
 .docs-prose h2,
-.docs-prose h3 {
+.docs-prose h3,
+.docs-prose h4 {
+  font-family: var(--font-family-heading, 'Nationale', system-ui, sans-serif);
+  color: var(--basecolors-text-accent);
+  line-height: 1.2;
   margin-top: 1.5em;
+  margin-bottom: 0.4em;
 }
+
+.docs-prose h1 { font-size: var(--typography-heading-large-font-size, 2rem); font-weight: 700; }
+.docs-prose h2 { font-size: var(--typography-heading-medium-font-size, 1.5rem); font-weight: 700; }
+.docs-prose h3 { font-size: var(--typography-heading-small-font-size, 1.25rem); font-weight: 600; }
+.docs-prose h4 { font-size: var(--typography-heading-xsmall-font-size, 1rem); font-weight: 600; }
 
 .docs-prose h1:first-child {
   margin-top: 0;
-}
-
-.docs-prose pre {
-  background: var(--basecolors-frame-tint);
-  padding: 16px;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 13px;
 }
 
 .docs-prose code {
@@ -293,23 +295,120 @@ main:focus {
   border-radius: 4px;
 }
 
+/* Shiki code blocks */
+.astro-code {
+  border-radius: 8px;
+  padding: 1em;
+  overflow-x: auto;
+  margin-bottom: 2rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 1rem;
+  line-height: 1.5;
+  --scrollbar-thumb-color: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover-color: rgba(255, 255, 255, 0.35);
+  scrollbar-color: var(--scrollbar-thumb-color) transparent;
+}
+
+.astro-code:hover {
+  scrollbar-color: var(--scrollbar-thumb-hover-color) transparent;
+}
+
+.astro-code::-webkit-scrollbar {
+  width: 1rem;
+  height: 1rem;
+  background-color: transparent;
+}
+
+.astro-code::-webkit-scrollbar-track {
+  margin-inline: 4px;
+  background-color: transparent;
+  border-radius: 1rem;
+}
+
+.astro-code::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb-color);
+  border-radius: 0.5rem;
+  border: 4px solid transparent;
+  background-clip: content-box;
+}
+
+.astro-code:hover::-webkit-scrollbar-thumb,
+.astro-code::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover-color);
+}
+
+.astro-code code {
+  font-size: inherit;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
 .docs-prose a {
   color: var(--basecolors-text-highlight);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
+.docs-prose ul,
+.docs-prose ol {
+  margin: 0.75rem 0;
+  padding-left: 1.75rem;
+}
+
+.docs-prose ul {
+  list-style: none;
+}
+
+.docs-prose ul li::before {
+  content: '';
+  background: var(--components-typography-list-standard-border);
+  display: block;
+  height: 0.125rem;
+  left: -1.75rem;
+  top: 0.75rem;
+  position: relative;
+  width: 0.75rem;
+}
+
+.docs-prose li {
+  margin-bottom: 0.4rem;
+  line-height: 1.6;
+}
+
+.docs-prose ol {
+  list-style: decimal;
+}
+
 .docs-prose table {
   border-collapse: collapse;
   width: 100%;
   margin: 16px 0;
+  font-size: 0.9375rem;
 }
 
 .docs-prose th,
 .docs-prose td {
   border: 1px solid var(--basecolors-stroke-subdued);
-  padding: 8px 12px;
+  padding: 10px 14px;
   text-align: left;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.docs-prose th {
+  background: var(--basecolors-frame-tint);
+  font-weight: 600;
+  color: var(--basecolors-text-accent);
+  white-space: nowrap;
+}
+
+.docs-prose tbody tr:nth-child(even) {
+  background: var(--basecolors-frame-default);
+}
+
+.docs-prose tbody tr:hover {
+  background: var(--basecolors-fill-subdued);
 }
 
 /* Homepage — full-bleed contrast */
