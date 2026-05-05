@@ -3,21 +3,19 @@ title: Getting started
 description: Install and use Entur AI as a Claude Code marketplace.
 ---
 
+import { CopyCommand } from '../../components/CopyCommand';
+
 Entur AI is a Claude Code plugin marketplace. Install via the marketplace command, then enable individual plugins.
 
 ## Add the marketplace
 
-```
-/plugin marketplace add entur/ai
-```
+<CopyCommand client:load>/plugin marketplace add entur/ai</CopyCommand>
 
 ## Install a plugin
 
-```
-/plugin install bootstrap@entur
-/plugin install scr@entur
-/plugin install cicd-workflows@entur
-```
+<CopyCommand client:load>/plugin install bootstrap@entur</CopyCommand>
+<CopyCommand client:load>/plugin install scr@entur</CopyCommand>
+<CopyCommand client:load>/plugin install cicd-workflows@entur</CopyCommand>
 
 ## Use a skill
 
