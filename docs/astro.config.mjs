@@ -10,4 +10,10 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'ignore',
   integrations: [react(), mdx(), sitemap()],
+  markdown: {
+    syntaxHighlight: 'shiki',
+    shikiConfig: {
+      theme: 'dark-plus',
+    },
+  },
 });
