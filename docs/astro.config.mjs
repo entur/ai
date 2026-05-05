@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://entur.github.io',
-  base: '/',
+  base: '/ai',
   output: 'static',
   trailingSlash: 'ignore',
   integrations: [react(), mdx(), sitemap()],
