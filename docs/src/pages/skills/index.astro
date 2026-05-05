@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
-import { Heading1, Paragraph } from '@entur/typography';
+import { CodeText, Heading1, Paragraph } from '@entur/typography';
 import { NavigationCard } from '@entur/layout';
 import { firstSentence } from '../../lib/text.ts';
 
@@ -16,7 +16,7 @@ const skills = (await getCollection('skills')).sort((a, b) =>
   breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Skills' }]}
 >
   <Heading1>Skills</Heading1>
-  <Paragraph>Reusable agent skills, sourced from <code>/skills</code>.</Paragraph>
+  <Paragraph>Reusable agent skills, sourced from <CodeText>/skills</CodeText>.</Paragraph>
   <div class="card-grid">
     {skills.map((s) => (
       <NavigationCard as="a" href={`/skills/${s.id}`} title={s.data.title}>

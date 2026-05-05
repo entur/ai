@@ -264,6 +264,10 @@ main:focus {
 
 
 
+.docs-prose .eds-preformatted-text {
+  margin-bottom: 0.75rem;
+}
+
 .docs-prose h1,
 .docs-prose h2,
 .docs-prose h3,
@@ -290,9 +294,14 @@ main:focus {
 }
 
 .docs-prose :not(pre) > code {
-  background: var(--basecolors-frame-tint);
-  padding: 1px 6px;
-  border-radius: 4px;
+  background-color: var(--components-typography-codetext-standard-fill);
+  border: 0.0625rem solid var(--components-typography-codetext-standard-border);
+  border-radius: 0.25rem;
+  color: var(--components-typography-codetext-standard-text);
+  font-family: 'Monaco', monospace;
+  font-size: 0.875rem;
+  display: inline-block;
+  padding: 0.125rem 0.25rem;
 }
 
 /* Shiki code blocks */
