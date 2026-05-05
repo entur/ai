@@ -10,6 +10,7 @@ interface Props {
   sectionLabel?: string;
   prose?: boolean;
   headings?: TocHeading[];
+  section?: 'overview' | 'guides' | 'plugins' | 'skills';
 }
 
 const {
@@ -18,6 +19,7 @@ const {
   sectionLabel,
   prose = true,
   headings = [],
+  section,
 } = Astro.props;
 
 const tocHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
@@ -29,6 +31,7 @@ const showToc = tocHeadings.length >= 2;
   description={description}
   proseWidth={prose}
   withToc={showToc}
+  section={section}
 >
   {sectionLabel && <Label style={{ textTransform: 'uppercase' }}>{sectionLabel}</Label>}
   <Heading1>{title}</Heading1>

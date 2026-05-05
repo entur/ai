@@ -12,6 +12,7 @@ interface Props {
   proseWidth?: boolean;
   withToc?: boolean;
   fullBleed?: boolean;
+  section?: 'overview' | 'guides' | 'plugins' | 'skills';
 }
 
 const {
@@ -20,10 +21,12 @@ const {
   proseWidth = false,
   withToc = false,
   fullBleed = false,
+  section,
 } = Astro.props;
 
 const contentClass = [
   'app-content',
+  section ? '' : 'app-content--no-sidebar',
   proseWidth ? 'app-content--prose' : '',
   withToc ? 'app-content--with-toc' : '',
   fullBleed ? 'app-content--full-bleed' : '',
@@ -32,17 +35,18 @@ const contentClass = [
   .join(' ');
 
 const here = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const sectionActive = (prefix: string) => {
-  if (prefix === '/') return here === '/' || here === '/getting-started';
-  return here === prefix || here.startsWith(`${prefix}/`);
+const sectionActive = (match: string) => {
+  if (match === '/overview') {
+    return here.startsWith('/overview') || here === '/getting-started' || here === '/about';
+  }
+  return here === match || here.startsWith(`${match}/`);
 };
 
 const primaryNav = [
-  { label: 'Overview', href: '/', match: '/' },
-  { label: 'Skills', href: '/skills', match: '/skills' },
-  { label: 'Plugins', href: '/plugins', match: '/plugins' },
+  { label: 'Overview', href: '/getting-started', match: '/overview' },
   { label: 'Guides', href: '/guides', match: '/guides' },
-  { label: 'About', href: '/about', match: '/about' },
+  { label: 'Plugins', href: '/plugins', match: '/plugins' },
+  { label: 'Skills', href: '/skills', match: '/skills' },
 ];
 ---
 
@@ -76,28 +80,12 @@ const primaryNav = [
     {fullBleed ? (
       <Contrast as="header" className="app-topbar app-topbar--contrast">
         <a class="app-topbar__brand" href="/" aria-label="Entur AI — home">
-          <img
-            src="/logo-light.svg"
-            alt=""
-            class="app-topbar__brand-logo app-topbar__brand-logo--light"
-            width="112"
-            height="25"
-          />
-          <img
-            src="/logo-dark.svg"
-            alt=""
-            class="app-topbar__brand-logo app-topbar__brand-logo--dark"
-            width="112"
-            height="25"
-          />
+          <img src="/logo-light.svg" alt="" class="app-topbar__brand-logo app-topbar__brand-logo--light" width="112" height="25" />
+          <img src="/logo-dark.svg" alt="" class="app-topbar__brand-logo app-topbar__brand-logo--dark" width="112" height="25" />
         </a>
         <nav class="app-topbar__nav" aria-label="Primary">
           {primaryNav.map((item) => (
-            <TopNavigationItem
-              as="a"
-              href={item.href}
-              active={sectionActive(item.match)}
-            >
+            <TopNavigationItem as="a" href={item.href} active={sectionActive(item.match)}>
               {item.label}
             </TopNavigationItem>
           ))}
@@ -110,28 +98,12 @@ const primaryNav = [
     ) : (
       <header class="app-topbar">
         <a class="app-topbar__brand" href="/" aria-label="Entur AI — home">
-          <img
-            src="/logo-light.svg"
-            alt=""
-            class="app-topbar__brand-logo app-topbar__brand-logo--light"
-            width="112"
-            height="25"
-          />
-          <img
-            src="/logo-dark.svg"
-            alt=""
-            class="app-topbar__brand-logo app-topbar__brand-logo--dark"
-            width="112"
-            height="25"
-          />
+          <img src="/logo-light.svg" alt="" class="app-topbar__brand-logo app-topbar__brand-logo--light" width="112" height="25" />
+          <img src="/logo-dark.svg" alt="" class="app-topbar__brand-logo app-topbar__brand-logo--dark" width="112" height="25" />
         </a>
         <nav class="app-topbar__nav" aria-label="Primary">
           {primaryNav.map((item) => (
-            <TopNavigationItem
-              as="a"
-              href={item.href}
-              active={sectionActive(item.match)}
-            >
+            <TopNavigationItem as="a" href={item.href} active={sectionActive(item.match)}>
               {item.label}
             </TopNavigationItem>
           ))}
@@ -143,9 +115,9 @@ const primaryNav = [
       </header>
     )}
 
-    {!fullBleed && (
+    {section && (
       <aside class="app-sidebar-wrap">
-        <AppSidebar />
+        <AppSidebar section={section} />
       </aside>
     )}
 

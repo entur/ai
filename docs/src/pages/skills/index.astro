@@ -13,7 +13,7 @@ const skills = (await getCollection('skills')).sort((a, b) =>
 <DocsLayout
   title="Skills"
   prose={false}
-  breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Skills' }]}
+  section="skills"
 >
   <Paragraph>Reusable agent skills, sourced from <CodeText>/skills</CodeText>.</Paragraph>
   <div class="card-grid">
