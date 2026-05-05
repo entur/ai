@@ -1,66 +1,69 @@
 ---
 import { getCollection } from 'astro:content';
-import { SideNavigation, SideNavigationItem, SideNavigationGroup } from '@entur/menu';
+import { SidebarFilter } from './SidebarFilter';
+import type { NavGroup } from './SidebarFilter';
 
-const skills = (await getCollection('skills')).sort((a, b) =>
-  a.data.title.localeCompare(b.data.title),
-);
-const plugins = (await getCollection('plugins')).sort((a, b) =>
-  a.data.title.localeCompare(b.data.title),
-);
-const guides = (await getCollection('guides'))
-  .filter((g) => g.id !== 'about')
-  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+interface Props {
+  section: 'overview' | 'guides' | 'plugins' | 'skills';
+}
 
-const here = Astro.url.pathname.replace(/\/+$/, '') || '/';
-const isActive = (href: string) => {
-  const norm = href.replace(/\/+$/, '') || '/';
-  return here === norm;
-};
+const { section } = Astro.props;
 
-type Section = { title: string; items: { label: string; href: string }[] };
+let groups: NavGroup[] = [];
 
-const sections: Section[] = [
-  {
-    title: 'Get started',
-    items: [
-      { label: 'Overview', href: '/' },
-      { label: 'Getting started', href: '/getting-started' },
-      { label: 'About', href: '/about' },
-    ],
-  },
-  {
-    title: 'Skills',
-    items: [
-      { label: 'All skills', href: '/skills' },
-      ...skills.map((s) => ({ label: s.data.title, href: `/skills/${s.id}` })),
-    ],
-  },
-  {
-    title: 'Plugins',
-    items: [
-      { label: 'All plugins', href: '/plugins' },
-      ...plugins.map((p) => ({ label: p.data.title, href: `/plugins/${p.id}` })),
-    ],
-  },
-  {
-    title: 'Guides',
-    items: [
-      { label: 'All guides', href: '/guides' },
-      ...guides.map((g) => ({ label: g.data.title, href: `/guides/${g.id}` })),
-    ],
-  },
-];
+if (section === 'overview') {
+  groups = [
+    {
+      title: 'Overview',
+      items: [
+        { label: 'Getting started', href: '/getting-started' },
+        { label: 'About', href: '/about' },
+      ],
+    },
+  ];
+} else if (section === 'skills') {
+  const skills = (await getCollection('skills')).sort((a, b) =>
+    a.data.title.localeCompare(b.data.title),
+  );
+  groups = [
+    {
+      title: 'Introduction',
+      items: [{ label: 'All skills', href: '/skills' }],
+    },
+    {
+      title: 'Skills',
+      items: skills.map((s) => ({ label: s.data.title, href: `/skills/${s.id}` })),
+    },
+  ];
+} else if (section === 'plugins') {
+  const plugins = (await getCollection('plugins')).sort((a, b) =>
+    a.data.title.localeCompare(b.data.title),
+  );
+  groups = [
+    {
+      title: 'Introduction',
+      items: [{ label: 'All plugins', href: '/plugins' }],
+    },
+    {
+      title: 'Plugins',
+      items: plugins.map((p) => ({ label: p.data.title, href: `/plugins/${p.id}` })),
+    },
+  ];
+} else if (section === 'guides') {
+  const guides = (await getCollection('guides'))
+    .filter((g) => g.id !== 'about')
+    .sort((a, b) => a.data.title.localeCompare(b.data.title));
+  groups = [
+    {
+      title: 'Introduction',
+      items: [{ label: 'All guides', href: '/guides' }],
+    },
+    {
+      title: 'Guides',
+      items: guides.map((g) => ({ label: g.data.title, href: `/guides/${g.id}` })),
+    },
+  ];
+}
 ---
 
-<SideNavigation>
-  {sections.map((section) => (
-    <SideNavigationGroup title={section.title} defaultOpen>
-      {section.items.map((item) => (
-        <SideNavigationItem as="a" href={item.href} active={isActive(item.href)}>
-          {item.label}
-        </SideNavigationItem>
-      ))}
-    </SideNavigationGroup>
-  ))}
-</SideNavigation>
+<SidebarFilter client:load groups={groups} />
