@@ -268,7 +268,10 @@ main:focus {
   margin-bottom: 0.75rem;
 }
 
-.docs-prose h1,
+.docs-prose h1 {
+  display: none;
+}
+
 .docs-prose h2,
 .docs-prose h3,
 .docs-prose h4 {
@@ -279,12 +282,11 @@ main:focus {
   margin-bottom: 0.4em;
 }
 
-.docs-prose h1 { font-size: var(--typography-heading-large-font-size, 2rem); font-weight: 700; }
 .docs-prose h2 { font-size: var(--typography-heading-medium-font-size, 1.5rem); font-weight: 700; }
 .docs-prose h3 { font-size: var(--typography-heading-small-font-size, 1.25rem); font-weight: 600; }
 .docs-prose h4 { font-size: var(--typography-heading-xsmall-font-size, 1rem); font-weight: 600; }
 
-.docs-prose h1:first-child {
+.docs-prose > *:first-child {
   margin-top: 0;
 }
 
@@ -353,10 +355,27 @@ main:focus {
   border-radius: 0;
 }
 
-.docs-prose a {
-  color: var(--basecolors-text-highlight);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.docs-prose hr {
+  border: none;
+  border-top: 1px solid var(--basecolors-stroke-subdued);
+  margin: 2rem 0;
+}
+
+.docs-prose a,
+.docs-prose a:link,
+.docs-prose a:visited {
+  color: var(--primary-text-color);
+  text-decoration: none;
+  position: relative;
+  background-image: linear-gradient(120deg, var(--primary-text-color) 0%, var(--primary-text-color) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 0.125rem;
+  background-position: 0 100%;
+}
+
+.docs-prose a:hover {
+  animation: eds-link-underline 0.3s ease-in;
+  cursor: pointer;
 }
 
 .docs-prose ul,
