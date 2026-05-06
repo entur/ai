@@ -646,6 +646,13 @@ main:focus {
   margin: 32px 0;
 }
 
+.card-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;

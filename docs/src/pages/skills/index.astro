@@ -18,7 +18,7 @@ const skills = (await getCollection('skills')).sort((a, b) =>
   <div class="card-grid">
     {skills.map((s) => (
       <NavigationCard as="a" href={`/skills/${s.id}`} title={s.data.title}>
-        {s.data.description}
+        <span class="card-clamp">{s.data.description}</span>
       </NavigationCard>
     ))}
   </div>
