@@ -181,9 +181,10 @@ A few ways to contribute:
 When submitting changes:
 
 1. Use Conventional Commits format (`<type>(<scope>): <description>`) for commit messages
-2. Keep in mind the audience is AI agents, not humans -- be precise and structured
-3. **Run the comprehension tests** before opening a PR (see below)
-4. Get a review from the platform team
+2. Do **not** introduce links to non-Entur external URLs -- see [External Links](guides/documentation.md#external-links) for the allow-list and how to handle the cases where you would have linked out
+3. Keep in mind the audience is AI agents, not humans -- be precise and structured
+4. **Run the comprehension tests** before opening a PR (see below)
+5. Get a review from the platform team
 
 ### Comprehension Tests (required)
 
