@@ -34,7 +34,7 @@ Repository name = application name = Docker image name = Kubernetes namespace = 
 - CI: `.github/workflows/ci.yml`, CD: `.github/workflows/cd.yml`
 - Security allowlists: `.entur/security/`
 - Documentation: `./guides/`
-- [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
+- Conventional Commits format (`<type>(<scope>): <description>`, e.g. `feat(api): add endpoint`)
 
 ## How to Use This Repository
 

@@ -6,7 +6,7 @@
 
 - [ ] Code compiles and all tests pass locally
 - [ ] New code has appropriate test coverage
-- [ ] PR title follows [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) (validated by CI)
+- [ ] PR title follows Conventional Commits format `<type>(<scope>): <description>` (validated by CI)
 - [ ] PR description explains **what** and **why**
 - [ ] Large changes broken into smaller PRs
 - [ ] All changes relate to the PR purpose

@@ -136,9 +136,3 @@ Per standard layout in [CONVENTIONS.md](../CONVENTIONS.md):
 - Delete docs for removed features
 - Run `markdownlint-cli2 "**/*.md"` before committing (see [markdown.md](markdown.md))
 - Treat doc lint failures the same as code lint failures
-
-## Further Reading
-
-- [Google developer documentation style guide](https://developers.google.com/style)
-- [Google Technical Writing -- Active voice](https://developers.google.com/tech-writing/one/active-voice)
-- [Microsoft Writing Style Guide](https://learn.microsoft.com/en-us/style-guide/welcome/)

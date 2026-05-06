@@ -111,7 +111,7 @@ For use cases, key naming conventions, and best practices, see [java.md](java.md
 
 ### Client Setup
 
-Use [`go-redis/redis`](https://github.com/redis/go-redis) (v9+). Create a `NewClient(cfg *Config)` function that configures `redis.Options` with address, password, timeouts (DialTimeout: 1s, ReadTimeout: 2s, WriteTimeout: 2s), and pool settings (PoolSize: 10, MinIdleConns: 2). Verify connectivity with `client.Ping()`.
+Use `go-redis/redis` (v9+). Create a `NewClient(cfg *Config)` function that configures `redis.Options` with address, password, timeouts (DialTimeout: 1s, ReadTimeout: 2s, WriteTimeout: 2s), and pool settings (PoolSize: 10, MinIdleConns: 2). Verify connectivity with `client.Ping()`.
 
 Configuration uses `REDIS_HOST` (required), `REDIS_PORT` (default 6379), and `REDIS_PASSWORD` (required) environment variables.
 

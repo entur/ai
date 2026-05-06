@@ -46,7 +46,7 @@ linked from that file (e.g. java.md, helm.md, docker.md).
 - Custom health indicator for external route provider connectivity
 ```
 
-That's it. `AGENTS.md` is read automatically by GitHub Copilot and [many other agents](https://agents.md). Claude Code reads `CLAUDE.md` instead -- see [Agent Compatibility](#agent-compatibility) for details. The agent will fetch the linked URL to get the full platform standards.
+That's it. `AGENTS.md` is read automatically by GitHub Copilot and many other agents. Claude Code reads `CLAUDE.md` instead -- see [Agent Compatibility](#agent-compatibility) for details. The agent will fetch the linked URL to get the full platform standards.
 
 ### Tips for a good `AGENTS.md`
 
@@ -94,13 +94,13 @@ codex # then run /plugins to browse
 
 ## Install individual skills (any agent)
 
-For agents without a plugin marketplace, two CLIs can pull skills directly from this repo:
+For agents without a plugin marketplace, two third-party CLIs can pull skills directly from this repo:
 
 ```shell
-# Vercel Labs CLI (https://github.com/vercel-labs/skills)
+# Vercel Labs `skills` npm CLI -- no install, fetched on demand by npx
 npx skills add entur/ai
 
-# gh CLI (https://cli.github.com/manual/gh_skill_install)
+# `gh skill` extension for the gh CLI -- install once via `gh extension install`
 gh skill install entur/ai
 ```
 
@@ -114,7 +114,7 @@ Both walk the repo for `SKILL.md` files and let you pick which to install into y
 | GitHub Copilot | Yes                     | Limited        | Reads `AGENTS.md`; may not fetch URLs in all modes                           |
 | opencode       | Yes                     | Unknown        | Reads `AGENTS.md` natively                                                   |
 
-`AGENTS.md` is supported by a [large ecosystem of AI coding agents](https://agents.md) including Codex, Gemini CLI, Jules, Windsurf, Aider, and many more.
+`AGENTS.md` is supported by a large ecosystem of AI coding agents including Codex, Gemini CLI, Jules, Windsurf, Aider, and many more.
 
 Claude Code reads `CLAUDE.md`, not `AGENTS.md`. To support Claude Code alongside other agents, create a symlink: `ln -s AGENTS.md CLAUDE.md`.
 
@@ -180,7 +180,7 @@ A few ways to contribute:
 
 When submitting changes:
 
-1. Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages
+1. Use Conventional Commits format (`<type>(<scope>): <description>`) for commit messages
 2. Keep in mind the audience is AI agents, not humans -- be precise and structured
 3. **Run the comprehension tests** before opening a PR (see below)
 4. Get a review from the platform team
