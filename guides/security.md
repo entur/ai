@@ -1,3 +1,7 @@
+---
+description: Security requirements for Entur services based on OWASP ASVS.
+---
+
 # Security Standards
 
 Security conventions for all Entur services. Entur uses OWASP ASVS three-tier model:

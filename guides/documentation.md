@@ -1,3 +1,7 @@
+---
+description: Standards for writing documentation in Entur repositories.
+---
+
 # Documentation Standards
 
 Rules for writing documentation in Entur repositories. Follow [markdown.md](markdown.md) for formatting.

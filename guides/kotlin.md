@@ -1,3 +1,7 @@
+---
+description: Kotlin conventions for Entur applications, building on the shared Java/JVM guide.
+---
+
 # Kotlin Standards
 
 Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) first for cross-language standards, and [java.md](java.md) for shared JVM patterns (Spring Boot, logging, Redis, testing, dependencies, Dockerfile).

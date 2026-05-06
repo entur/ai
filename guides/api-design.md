@@ -1,3 +1,7 @@
+---
+description: Rules for designing RESTful APIs at Entur, including HTTP conventions, OpenAPI 3.x requirements, and JWT authentication.
+---
+
 # API Design Standards
 
 ## API guidelines

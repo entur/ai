@@ -1,3 +1,7 @@
+---
+description: Application architecture principles for Entur services on GKE.
+---
+
 # Architecture Standards
 
 Guidelines for application architecture at Entur. All services run on GKE in `europe-west1`.

@@ -1,3 +1,7 @@
+---
+description: Event streaming with Kafka on Aiven, including producer, consumer, and schema registry patterns.
+---
+
 # Kafka / Event Streaming
 
 Entur uses **Apache Kafka** on **Aiven** for event streaming. The standard library is **`entur-kafka-spring-starter`** (`org.entur.data:entur-kafka-spring-starter`), providing Spring Boot autoconfiguration with sensible defaults.

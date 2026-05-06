@@ -1,3 +1,7 @@
+---
+description: Go conventions for Entur applications.
+---
+
 # Go Standards
 
 Go conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) first for cross-language standards.

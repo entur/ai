@@ -1,3 +1,7 @@
+---
+description: How to use Permission Store and Permission Client for centralized authorization.
+---
+
 # Authorization with Permission Store
 
 Entur uses **Permission Store** (backend) and **Permission Client** (Java/Node SDK) for centralized authorization.

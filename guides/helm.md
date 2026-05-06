@@ -1,3 +1,7 @@
+---
+description: How to configure the Entur common Helm chart for Kubernetes deployments.
+---
+
 # Entur Common Helm Chart
 
 Reference: [entur/helm-charts](https://github.com/entur/helm-charts)

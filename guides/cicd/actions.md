@@ -1,3 +1,7 @@
+---
+description: Composite GitHub Actions for GCP and GKE authentication, sourced from entur/gha-meta.
+---
+
 # Entur Composite Actions
 
 Reference: [entur/gha-meta](https://github.com/entur/gha-meta)

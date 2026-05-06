@@ -1,3 +1,7 @@
+---
+description: Entur Terraform modules for provisioning managed GCP resources.
+---
+
 # Entur Terraform Modules
 
 > **GCP projects are ALWAYS provisioned through self-service manifests in `.entur/`.** Terraform manages resources _within_ an existing GCP project. See [self-service.md](../self-service.md). For help, ask in `#talk-utviklerplattform`.

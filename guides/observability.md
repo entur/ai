@@ -1,3 +1,7 @@
+---
+description: Health check, Prometheus metrics, and distributed tracing requirements.
+---
+
 # Observability Standards
 
 All Entur services must expose health checks, Prometheus metrics, and distributed tracing.

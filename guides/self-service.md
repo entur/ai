@@ -1,3 +1,7 @@
+---
+description: How to provision GCP projects and resources using self-service YAML manifests.
+---
+
 # Self-Service Platform Provisioning
 
 Define YAML manifests in `.entur/` and apply through a GitOps PR workflow.

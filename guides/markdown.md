@@ -1,3 +1,7 @@
+---
+description: Markdown formatting rules and markdownlint configuration for Entur docs.
+---
+
 # Markdown Standards
 
 All Entur docs must pass [markdownlint](https://github.com/DavidAnson/markdownlint).

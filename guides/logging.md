@@ -1,3 +1,7 @@
+---
+description: Structured JSON logging requirements for all Entur services.
+---
+
 # Structured Logging Standards
 
 All services must produce structured JSON logs to stdout. GCP Cloud Logging automatically ingests stdout from Kubernetes pods.

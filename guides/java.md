@@ -1,3 +1,7 @@
+---
+description: Java conventions for Entur applications on Spring Boot.
+---
+
 # Java Standards
 
 Java conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) first for cross-language standards.

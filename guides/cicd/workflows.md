@@ -1,3 +1,7 @@
+---
+description: Reusable GitHub Actions workflows for CI, CD, and deployment at Entur.
+---
+
 # Entur Reusable GitHub Actions Workflows
 
 Always use Entur reusable workflows instead of custom pipeline steps.

@@ -1,3 +1,7 @@
+---
+description: Dockerfile conventions and image requirements for Entur services.
+---
+
 # Containerization with Docker
 
 All Entur applications deployed to Kubernetes are packaged as Docker images.

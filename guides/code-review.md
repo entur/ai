@@ -1,3 +1,7 @@
+---
+description: Checklist and expectations for PR authors and reviewers.
+---
+
 # Code Review
 
 ## For Authors
