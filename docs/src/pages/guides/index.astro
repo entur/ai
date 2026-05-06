@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
 import { CodeText, Paragraph } from '@entur/typography';
 import { NavigationCard } from '@entur/layout';
-import { firstSentence } from '../../lib/text.ts';
 
 const guides = (await getCollection('guides'))
   .filter((g) => g.id !== 'about')
@@ -19,7 +18,7 @@ const guides = (await getCollection('guides'))
   <div class="card-grid">
     {guides.map((g) => (
       <NavigationCard as="a" href={`/guides/${g.id}`} title={g.data.title}>
-        {firstSentence(g.data.description) || g.id}
+        {g.data.description}
       </NavigationCard>
     ))}
   </div>

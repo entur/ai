@@ -3,7 +3,6 @@ import { getCollection } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
 import { CodeText, Paragraph } from '@entur/typography';
 import { NavigationCard } from '@entur/layout';
-import { firstSentence } from '../../lib/text.ts';
 
 const skills = (await getCollection('skills')).sort((a, b) =>
   a.data.title.localeCompare(b.data.title),
@@ -19,7 +18,7 @@ const skills = (await getCollection('skills')).sort((a, b) =>
   <div class="card-grid">
     {skills.map((s) => (
       <NavigationCard as="a" href={`/skills/${s.id}`} title={s.data.title}>
-        {firstSentence(s.data.description)}
+        {s.data.description}
       </NavigationCard>
     ))}
   </div>
