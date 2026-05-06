@@ -1,7 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import TableOfContents from '../components/TableOfContents.tsx';
-import type { TocHeading } from '../components/TableOfContents.tsx';
+import TableOfContents from '../components/TableOfContents.astro';
+import type { MarkdownHeading } from 'astro';
 import { Heading1, Label, LeadParagraph } from '@entur/typography';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
   description?: string;
   sectionLabel?: string;
   prose?: boolean;
-  headings?: TocHeading[];
+  headings?: MarkdownHeading[];
   section?: 'overview' | 'guides' | 'plugins' | 'skills';
 }
 
@@ -45,7 +45,7 @@ const showToc = tocHeadings.length >= 2;
   )}
   {showToc && (
     <Fragment slot="aside">
-      <TableOfContents client:load headings={tocHeadings} />
+      <TableOfContents headings={tocHeadings} />
     </Fragment>
   )}
 </BaseLayout>

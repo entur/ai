@@ -1,0 +1,66 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+---
+
+{headings.length >= 2 && (
+  <nav class="toc" aria-label="On this page">
+    <h2 class="toc__title">On this page</h2>
+    <ul class="toc__list">
+      {headings.map((h) => (
+        <li class={`toc__item toc__item--depth-${h.depth}`}>
+          <a class="toc__link" href={`#${h.slug}`}>
+            <span>{h.text}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<script>
+  const nav = document.querySelector<HTMLElement>('.toc');
+  if (nav) {
+    const links = Array.from(nav.querySelectorAll<HTMLAnchorElement>('.toc__link[href^="#"]'));
+    const ids = links.map((a) => a.getAttribute('href')!.slice(1));
+    const els = ids.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => el !== null);
+
+    const states = new Map<string, boolean>(ids.map((id) => [id, false]));
+
+    const TOP_OFFSET = 80;
+
+    function setActive(id: string | undefined) {
+      for (const a of links) {
+        a.classList.toggle('toc__link--active', a.getAttribute('href')!.slice(1) === id);
+      }
+    }
+
+    function updateActive() {
+      const intersecting = els.find((el) => states.get(el.id));
+      if (intersecting) {
+        setActive(intersecting.id);
+        return;
+      }
+      // Nothing intersecting: find the last heading that has scrolled above the threshold.
+      const threshold = window.scrollY + TOP_OFFSET;
+      const passed = els.filter((el) => el.offsetTop <= threshold);
+      setActive(passed[passed.length - 1]?.id ?? els[0]?.id);
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) states.set(e.target.id, e.isIntersecting);
+        updateActive();
+      },
+      { rootMargin: `-${TOP_OFFSET}px 0px -20% 0px`, threshold: 0 },
+    );
+
+    for (const el of els) observer.observe(el);
+    updateActive();
+  }
+</script>
