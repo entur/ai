@@ -44,12 +44,42 @@ function slugify(input: string) {
     .replace(/^-+|-+$/g, '');
 }
 
+const TERM_MAP: Record<string, string> = {
+  api: 'API',
+  apis: 'APIs',
+  cicd: 'CI/CD',
+  ci: 'CI',
+  cd: 'CD',
+  gcp: 'GCP',
+  gke: 'GKE',
+  iam: 'IAM',
+  sql: 'SQL',
+  nosql: 'NoSQL',
+  http: 'HTTP',
+  https: 'HTTPS',
+  url: 'URL',
+  urls: 'URLs',
+  ui: 'UI',
+  sdk: 'SDK',
+  jwt: 'JWT',
+  oauth: 'OAuth',
+  rest: 'REST',
+  grpc: 'gRPC',
+  yaml: 'YAML',
+  json: 'JSON',
+  mdx: 'MDX',
+  css: 'CSS',
+  html: 'HTML',
+  k8s: 'Kubernetes',
+  scr: 'SCR',
+};
+
 function titleCase(input: string) {
   return input
     .replace(/[-_]+/g, ' ')
     .split(/\s+/)
     .filter(Boolean)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((w) => TERM_MAP[w.toLowerCase()] ?? w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
 }
 
@@ -61,7 +91,7 @@ function normalize(
 ) {
   const out: Record<string, unknown> = { ...data };
   out.slug = slug;
-  if (!out.title) out.title = data.name ?? fallbackTitle;
+  if (!out.title) out.title = typeof data.name === 'string' ? titleCase(data.name) : fallbackTitle;
   if (!out.category) out.category = collection;
   if (!Array.isArray(out.tags)) out.tags = [];
   return out;
