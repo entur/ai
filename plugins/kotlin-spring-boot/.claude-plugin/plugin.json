@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "kotlin-spring-boot",
+  "version": "0.2.0",
+  "description": "Entur Kotlin Spring Boot conventions, LSP, and formatting. Stack axes (build tool, spring stack, db, test libs, formatter) are configured per repo via /kotlin-spring-boot:init, which writes .claude/entur/kotlin-spring-boot.json.",
+  "author": {
+    "name": "Team Plattform",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "kotlin",
+    "spring-boot",
+    "gradle",
+    "maven",
+    "conventions",
+    "lsp"
+  ],
+  "lspServers": "./.lsp.json"
+}

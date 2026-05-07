@@ -1,0 +1,10 @@
+{
+  "kotlin": {
+    "command": "kotlin-language-server",
+    "args": [],
+    "extensionToLanguage": {
+      ".kt": "kotlin",
+      ".kts": "kotlin"
+    }
+  }
+}
