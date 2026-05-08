@@ -65,6 +65,20 @@
       "homepage": "https://github.com/entur/ai",
       "repository": "https://github.com/entur/ai",
       "license": "EUPL-1.2"
+    },
+    {
+      "name": "kotlin-spring-boot",
+      "source": "./plugins/kotlin-spring-boot",
+      "description": "Entur Kotlin Spring Boot conventions, LSP, and formatting. Auto-detects build tool, database layer, API approach, and test libraries from your project; falls back to install-time config.",
+      "category": "conventions",
+      "keywords": ["entur", "kotlin", "spring-boot", "gradle", "maven", "conventions", "lsp", "ktlint"],
+      "author": {
+        "name": "Team Plattform",
+        "email": "support@entur.org"
+      },
+      "homepage": "https://github.com/entur/ai",
+      "repository": "https://github.com/entur/ai",
+      "license": "EUPL-1.2"
     }
   ]
 }
