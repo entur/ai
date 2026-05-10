@@ -1,32 +1,29 @@
 ---
 name: conventions
 description: >
-  Apply when editing .kt/.kts Kotlin sources, build.gradle.kts, gradle/libs.versions.toml,
-  or pom.xml in a Spring Boot repo. Provides Entur Kotlin Spring Boot conventions:
-  dependencies, controllers, services, testing, logging, build, config. Stack axes
-  (mvc vs webflux, jpa vs exposed vs jdbc, mockk vs mockito, kotest vs assertj, formatter)
-  read from .claude/entur/kotlin-spring-boot.json. Do NOT invoke for plain Java (.java),
-  non-Spring Kotlin (Ktor, Android, CLI), or repos without spring-boot-starter-* on the
-  classpath.
+  Entur Kotlin Spring Boot conventions: dependencies, controllers, services,
+  testing, logging, build, config. Triggered when editing .kt/.kts, build.gradle.kts,
+  gradle/libs.versions.toml, or pom.xml in a Spring Boot repo. Stack axes
+  (mvc/webflux, jpa/exposed/jdbc, mockk/mockito, kotest/assertj, formatter)
+  read from .claude/entur/kotlin-spring-boot.json. Skip for plain Java (.java),
+  non-Spring Kotlin (Ktor, Android, CLI), and repos without spring-boot-starter-*.
 ---
 
 # Kotlin Spring Boot Conventions
 
 ## Activation
 
-Apply only when a Spring Boot signal is present:
+Apply only if the repo has a Spring Boot signal:
 
-- `build.gradle.kts` / `build.gradle` — `org.springframework.boot` plugin or any `spring-boot-starter-*` dependency
-- `pom.xml` — `spring-boot-starter-parent` or any `spring-boot-starter-*` dependency
-- `gradle/libs.versions.toml` — `spring-boot` version entry
+- `org.springframework.boot` Gradle plugin or any `spring-boot-starter-*` dependency
+- `pom.xml` with `spring-boot-starter-parent` or any `spring-boot-starter-*`
+- `gradle/libs.versions.toml` with a `spring-boot` version
 
-If absent, exit silently. Ktor, plain Kotlin, and Java repos are out of scope.
+Otherwise exit silently.
 
 ## Stack file
 
-Single source of truth for axes that vary across Entur Kotlin services: `.claude/entur/kotlin-spring-boot.json` (committed, team-shared).
-
-Schema (version 1):
+Read `.claude/entur/kotlin-spring-boot.json` (committed, team-shared). Schema:
 
 ```json
 {
@@ -43,72 +40,70 @@ Schema (version 1):
 }
 ```
 
-Treat values as authoritative. Honour `notes` as binding context — if the team documented why a non-default choice exists, do not push back against it.
+Use values as-is. Respect `notes` — if the team explained a non-default choice, don't argue with it.
 
-`legacy_mode: true` suppresses modernization advice. Do not propose Java toolchain upgrades, dependency catalog migrations, framework version bumps, or pattern rewrites unless the user explicitly asks. Match the existing style; fix bugs, add tests, make small additions.
+`legacy_mode: true` means: no toolchain upgrades, no version catalog migrations, no framework bumps, no pattern rewrites. Match existing style; fix bugs, add tests, make small additions.
 
-If `version > 1`, stop applying conventions and tell the user the plugin is older than the stack file and must be upgraded.
+`version > 1`: stop. The plugin is older than the stack file and must be upgraded.
 
-### Missing stack file
+### When the stack file is missing
 
-If `.claude/entur/kotlin-spring-boot.json` is absent, fall back to detecting axes from build files using the mapping in [`commands/init.md`](../../commands/init.md). Tell the user once per session:
+Detect axes from build files using the table in [`commands/init.md`](../../commands/init.md). Once per session, tell the user:
 
-> `.claude/entur/kotlin-spring-boot.json` is missing. Run `/kotlin-spring-boot:init` to generate it. The file is committed and shared with the team.
+> `.claude/entur/kotlin-spring-boot.json` is missing. Run `/kotlin-spring-boot:init` to generate it.
 
-Proceed with detected values. Do not block.
+Then proceed. Don't block.
 
 ## Tooling
 
 - Kotlin LSP: `brew install kotlin-language-server` (plugin ships LSP config)
-- `ktlint`: `brew install ktlint` — auto-runs on Write/Edit when `formatter=ktlint`
-- Spotless: configured in the repo's `build.gradle.kts` or `pom.xml`, not the plugin
+- ktlint: `brew install ktlint` — auto-runs on save when `formatter=ktlint`
+- Spotless: configured in the repo's build files, not by the plugin
 
-## Reference loading
+## References
 
-Load only the reference matching the current task. Inside each reference, apply only sections matching the active stack axes; skip inactive options.
+Load the reference matching the file you're editing. Inside it, apply sections matching the active stack axes — skip the rest.
 
-| Task | Reference |
+| When editing | Read |
 |---|---|
-| Build config, dependencies, version catalog, `build.gradle.kts`, `pom.xml`, Artifactory | `references/build.md` |
-| Controllers, services, mappers, exception handling, validation | `references/patterns.md` |
-| Database access (Exposed, Spring Data JDBC, JPA, Flyway, migrations) | `references/database.md` |
-| Tests, mocking, assertions, TestContainers, integration tests | `references/testing.md` |
-| Logging, cloud-logging, request-response logging | `references/logging.md` |
-| `application.yml`, Cloud SQL, HikariCP, Redis, Flyway config | `references/config.md` |
+| `build.gradle.kts`, `build.gradle`, `pom.xml`, `gradle/libs.versions.toml`, `settings.gradle.kts` | `references/build.md` |
+| `*.kt` controllers, services, mappers, exception handlers, validators | `references/patterns.md` |
+| DAOs, repositories, `@Entity`, `@Table`, `*.sql` migrations | `references/database.md` |
+| `**/test/**/*.kt`, `*Test.kt`, `*IntegrationTest.kt`, `TestContainersConfig` | `references/testing.md` |
+| Code using SLF4J `Logger`/`LoggerFactory` or `entur.logging.*` config | `references/logging.md` |
+| `application.yml`, `application-*.yml` | `references/config.md` |
 
-## Kotlin language principles
+## Kotlin principles
 
-Apply to all Kotlin code regardless of stack:
-
-- Primary constructor injection — never `@Autowired` field injection
+- Primary constructor injection. Never `@Autowired` field injection.
 - `val` over `var`
-- Kotlin null-safety (`T?`) — never `Optional<T>`
-- `data class` for domain models and value objects
-- `sealed class` / `sealed interface` for restricted hierarchies
-- `object` for stateless singletons (validators, constants)
-- `internal` visibility for implementation details
-- `when` over `if-else` chains with multiple branches
-- Trailing commas on multi-line argument and parameter lists
-- Scope functions (`let`, `apply`, `run`, `also`) where they clarify intent — not for brevity alone
-- Backtick test names: `` fun `should return 404 when route not found`() ``
+- `T?` over `Optional<T>`
+- `data class` for domain types
+- `sealed class` / `sealed interface` for closed hierarchies
+- `object` for stateless singletons
+- `internal` for non-public API
+- `when` over long `if/else` chains
+- Trailing commas on multi-line lists
+- Scope functions (`let`, `apply`, `run`, `also`) only when they clarify intent
+- Backtick test names: `` fun `returns 404 when route not found`() ``
 - `@DisplayName` on test classes when backtick names get unwieldy
 
 ## Non-negotiable Entur rules
 
-Apply to every Kotlin Spring Boot project regardless of stack. These remain in this plugin so they reach developers who install only `kotlin-spring-boot`.
+These apply to every project. Kept here so devs who install only this plugin still see them.
 
 1. Secrets: Google Secret Manager + ExternalSecrets in Helm. Never hardcoded.
-2. IAM roles: only from the Entur approved list. Other roles require platform-team approval (`#talk-utviklerplattform`).
-3. Terraform: Entur modules only — `terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`.
-4. CI/CD: Entur reusable GitHub Actions workflows only. No custom CI steps.
-5. K8s deploys: Entur `common` Helm chart.
-6. Pin all dependencies — Gradle version catalog or Maven `<dependencyManagement>`; Terraform `?ref=TAG`; Actions `@vN`; Docker images by exact tag.
-7. Every service: health checks (`/actuator/health/liveness`, `/actuator/health/readiness`), structured logging (`entur/cloud-logging`), Prometheus metrics.
-8. Default GCP region: `europe-west1`.
-9. Conventional commits — required for release-please semver automation.
-10. Every PR passes: Ktlint/Spotless, unit tests, CodeQL, Helm lint.
-11. GCP projects: created via `.entur/*.yaml` self-service manifests only. Never `google_project` Terraform resource or `gcloud projects create`.
+2. IAM roles: only from the Entur approved list. Anything else needs platform-team approval (`#talk-utviklerplattform`).
+3. Terraform modules: `terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`.
+4. CI/CD: Entur reusable GitHub Actions workflows. No custom CI steps.
+5. K8s: Entur `common` Helm chart.
+6. Pin everything — Gradle catalog or Maven `<dependencyManagement>`, Terraform `?ref=TAG`, Actions `@vN`, Docker by exact tag.
+7. Every service: liveness + readiness probes, structured logging via `entur/cloud-logging`, Prometheus metrics.
+8. GCP region: `europe-west1`.
+9. Conventional commits (release-please needs them).
+10. PRs must pass: Ktlint/Spotless, unit tests, CodeQL, Helm lint.
+11. GCP projects: `.entur/*.yaml` self-service manifests only. Never `google_project` Terraform or `gcloud projects create`.
 
 ## Out of scope
 
-Kotlin Spring Boot code only. For CI/CD workflows, Helm, Terraform, Kafka, security, scaffolding, or writing formats, point the user to the Entur marketplace at https://github.com/entur/ai (or `/plugin marketplace add entur/ai`) and let them pick the plugin matching the topic.
+Kotlin Spring Boot code. For CI/CD, Helm, Terraform, Kafka, security, scaffolding, or writing formats, send the user to the Entur marketplace at https://github.com/entur/ai (`/plugin marketplace add entur/ai`).
