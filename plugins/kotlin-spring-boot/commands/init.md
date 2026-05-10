@@ -1,75 +1,69 @@
 ---
-description: Generate .claude/entur/kotlin-spring-boot.json by scanning this repo's build files. Run once per repo, then commit the result.
+description: Scan the repo and write .claude/entur/kotlin-spring-boot.json. Run once per repo, then commit it.
 argument-hint: "[--force]"
 ---
 
 # Initialize Kotlin Spring Boot stack file
 
-Goal: write `.claude/entur/kotlin-spring-boot.json` so the conventions skill applies guidance matching this repo's actual stack. The file is committed and shared with the team.
+Write `.claude/entur/kotlin-spring-boot.json` so the conventions skill matches this repo's stack. Commit the file.
 
-## Procedure
+## Steps
 
-### 1. Spring Boot signal check
+### Check Spring Boot signal
 
-Confirm at least one of:
+Confirm one of:
 
-- `build.gradle.kts` / `build.gradle` references `org.springframework.boot` plugin or any `spring-boot-starter-*`
-- `pom.xml` declares `spring-boot-starter-parent` or any `spring-boot-starter-*`
-- `gradle/libs.versions.toml` defines a `spring-boot` version
+- `build.gradle.kts` / `build.gradle`: `org.springframework.boot` plugin or `spring-boot-starter-*`
+- `pom.xml`: `spring-boot-starter-parent` or `spring-boot-starter-*`
+- `gradle/libs.versions.toml`: a `spring-boot` version
 
-If none match, tell the user this is not a Kotlin Spring Boot project, write nothing, stop.
+No match → not a Kotlin Spring Boot project. Write nothing. Stop.
 
-### 2. Existing-file check
+### Check for existing file
 
-If `.claude/entur/kotlin-spring-boot.json` already exists and `$ARGUMENTS` does not contain `--force`:
+If `.claude/entur/kotlin-spring-boot.json` exists and `$ARGUMENTS` doesn't contain `--force`:
 
-- Read it and show the current values
-- Ask: "Stack file exists. Overwrite all axes, edit specific axes, or cancel?"
-- On cancel → stop. On edit → re-prompt only for chosen axes; keep the rest.
+- Show current values
+- Ask: overwrite all, edit specific axes, or cancel
+- Cancel → stop. Edit → only re-prompt the chosen axes; keep the rest.
 
-### 3. Detect each axis
+### Detect axes
 
-Read `build.gradle.kts`, `build.gradle`, `pom.xml`, `gradle/libs.versions.toml`, and `settings.gradle.kts` as available. Auto-fill confident detections. Only ask the user when ambiguous or undetected.
+Read `build.gradle.kts`, `build.gradle`, `pom.xml`, `gradle/libs.versions.toml`, `settings.gradle.kts`. Auto-fill confident detections; ask only when ambiguous or undetected.
 
 | Axis | Signal | Default |
 |---|---|---|
-| `build_tool` | `gradlew` or `build.gradle.kts` → `gradle`. `mvnw` or `pom.xml` → `maven` | required, no default |
+| `build_tool` | `gradlew` or `build.gradle.kts` → `gradle`. `mvnw` or `pom.xml` → `maven` | required |
 | `spring_stack` | `spring-boot-starter-webflux` → `webflux`. `spring-boot-starter-web` → `mvc` | `mvc` |
-| `api_approach` | `org.openapi.generator` plugin and `specs/` directory → `contract-first` | `traditional` |
-| `database` | `org.jetbrains.exposed:exposed-spring-boot-starter` → `exposed`. `spring-boot-starter-data-jdbc` → `spring-data-jdbc`. `spring-boot-starter-data-jpa` → `jpa`. None of the above → `none` | `none` |
+| `api_approach` | `org.openapi.generator` plugin + `specs/` dir → `contract-first` | `traditional` |
+| `database` | `exposed-spring-boot-starter` → `exposed`. `spring-boot-starter-data-jdbc` → `spring-data-jdbc`. `spring-boot-starter-data-jpa` → `jpa` | `none` |
 | `test_mocking` | `com.ninja-squad:springmockk` → `mockk`. `org.mockito.kotlin:mockito-kotlin` → `mockito-kotlin` | `mockk` |
 | `test_assertions` | `io.kotest:kotest-assertions-core` → `kotest` | `assertj` |
-| `formatter` | `com.diffplug.spotless` Gradle plugin → `spotless-gradle`. `spotless-maven-plugin` in `pom.xml` → `spotless-maven`. `org.jlleitschuh.gradle.ktlint` plugin or `.editorconfig` ktlint section → `ktlint` | `ktlint` |
+| `formatter` | `com.diffplug.spotless` Gradle plugin → `spotless-gradle`. `spotless-maven-plugin` → `spotless-maven`. `org.jlleitschuh.gradle.ktlint` or `.editorconfig` ktlint rules → `ktlint` | `ktlint` |
 
-Ambiguity rules:
+Ambiguity:
 
-- Both `webflux` and `web` starters present → ask which is the primary runtime
-- Multiple database starters present → ask which is canonical for this service
-- No build files readable → stop and tell the user the repo state is not parseable
+- Both `webflux` and `web` present → ask which is primary
+- Multiple database starters → ask which is canonical
+- Build files unreadable → stop, tell the user the repo state isn't parseable
 
-### 4. Legacy flag
+### Ask about legacy
 
-Ask the user explicitly:
+> Is this a legacy codebase? `legacy_mode: true` suppresses modernization advice — no toolchain upgrades, no version catalog migrations, no framework bumps. Match existing patterns; fix bugs, add tests, make small additions. Default `false`.
 
-> "Is this a legacy codebase? `legacy_mode: true` tells the assistant to suppress modernization advice (no toolchain upgrades, no dependency catalog migration, no framework bumps). Match existing patterns; fix bugs, add tests, make small additions. Default `false`."
+### Ask for notes
 
-### 5. Notes
+> Any non-default choice that needs context? Example: "Webflux for the legacy reactive pipeline; do not migrate to MVC." Leave blank to skip.
 
-Ask one short question:
+### Write the file
 
-> "Any non-default choice that needs context? Example: 'Webflux because of legacy reactive pipeline; do not migrate to MVC.' Leave blank to skip."
-
-Store in `notes`. Empty string is fine.
-
-### 6. Write the file
-
-Path: `.claude/entur/kotlin-spring-boot.json`. Create parent directories as needed. Format with two-space indent.
+Path: `.claude/entur/kotlin-spring-boot.json`. Two-space indent. Create parent dirs.
 
 ```json
 {
   "$schema": "https://entur.github.io/ai/schemas/kotlin-spring-boot-stack.json",
   "version": 1,
-  "generated_at": "<ISO 8601 UTC timestamp>",
+  "generated_at": "<ISO 8601 UTC>",
   "build_tool": "<value>",
   "spring_stack": "<value>",
   "api_approach": "<value>",
@@ -82,18 +76,18 @@ Path: `.claude/entur/kotlin-spring-boot.json`. Create parent directories as need
 }
 ```
 
-### 7. Confirm and prompt commit
+### Confirm
 
-Print a one-axis-per-line summary. Then:
+Print one axis per line. Then:
 
-> "Stack file written. Commit so teammates pick up the same configuration:
+> Stack file written. Commit so teammates pick it up:
 >
 >     git add .claude/entur/kotlin-spring-boot.json
->     git commit -m 'chore: initialize kotlin-spring-boot stack file'"
+>     git commit -m 'chore: initialize kotlin-spring-boot stack file'
 
 ## Constraints
 
-- Do not modify build files, source code, or anything outside `.claude/entur/`
-- Read values from the actual repo files; do not infer from training data
-- If a build file cannot be read or parsed, ask the user rather than guessing
-- Never write secrets, internal URLs, or environment-specific values into this file
+- Don't modify build files, source code, or anything outside `.claude/entur/`
+- Read values from the actual repo files; don't infer from training data
+- If a build file is unreadable or unparseable, ask the user; don't guess
+- Don't write secrets, internal URLs, or environment-specific values
