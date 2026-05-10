@@ -1,6 +1,6 @@
-# Database Reference
+# Database
 
-Apply the section matching your active `database` configuration. Skip sections for inactive options.
+Apply the section matching the active `database` axis. Skip the rest.
 
 ---
 
@@ -98,7 +98,7 @@ class RouteDaoImpl : RouteDao {
 
 ### Joins
 
-Define reusable join functions as extension functions:
+Reusable joins as extension functions on the table:
 
 ```kotlin
 object RouteTable : LongIdTable("routes") {
@@ -106,7 +106,6 @@ object RouteTable : LongIdTable("routes") {
     fun joinStops() = join(StopTable, JoinType.LEFT, id, StopTable.routeId)
 }
 
-// Usage
 RouteTable.joinStops()
     .selectAll()
     .where { RouteTable.status eq RouteStatus.ACTIVE }
@@ -115,7 +114,7 @@ RouteTable.joinStops()
 
 ### Transaction boundaries
 
-Keep `transaction {}` in the DAO layer. Never call `transaction {}` from services — that couples services to the persistence layer.
+`transaction {}` belongs in the DAO. Never call it from services — that couples services to persistence.
 
 ---
 
@@ -188,13 +187,13 @@ class RouteDaoImpl(
 }
 ```
 
-### Spring Data JDBC notes
+### Notes
 
-- Aggregates are loaded completely — no lazy loading
-- One-to-many relationships: reference child table's column pointing to parent `@Id`
-- For complex queries, prefer `@Query` with raw SQL over Spring Data JDBC's limited query derivation
-- Pagination: extend `PagingAndSortingRepository<Entity, Long>` instead of `CrudRepository`
-- Use `@Transactional` on service methods that call multiple repository operations
+- Aggregates load completely — no lazy loading
+- One-to-many: child table column references parent `@Id`
+- Complex queries: `@Query` with raw SQL beats Spring Data JDBC's query derivation
+- Pagination: `PagingAndSortingRepository<Entity, Long>` instead of `CrudRepository`
+- Multi-step service methods: `@Transactional`
 
 ---
 
@@ -202,11 +201,11 @@ class RouteDaoImpl(
 
 Spring Data JPA. Use when integrating with an existing JPA schema or when the team is already fluent with Hibernate.
 
-### Known Kotlin/JPA friction points
+### Kotlin/JPA gotchas
 
-- Kotlin data classes with `val` properties conflict with Hibernate's need to mutate fields — use `var` in `@Entity` classes, or apply the `kotlin-jpa` plugin (generates no-arg constructors) and accept `var`
-- Lazy loading requires proxying — use `open` classes or the `kotlin-allopen` plugin. The `kotlin-spring` plugin already does this for `@Entity`
-- Avoid `copy()` on entities managed by the persistence context — it creates a detached instance
+- Hibernate mutates fields — `@Entity` classes need `var`, not `val`. Apply the `kotlin-jpa` plugin for no-arg constructors.
+- Lazy loading needs proxying — use `open` classes or the `kotlin-allopen` plugin. `kotlin-spring` already does this for `@Entity`.
+- Don't `copy()` a managed entity — it creates a detached instance.
 
 ### Entity
 
@@ -263,10 +262,10 @@ class RouteServiceImpl(
 private fun RouteEntity.toDomain() = Route(id = id, name = name, description = description, status = status)
 ```
 
-### JPA notes
+### Notes
 
-- Avoid `FetchType.LAZY` on `@OneToMany` unless you can guarantee the session is open — prefer explicit JPQL joins
-- Use `@EntityGraph` for controlling fetch plan without N+1 queries
-- Use `@BatchSize` on collections to reduce N+1 queries
-- Paginated queries: use `Pageable` parameter in repository methods
-- `findByIdOrNull` (Spring Data Kotlin extension) is safer than `findById` which returns `Optional`
+- Avoid `FetchType.LAZY` on `@OneToMany` unless the session is guaranteed open — prefer explicit JPQL joins
+- `@EntityGraph` controls fetch plan without N+1
+- `@BatchSize` on collections reduces N+1
+- Pagination: `Pageable` parameter in repository methods
+- `findByIdOrNull` (Kotlin extension) over `findById` which returns `Optional`

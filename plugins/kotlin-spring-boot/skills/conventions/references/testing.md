@@ -1,8 +1,6 @@
-# Testing Reference
+# Testing
 
-Kotlin Spring Boot testing conventions for Entur projects.
-
-Active mocking and assertion libraries are read from the stack file's `test_mocking` and `test_assertions` axes. JUnit 5, Spring Boot Test, and TestContainers (when the service has a database or Redis) are always active; Entur Auth Test is active when the service has auth.
+Mocking and assertion libraries come from the stack file's `test_mocking` and `test_assertions` axes. JUnit 5 and Spring Boot Test are always active. TestContainers when the service has a database or Redis. Entur Auth Test when the service has auth.
 
 ---
 
@@ -151,7 +149,7 @@ class RouteServiceTest {
 }
 ```
 
-Use backtick function names for readable sentences. Each test covers one behaviour. Use the Arrange-Act-Assert pattern.
+Backtick names. One behaviour per test. Arrange-Act-Assert.
 
 ---
 
@@ -309,15 +307,15 @@ fun buildCreateRouteCommand(
 ) = CreateRouteCommand(name = name, description = description)
 ```
 
-Builders provide sensible defaults so tests only declare the values they care about.
+Tests only declare the values that matter for the case at hand.
 
 ---
 
 ## Entur Auth Test
 
-For Entur OIDC auth (resource server, JWT, scopes, tenant tokens), source of truth: https://github.com/entur/oidc-auth-resource-server. Fetch the README for current test artifact names and the supported tenant/scope annotations.
+Source: https://github.com/entur/oidc-auth-resource-server. Fetch the README for current test artifact names and tenant/scope annotations.
 
-Pattern (annotation names per repo README):
+Pattern:
 
 ```kotlin
 @ExtendWith(TenantJsonWebToken::class)
@@ -336,4 +334,4 @@ class RouteControllerTest {
 }
 ```
 
-For broader authorization patterns (scopes, role mapping, configuration), see the `entur/ai` repo guides via the `guides` plugin or directly at https://github.com/entur/ai.
+For broader auth patterns (scopes, role mapping, config), see the `guides` plugin or https://github.com/entur/ai.

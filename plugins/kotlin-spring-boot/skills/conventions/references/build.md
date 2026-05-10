@@ -1,10 +1,10 @@
-# Build Reference
+# Build
 
-Kotlin Spring Boot build setup for Entur projects. Gradle (Kotlin DSL) is the default; Maven is supported via equivalent plugins (`kotlin-maven-plugin`, `spring-boot-maven-plugin`, `openapi-generator-maven-plugin`).
+Gradle Kotlin DSL is the default. Maven uses equivalent plugins (`kotlin-maven-plugin`, `spring-boot-maven-plugin`, `openapi-generator-maven-plugin`).
 
-## Source-of-truth rule
+## Pin versions, never invent them
 
-Never invent or hardcode artifact versions. Read them from the project's own `gradle/libs.versions.toml` (Gradle) or `pom.xml` `<dependencyManagement>` (Maven). When adding a new Entur library, fetch the current artifact list and BOM coordinates from its repo:
+Read versions from `gradle/libs.versions.toml` (Gradle) or `pom.xml` `<dependencyManagement>` (Maven). For new Entur libraries, fetch artifact list and BOM coordinates from the source repo:
 
 | Library | Repo |
 |---|---|
@@ -14,7 +14,7 @@ Never invent or hardcode artifact versions. Read them from the project's own `gr
 
 Other Entur libraries: search https://github.com/entur for `*-spring-boot-starter` or `*-spring-starter`.
 
-## build.gradle.kts — base (all projects)
+## Base build.gradle.kts
 
 ```kotlin
 plugins {
@@ -34,7 +34,7 @@ java {
 
 kotlin {
     compilerOptions {
-        freeCompilerArgs.add("-Xjsr305=strict")   // strict null-safety with Spring annotations
+        freeCompilerArgs.add("-Xjsr305=strict")
     }
 }
 
@@ -43,13 +43,13 @@ tasks.withType<Test> {
 }
 ```
 
-## Additions by configuration
+## Plugin additions
 
 ### `api_approach=contract-first`
 
 ```kotlin
 plugins {
-    alias(libs.plugins.openapi.generator)   // add to plugins block
+    alias(libs.plugins.openapi.generator)
 }
 
 openApiGenerate {
@@ -74,13 +74,13 @@ tasks.compileKotlin {
 }
 ```
 
-Add `"reactive" to "true"` to `configOptions` when also using `spring_stack=webflux`.
+Add `"reactive" to "true"` to `configOptions` when also `spring_stack=webflux`.
 
 ### `database=jpa`
 
 ```kotlin
 plugins {
-    alias(libs.plugins.kotlin.jpa)   // generates no-arg constructors for @Entity classes
+    alias(libs.plugins.kotlin.jpa)   // generates no-arg constructors for @Entity
 }
 ```
 
@@ -107,18 +107,18 @@ tasks {
 }
 ```
 
-## gradle/libs.versions.toml — structure
+## gradle/libs.versions.toml
 
-Versions below are placeholders. Pin to the current stable release for each library — never invent a version. Check the project's existing catalog first; for new libraries, check the relevant repo (Entur libs above; upstream libs on Maven Central or the project's GitHub releases).
+Versions below are placeholders. Pin to the current stable release per library — never invent a version. Check the project's existing catalog first; for new libraries, check the source repo (Entur libs above; upstream on Maven Central or GitHub releases).
 
 ```toml
 [versions]
 kotlin                  = "<pin>"
 spring-boot             = "<pin>"
 spring-dependency-mgmt  = "<pin>"
-exposed                 = "<pin>"   # see github.com/JetBrains/Exposed
+exposed                 = "<pin>"
 flyway                  = "<pin>"
-entur-cloud-logging     = "<pin>"   # see github.com/entur/cloud-logging
+entur-cloud-logging     = "<pin>"
 kotest                  = "<pin>"
 testcontainers          = "<pin>"
 openapi-generator       = "<pin>"
@@ -156,7 +156,7 @@ spring-dependency-mgmt  = { id = "io.spring.dependency-management",    version.r
 
 ## Dependencies by configuration
 
-### Always include
+### Always
 
 ```kotlin
 dependencies {
@@ -173,7 +173,7 @@ dependencies {
 }
 ```
 
-For OIDC auth, add the Entur resource-server starter and test starter — see https://github.com/entur/oidc-auth-resource-server. For Kafka, use the Entur Kafka Spring starter — see https://github.com/entur/entur-kafka-spring-starter. Pin both via the version catalog.
+For OIDC auth, add the Entur resource-server starter and test starter from https://github.com/entur/oidc-auth-resource-server. For Kafka, use the Entur Kafka Spring starter from https://github.com/entur/entur-kafka-spring-starter. Pin both via the version catalog.
 
 ### `spring_stack=mvc`
 ```kotlin
@@ -210,20 +210,20 @@ runtimeOnly("org.postgresql:postgresql")
 testImplementation("org.testcontainers:postgresql")
 ```
 
-### Test libraries by configuration
+### Test libraries
 
-Add only the entries matching the active config. AssertJ and mockito-core are already pulled in transitively via `spring-boot-starter-test`.
+AssertJ and mockito-core come transitively via `spring-boot-starter-test`. Add only the entries matching the active config.
 
 | Config | Dependency |
 |---|---|
 | `test_mocking=mockk` | `testImplementation(libs.springMockk)` |
 | `test_mocking=mockito-kotlin` | `testImplementation(libs.mockitoKotlin)` |
 | `test_assertions=kotest` | `testImplementation(libs.kotestAssertionsCore)` |
-| `test_assertions=assertj` | (none — transitive via spring-boot-starter-test) |
+| `test_assertions=assertj` | (transitive) |
 
 ## Artifactory (JFrog)
 
-For Entur-internal release artifacts, add the Entur JFrog repository. Treat the URL as deployment-config — read it from a project-specific `gradle.properties`, an env var, or an existing repo's build script. Do not hardcode internal URLs in skill output.
+Entur-internal release artifacts live in JFrog. Treat the URL as deployment config — read it from a project-specific `gradle.properties`, an env var, or an existing repo's build script. Don't hardcode internal URLs in skill output.
 
 ```kotlin
 repositories {
@@ -244,4 +244,4 @@ repositories {
 }
 ```
 
-Credentials: `~/.gradle/gradle.properties` locally, `ARTIFACTORY_AUTH_USER`/`ARTIFACTORY_AUTH_TOKEN` org secrets in CI. Ask the team or check an existing Entur repo's `gradle.properties` for the current Artifactory URL.
+Credentials: `~/.gradle/gradle.properties` locally, `ARTIFACTORY_AUTH_USER` / `ARTIFACTORY_AUTH_TOKEN` org secrets in CI. Ask the team or check an existing repo for the current Artifactory URL.

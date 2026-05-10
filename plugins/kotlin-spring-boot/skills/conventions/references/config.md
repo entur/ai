@@ -1,6 +1,6 @@
-# Application Configuration Reference
+# Application configuration
 
-Spring Boot application configuration, Cloud SQL, HikariCP, Flyway, and Redis for Entur Kotlin services.
+`application.yml`, Cloud SQL, HikariCP, Flyway, Redis.
 
 ## application.yml (defaults)
 
@@ -36,11 +36,7 @@ logging:
     no.entur.myapp: INFO
 ```
 
-Health endpoints:
-- Liveness: `/actuator/health/liveness`
-- Readiness: `/actuator/health/readiness`
-
-These are the defaults in the Entur common Helm chart. Do not change unless you also update Helm values.
+Probe paths: `/actuator/health/liveness`, `/actuator/health/readiness`. These match the Entur `common` Helm chart defaults — only change them if you also update Helm values.
 
 ## application-local.yml
 
@@ -64,7 +60,7 @@ springdoc:
 
 ## Cloud SQL (PostgreSQL)
 
-Connects via Cloud SQL Auth Proxy sidecar (configured in Helm). Credentials injected via Kubernetes secrets created by `terraform-google-sql-db`.
+Reaches the database via the Cloud SQL Auth Proxy sidecar (configured in Helm). Credentials come from Kubernetes secrets that `terraform-google-sql-db` creates.
 
 ```yaml
 spring:
@@ -84,11 +80,11 @@ spring:
     open-in-view: false     # disable OSIV — it causes N+1 queries
 ```
 
-For `database=exposed`, Exposed uses its own JDBC connection config via the `exposed-spring-boot-starter`. It reads Spring's `spring.datasource.*` automatically.
+For `database=exposed`, the `exposed-spring-boot-starter` reads `spring.datasource.*` directly — no extra config.
 
-## HikariCP Connection Pool
+## HikariCP
 
-Default pool size is 10. Total connections = `num_pods × max_pool_size`. Ensure Cloud SQL `max_connections` handles worst-case HPA pod count (include 3 reserved connections).
+Default pool size is 10. Total connections = `pods × maximum-pool-size`. Cloud SQL `max_connections` must cover the worst-case HPA pod count plus 3 reserved.
 
 ```yaml
 spring:
@@ -101,7 +97,7 @@ spring:
       max-lifetime: 1800000           # ms — recycle connections every 30 min
 ```
 
-Exposed with `exposed-spring-boot-starter` uses the same HikariCP pool. No separate configuration needed.
+Exposed shares the same HikariCP pool — no separate config.
 
 ## Flyway
 
@@ -116,8 +112,6 @@ spring:
 Migrations run on startup — if one fails, the service fails to start. For migration file naming and DAO/entity patterns, see `references/database.md`.
 
 ## Redis (Memorystore)
-
-Dependency:
 
 ```kotlin
 implementation("org.springframework.boot:spring-boot-starter-data-redis")
@@ -140,7 +134,7 @@ spring:
           max-wait: 1000ms
 ```
 
-`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` come from Kubernetes secrets created by `terraform-google-memorystore`.
+`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD` come from Kubernetes secrets that `terraform-google-memorystore` creates.
 
 ### Spring Cache abstraction
 
@@ -188,13 +182,13 @@ class RouteServiceImpl(private val routeDao: RouteDao) : RouteService {
 {app}:dedup:{messageId}      → idempotency keys: products-api:dedup:msg-abc123
 ```
 
-### Redis best practices
+### Redis rules
 
-- Always set TTLs — unbounded growth exhausts Memorystore memory
-- Use `allkeys-lfu` eviction policy (configured in Terraform)
-- Handle Redis failures gracefully — it's a cache, not the primary store
-- Use `SCAN` (never `KEYS *`) for key iteration in production scripts
-- Keep values small — aim for < 100 KB per key; use Cloud Storage for large objects
-- Use pipelining for batch operations
-- ALWAYS use Kafka for messaging — Redis Pub/Sub lacks persistence and delivery guarantees
+- Always set TTLs. Unbounded growth fills Memorystore.
+- Eviction policy: `allkeys-lfu` (set in Terraform).
+- Treat Redis as a cache, not the primary store. Tolerate failures.
+- `SCAN`, never `KEYS *`.
+- Values under ~100 KB. Use Cloud Storage for larger objects.
+- Pipeline batch operations.
+- Messaging goes through Kafka, not Redis Pub/Sub. Pub/Sub has no persistence or delivery guarantees.
 

@@ -1,10 +1,10 @@
-# Logging Reference
+# Logging
 
-Structured logging for Entur Kotlin Spring Boot services. Source of truth: https://github.com/entur/cloud-logging — fetch the README for the current artifact list, BOM coordinates, and supported web stack variants (web vs webflux, with/without request-response, on-demand). Do not invent artifact names from this file.
+Source: https://github.com/entur/cloud-logging. Fetch the README for current artifact names, BOM coordinates, and web stack variants (web/webflux, with/without request-response, on-demand). Don't invent artifact names from this file.
 
 ## Setup
 
-Pin the cloud-logging version in `gradle/libs.versions.toml` (or Maven `<dependencyManagement>`). Apply the BOM, then the GCP web starter that matches the project's Spring stack — exact artifact names per repo README.
+Pin the cloud-logging version in `gradle/libs.versions.toml` (or Maven `<dependencyManagement>`). Apply the BOM, then the GCP web starter matching the Spring stack.
 
 ```kotlin
 // build.gradle.kts — structure only; replace <starter> with names from cloud-logging README
@@ -16,11 +16,11 @@ dependencies {
 }
 ```
 
-Remove any existing `logback.xml` or `logback-spring.xml` — cloud-logging provides its own configuration.
+Delete any existing `logback.xml` or `logback-spring.xml` — cloud-logging ships its own.
 
 ## Usage
 
-Standard SLF4J — cloud-logging handles JSON formatting, GCP severity mapping, and correlation-ID propagation automatically.
+Standard SLF4J. Cloud-logging handles JSON formatting, GCP severity, and correlation-ID propagation.
 
 ```kotlin
 import org.slf4j.LoggerFactory
@@ -54,7 +54,7 @@ logging:
 
 ## Optional: Request-Response Logging
 
-Logs full HTTP request and response bodies for debugging. Adds overhead — use selectively. Add the request-response starter from cloud-logging (exact artifact name in repo README).
+Logs full HTTP request/response bodies. Has overhead — use selectively. Add the request-response starter from cloud-logging.
 
 ```kotlin
 dependencies {
@@ -72,7 +72,7 @@ logbook:
 
 ## Optional: On-Demand Logging
 
-Buffers log statements per request and only flushes the full log for failed requests. Reduces GCP logging costs significantly for high-traffic services. Add the on-demand starter from cloud-logging (exact artifact name in repo README).
+Buffers per request, flushes only on failure. Cuts GCP logging cost for high-traffic services. Add the on-demand starter from cloud-logging.
 
 ```kotlin
 dependencies {
@@ -108,9 +108,9 @@ entur:
     style: humanReadablePlain    # humanReadablePlain | humanReadableJson | machineReadableJson
 ```
 
-## DevOpsLogger — additional severity levels
+## DevOpsLogger
 
-cloud-logging includes `DevOpsLogger` with alerting-oriented severity methods:
+`DevOpsLogger` from cloud-logging maps method names to GCP severity for alerts:
 
 ```kotlin
 import no.entur.logging.cloud.api.DevOpsLoggerFactory
@@ -123,4 +123,4 @@ devOpsLog.errorInterruptMyDinner("Payment processing unavailable: {}", error) //
 devOpsLog.errorWakeMeUpRightNow("Database connection pool exhausted")         // ALERT
 ```
 
-Use standard `log.error()` for application errors that don't need paging. Use `DevOpsLogger` only for production incidents that require human intervention.
+Use plain `log.error()` for non-paging errors. `DevOpsLogger` is for production incidents needing human intervention.
