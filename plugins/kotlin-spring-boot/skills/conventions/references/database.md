@@ -4,26 +4,17 @@ Apply the section matching your active `database` configuration. Skip sections f
 
 ---
 
-## Flyway Migrations (all configurations except `none`)
+## Flyway Migrations (all `database` values except `none`)
 
-```yaml
-# application.yml
-spring:
-  flyway:
-    enabled: true
-    locations: classpath:db/migration
-    baseline-on-migrate: false
-```
+Migration files live at `src/main/resources/db/migration/V{version}__{description}.sql`. Naming examples: `V1__create_routes_table.sql`, `V2__add_status_column.sql`. Never modify an applied migration — always add a new versioned file.
 
-Migration files: `src/main/resources/db/migration/V{version}__{description}.sql`
-
-Naming: `V1__create_routes_table.sql`, `V2__add_status_column.sql`. Never modify an applied migration.
+For `application.yml` Flyway settings (locations, `baseline-on-migrate`), see `references/config.md`.
 
 ---
 
-## Exposed SQL-DSL (`database=exposed`)
+## `database=exposed`
 
-JetBrains Exposed provides a typesafe SQL DSL without ORM magic. No `@Entity`, no lazy loading.
+JetBrains Exposed: typesafe SQL DSL without ORM magic. No `@Entity`, no lazy loading.
 
 ### Table definition
 
@@ -128,9 +119,9 @@ Keep `transaction {}` in the DAO layer. Never call `transaction {}` from service
 
 ---
 
-## Spring Data JDBC (`database=spring-data-jdbc`)
+## `database=spring-data-jdbc`
 
-Simpler than JPA: no lazy loading, no entity lifecycle, no bytecode manipulation. Plain Kotlin data classes work without modification.
+Spring Data JDBC: simpler than JPA. No lazy loading, no entity lifecycle, no bytecode manipulation. Plain Kotlin data classes work without modification.
 
 ### Entity
 
@@ -207,9 +198,9 @@ class RouteDaoImpl(
 
 ---
 
-## Spring Data JPA (`database=jpa`)
+## `database=jpa`
 
-Use when integrating with an existing JPA schema or when the team is already fluent with Hibernate.
+Spring Data JPA. Use when integrating with an existing JPA schema or when the team is already fluent with Hibernate.
 
 ### Known Kotlin/JPA friction points
 

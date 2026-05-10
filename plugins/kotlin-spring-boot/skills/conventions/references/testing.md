@@ -2,18 +2,7 @@
 
 Kotlin Spring Boot testing conventions for Entur projects.
 
-## Test stack
-
-| Library | Purpose | Always? |
-|---|---|---|
-| JUnit 5 | Test framework | Yes |
-| Spring Boot Test | `@SpringBootTest`, `@WebMvcTest`, `@DataJdbcTest` | Yes |
-| TestContainers | Dockerized PostgreSQL/Redis in integration tests | When database/Redis |
-| Entur Auth Test | `TenantJsonWebToken` for simulating auth | When service has auth |
-| SpringMockK (`com.ninja-squad:springmockk`) | `@MockkBean` — MockK mocks in Spring context | When `test_mocking=mockk` |
-| Mockito-Kotlin (`org.mockito.kotlin:mockito-kotlin`) | `@MockBean` — Mockito mocks in Spring context | When `test_mocking=mockito-kotlin` |
-| Kotest assertions | `shouldBe`, `shouldThrow`, etc. | When `test_assertions=kotest` |
-| AssertJ | `assertThat(...).isEqualTo(...)` | When `test_assertions=assertj` |
+Active mocking and assertion libraries are read from the stack file's `test_mocking` and `test_assertions` axes. JUnit 5, Spring Boot Test, and TestContainers (when the service has a database or Redis) are always active; Entur Auth Test is active when the service has auth.
 
 ---
 

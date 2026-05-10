@@ -113,16 +113,7 @@ spring:
     baseline-on-migrate: false
 ```
 
-Migration naming: `V{version}__{description}.sql`
-
-```
-src/main/resources/db/migration/
-  V1__create_routes_table.sql
-  V2__add_route_status_index.sql
-  V3__add_stops_table.sql
-```
-
-Never modify an applied migration. Always run on startup — if migration fails, the service fails to start.
+Migrations run on startup — if one fails, the service fails to start. For migration file naming and DAO/entity patterns, see `references/database.md`.
 
 ## Redis (Memorystore)
 
@@ -207,15 +198,3 @@ class RouteServiceImpl(private val routeDao: RouteDao) : RouteService {
 - Use pipelining for batch operations
 - ALWAYS use Kafka for messaging — Redis Pub/Sub lacks persistence and delivery guarantees
 
-## mise.toml (tool version management)
-
-```toml
-[tools]
-java    = "liberica-<pin>"      # current LTS/stable Liberica build
-kotlin  = "<pin>"               # current stable Kotlin
-
-[settings]
-experimental = true
-```
-
-Pin to current stable versions — read from existing Entur repos or check upstream releases. For full `mise.toml` setup (Terraform, Python, Google Cloud SDK), see https://github.com/entur/ai (`CONVENTIONS.md`) via the `guides` plugin.

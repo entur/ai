@@ -77,9 +77,9 @@ fun Route.toResponse() = RouteResponse(id = id, name = name, status = status.nam
 fun CreateRouteRequest.toDomain() = CreateRouteCommand(name = name, description = description)
 ```
 
-### `spring_stack=webflux` additions
+### `spring_stack=webflux`
 
-Controllers use `suspend` functions. Spring handles coroutine-to-reactive bridging automatically.
+Controllers use `suspend` functions. Spring handles coroutine-to-reactive bridging automatically. Compose this on top of either `api_approach` above — apply both gates.
 
 ```kotlin
 @RestController
