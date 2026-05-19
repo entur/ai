@@ -26,6 +26,8 @@ Sets up Workload Identity Federation for keyless authentication.
 
 ## Kubernetes Authentication
 
+Fetches GKE credentials, configuring `kubectl` to target the Entur cluster for the given environment.
+
 ```yaml
 steps:
   - uses: entur/gha-meta/.github/actions/k8s-auth@v1
@@ -34,6 +36,8 @@ steps:
 ```
 
 ## Docker Registry Authentication
+
+Authenticates Docker with Google Artifact Registry (`europe-west1-docker.pkg.dev`).
 
 ```yaml
 steps:
