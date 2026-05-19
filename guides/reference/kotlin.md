@@ -1,6 +1,6 @@
 # Kotlin Standards
 
-Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) first for cross-language standards, and [java.md](java.md) for shared JVM patterns (Spring Boot, logging, Redis, testing, dependencies, Dockerfile).
+Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS.md) first for cross-language standards, and [java.md](java.md) for shared JVM patterns (Spring Boot, logging, Redis, testing, dependencies, Dockerfile).
 
 ## Runtime and Build
 
@@ -190,7 +190,7 @@ Use backtick method names for readability. Use Kotest assertions (`shouldBe`, `s
 
 ### Controller Tests (WebMvcTest)
 
-Use `@WebMvcTest` with `@MockkBean` for service mocking. Use `TenantJsonWebToken` with `@InternalTenant` / `@TravellerTenant` annotations for simulating authenticated requests (see [authorization.md](authorization.md#test-configuration)).
+Use `@WebMvcTest` with `@MockkBean` for service mocking. Use `TenantJsonWebToken` with `@InternalTenant` / `@TravellerTenant` annotations for simulating authenticated requests (see [authorization.md](../platform/permission-store.md#test-configuration)).
 
 ### Integration Tests (TestContainers)
 

@@ -33,10 +33,16 @@ These rules are non-negotiable and apply to every Entur application:
 
 ## How to use this skill
 
-Pick the guide that matches the task and fetch it. URL pattern:
+`guides/` is split into three layers — pick the right one and fetch:
+
+- **`guides/platform/`** -- platform-provided capabilities (self-service, common chart, reusable workflows, Terraform modules, Permission Store, Kafka starter).
+- **`guides/playbooks/`** -- end-to-end tasks (bootstrap, add postgres/redis/kafka, set up auth, deploy to prd). Prefer these as the entry point for multi-step work.
+- **`guides/reference/`** -- language and topic standards (Java, Kotlin, Go, Docker, observability, security, etc).
+
+URL pattern:
 
 ```text
-https://raw.githubusercontent.com/entur/ai/main/guides/<path>.md
+https://raw.githubusercontent.com/entur/ai/main/guides/<layer>/<file>.md
 ```
 
 Cross-language baseline always applies — fetch first when starting a non-trivial task:
@@ -45,32 +51,50 @@ Cross-language baseline always applies — fetch first when starting a non-trivi
 https://raw.githubusercontent.com/entur/ai/main/CONVENTIONS.md
 ```
 
-## Guide index
+## Playbook index (prefer these for multi-step tasks)
+
+| Goal | Path |
+|------|------|
+| Bootstrap a new service | `guides/playbooks/bootstrap-service.md` |
+| Add managed Postgres | `guides/playbooks/add-postgres.md` |
+| Add Memorystore Redis | `guides/playbooks/add-redis.md` |
+| Produce/consume Kafka events | `guides/playbooks/add-kafka.md` |
+| Set up authentication/authorization | `guides/playbooks/set-up-auth.md` |
+| Promote a service to prd | `guides/playbooks/deploy-to-prd.md` |
+| Deprecate or delete a service | `guides/playbooks/deprecate-service.md` |
+| Run the service locally | `guides/playbooks/local-dev.md` |
+
+## Platform capability index
 
 | Topic | Path | When to fetch |
 |-------|------|--------------|
-| Kotlin services | `guides/kotlin.md` | editing `.kt`, `build.gradle.kts`, designing a Kotlin Spring Boot service |
-| Java services | `guides/java.md` | editing `.java`, JVM patterns shared with Kotlin |
-| Go services | `guides/go.md` | editing `.go`, `go.mod` |
-| API design | `guides/api-design.md` | designing REST or gRPC contracts |
-| Architecture | `guides/architecture.md` | service boundaries, GCP project structure, resilience, production hardening |
-| Authorization | `guides/authorization.md` | Permission Store, Permission Client, `@PreAuthorize` |
-| Kafka | `guides/kafka.md` | producers, consumers, Avro/Protobuf schemas, Aiven Kafka |
-| Helm | `guides/helm.md` | `helm/<app>/`, common chart, ExternalSecrets values |
-| Docker | `guides/docker.md` | `Dockerfile`, multi-stage builds, distroless |
-| Terraform modules | `guides/terraform/modules.md` | `*.tf`, Entur Terraform modules (init, SQL, Redis, GCS) |
-| IAM roles | `guides/terraform/iam-roles.md` | granting any IAM role — only roles on this list are approved |
-| CI/CD workflows | `guides/cicd/workflows.md` | `.github/workflows/*.yml`, Entur reusable workflows |
-| CI/CD actions | `guides/cicd/actions.md` | composite GitHub Actions |
-| Self-service | `guides/self-service.md` | `.entur/*.yaml`, GCP project naming, `metadata.id` vs `metadata.name` |
-| Logging | `guides/logging.md` | structured JSON logs, traceId, requestId |
-| Observability | `guides/observability.md` | health endpoints, Prometheus metrics, tracing |
-| Security | `guides/security.md` | secrets, scanning, allowlists in `.entur/security/`, headers |
-| Code review | `guides/code-review.md` | reviewing or preparing a PR |
-| Markdown | `guides/markdown.md` | `.md` files, markdownlint |
-| Documentation | `guides/documentation.md` | writing user-facing prose |
+| Self-service | `guides/platform/self-service.md` | `.entur/*.yaml`, GCP project naming, `metadata.id` vs `metadata.name` |
+| Common Helm chart | `guides/platform/common-helm.md` | `helm/<app>/`, common chart, ExternalSecrets values |
+| Reusable GHA workflows | `guides/platform/gha-workflows.md` | `.github/workflows/*.yml`, Entur reusable workflows |
+| Composite GHA actions | `guides/platform/gha-actions.md` | custom steps using `entur/gha-meta` actions |
+| Terraform modules | `guides/platform/terraform-modules.md` | `*.tf`, Entur Terraform modules (init, SQL, Redis, GCS) |
+| Approved IAM roles | `guides/platform/iam-roles.md` | granting any IAM role — only roles on this list are approved |
+| Permission Store | `guides/platform/permission-store.md` | Permission Client, `@PreAuthorize`, business capabilities |
+| Entur Kafka starter | `guides/platform/entur-kafka-starter.md` | producers, consumers, Avro/Protobuf, Aiven clusters |
 
-If the topic is not listed but matches a filename pattern under `guides/`, try fetching `https://raw.githubusercontent.com/entur/ai/main/guides/<topic>.md` directly. Contributors add new conventions by adding a markdown file under `guides/`; this skill picks them up automatically.
+## Reference index (language and topic standards)
+
+| Topic | Path | When to fetch |
+|-------|------|--------------|
+| Kotlin services | `guides/reference/kotlin.md` | editing `.kt`, `build.gradle.kts`, designing a Kotlin Spring Boot service |
+| Java services | `guides/reference/java.md` | editing `.java`, JVM patterns shared with Kotlin |
+| Go services | `guides/reference/go.md` | editing `.go`, `go.mod` |
+| API design | `guides/reference/api-design.md` | designing REST or gRPC contracts |
+| Architecture | `guides/reference/architecture.md` | service boundaries, DB conventions, resilience, lifecycle |
+| Docker | `guides/reference/docker.md` | `Dockerfile`, multi-stage builds, distroless |
+| Logging | `guides/reference/logging.md` | structured JSON logs, traceId, requestId |
+| Observability | `guides/reference/observability.md` | health endpoints, Prometheus metrics, tracing |
+| Security | `guides/reference/security.md` | secrets, scanning, allowlists in `.entur/security/`, headers |
+| Code review | `guides/reference/code-review.md` | reviewing or preparing a PR |
+| Markdown | `guides/reference/markdown.md` | `.md` files, markdownlint |
+| Documentation | `guides/reference/documentation.md` | writing user-facing prose |
+
+If the topic is not listed but you suspect a guide exists, try fetching from `guides/platform/<topic>.md`, `guides/playbooks/<topic>.md`, or `guides/reference/<topic>.md` in that order. Contributors add new conventions by adding markdown files under `guides/`; this skill picks them up automatically.
 
 ## Fallback
 

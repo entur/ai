@@ -145,7 +145,7 @@ ENTRYPOINT ["python", "-m", "my_service"]
 - **No secrets in images**: Use Google Secret Manager + ExternalSecrets for runtime secrets, Helm-injected env vars for non-sensitive config
 - **Pin dependencies**: Pin base image tags, build tool versions, and use lock files (`go.sum`, `gradle.lockfile`, `requirements.txt`)
 - **Port**: All Entur apps default to port `8080`. Ensure `EXPOSE` and application binding match.
-- **Health endpoints**: Expose `GET /actuator/health/liveness` and `GET /actuator/health/readiness` (or equivalent). See [Helm guide](helm.md) for probe config.
+- **Health endpoints**: Expose `GET /actuator/health/liveness` and `GET /actuator/health/readiness` (or equivalent). See [Helm guide](../platform/common-helm.md) for probe config.
 
 ## CI/CD Integration
 
@@ -170,7 +170,7 @@ docker-push:
   uses: entur/gha-docker/.github/workflows/push.yml@v1
 ```
 
-The `docker-push` output `image_and_tag` is used by downstream Helm deploy jobs. For complete CI/CD pipeline examples, see [CI/CD workflows](cicd/workflows.md).
+The `docker-push` output `image_and_tag` is used by downstream Helm deploy jobs. For complete CI/CD pipeline examples, see [CI/CD workflows](../platform/gha-workflows.md).
 
 ## Hadolint Configuration
 

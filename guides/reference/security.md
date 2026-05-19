@@ -78,7 +78,7 @@ Rotate secrets at least every 90 days (excludes OAuth tokens which should have s
 
 ### Authorization
 
-Centralized system based on **Permission Store** and **Permission Client**. See [authorization.md](authorization.md) for details.
+Centralized system based on **Permission Store** and **Permission Client**. See [authorization.md](../platform/permission-store.md) for details.
 
 - **Business Capabilities**: operation + access level (LES, OPPRETT, ENDRE, SLETT) for endpoint-level access
 - **Responsibility Sets**: operation + responsibility type + object key for data-level access
@@ -216,7 +216,7 @@ Kubernetes security:
 
 ## IAM and Permissions
 
-Only use roles from the [approved list](terraform/iam-roles.md). Request additions in `#talk-utviklerplattform`.
+Only use roles from the [approved list](../platform/iam-roles.md). Request additions in `#talk-utviklerplattform`.
 
 | Role | Use case |
 |------|----------|

@@ -129,10 +129,10 @@ spec:
 
 ### Next Steps
 
-1. **Document your API** -- See [API design](api-design.md)
-2. **Create a container image** -- See [Docker guide](docker.md)
-3. **Set up CI/CD pipelines** -- See [CI/CD workflows](cicd/workflows.md)
-4. **Configure Helm deployment** -- See [Helm guide](helm.md)
+1. **Document your API** -- See [API design](../reference/api-design.md)
+2. **Create a container image** -- See [Docker guide](../reference/docker.md)
+3. **Set up CI/CD pipelines** -- See [CI/CD workflows](gha-workflows.md)
+4. **Configure Helm deployment** -- See [Helm guide](common-helm.md)
 
 ---
 

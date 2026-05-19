@@ -119,7 +119,7 @@ Use `text` for blocks with no specific language. Common tags: `yaml`, `json`, `h
 - Use relative paths for internal links, full URLs for external:
 
 ```markdown
-[CONVENTIONS.md](../CONVENTIONS.md)
+[CONVENTIONS.md](../../CONVENTIONS.md)
 [java.md](java.md)
 [entur/helm-charts](https://github.com/entur/helm-charts)
 ```

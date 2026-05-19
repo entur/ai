@@ -52,7 +52,7 @@ dependencies {
 }
 ```
 
-Published to Entur's [JFrog Artifactory](https://entur2.jfrog.io). See [java.md](java.md#artifactory-jfrog) for repository configuration.
+Published to Entur's [JFrog Artifactory](https://entur2.jfrog.io). See [java.md](../reference/java.md#artifactory-jfrog) for repository configuration.
 
 ## Configuration
 
@@ -405,7 +405,7 @@ Use `KafkaContainer` (from `confluentinc/cp-kafka` image) with `@Testcontainers`
 
 ## Redis as Kafka State Store
 
-Redis (Memorystore) is commonly paired with Kafka consumers for deduplication, state caching, and idempotent processing. For Redis infrastructure, see [terraform/modules.md](terraform/modules.md#memorystore-redis). For general Redis patterns, see [java.md](java.md#redis-memorystore) or [go.md](go.md#redis-memorystore).
+Redis (Memorystore) is commonly paired with Kafka consumers for deduplication, state caching, and idempotent processing. For Redis infrastructure, see [terraform/modules.md](terraform-modules.md#memorystore-redis). For general Redis patterns, see [java.md](../reference/java.md#redis-memorystore) or [go.md](../reference/go.md#redis-memorystore).
 
 ### Idempotent Consumer (Deduplication)
 
@@ -429,7 +429,7 @@ Cache reference data lookups to avoid repeated DB queries. Use a cache-aside pat
 
 The starter auto-registers **Micrometer/Prometheus** listeners on producer and consumer factories when a `MeterRegistry` bean is present. Standard Kafka client metrics (`kafka_producer_*`, `kafka_consumer_*`) are exposed without additional configuration.
 
-For processing time (`@Timed`) and consumption delay tracking, see [observability.md](observability.md#kafka-consumer-metrics).
+For processing time (`@Timed`) and consumption delay tracking, see [observability.md](../reference/observability.md#kafka-consumer-metrics).
 
 ## Key Beans Provided
 

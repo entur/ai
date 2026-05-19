@@ -20,7 +20,7 @@ Entur is a Norwegian public transportation company. All code targets Google Clou
 
 ## Key Concepts
 
-- **App ID** (`metadata.id` in self-service manifest): 3--10 char alphanumeric identifier, unique across Entur. The Platform Orchestrator creates GCP projects named `ent-{appid}-{env}` (e.g. `metadata.id: products` → `ent-products-dev`, `ent-products-prd`). Data projects use `ent-data-{appid}-{int|ext}-{env}`. Used as Helm `shortname`, Terraform `app_id`, and Terraform state bucket `ent-gcs-tfa-{appid}`. See [self-service.md](guides/self-service.md#gcp-project-naming).
+- **App ID** (`metadata.id` in self-service manifest): 3--10 char alphanumeric identifier, unique across Entur. The Platform Orchestrator creates GCP projects named `ent-{appid}-{env}` (e.g. `metadata.id: products` → `ent-products-dev`, `ent-products-prd`). Data projects use `ent-data-{appid}-{int|ext}-{env}`. Used as Helm `shortname`, Terraform `app_id`, and Terraform state bucket `ent-gcs-tfa-{appid}`. See [self-service.md](guides/platform/self-service.md#gcp-project-naming).
 - **App Name** (`metadata.name` in self-service manifest): Becomes the Kubernetes namespace. Typically matches the repository name. Different from App ID.
 - **Environments**: `dev`, `tst`, `prd` -- each gets its own GCP project (`ent-{appid}-dev`, `ent-{appid}-tst`, `ent-{appid}-prd`).
 
@@ -51,39 +51,61 @@ See https://github.com/entur/ai for Entur-wide standards.
 
 ## Documentation Map
 
-Always read `CONVENTIONS.md` first for cross-cutting standards.
+`guides/` is organised in three layers:
 
-### Always Read
+- **[`guides/platform/`](guides/platform/)** -- what the platform provides (self-service orchestrator, common Helm chart, reusable Actions workflows, Terraform modules, Permission Store, Kafka starter).
+- **[`guides/playbooks/`](guides/playbooks/)** -- end-to-end tasks (bootstrap, add a database, deploy to prd, etc). Prefer these as your entry point for multi-step work.
+- **[`guides/reference/`](guides/reference/)** -- language and topic standards (Java, Kotlin, Go, Docker, observability, logging, security, code review, docs).
 
-- [CONVENTIONS.md](CONVENTIONS.md) -- Cross-language conventions, naming, error handling, testing
+Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (naming, repo layout, testing, conventional commits).
 
-### By Task Type
+### By goal (start here)
 
-| Task | Documents |
-|------|-----------|
-| **Java/Kotlin code** | [java.md](guides/java.md), [kotlin.md](guides/kotlin.md) |
-| **Go code** | [go.md](guides/go.md) |
-| **API design** | [api-design.md](guides/api-design.md) |
-| **Architecture** | [architecture.md](guides/architecture.md) |
-| **Kafka** | [kafka.md](guides/kafka.md) |
-| **Authorization** | [authorization.md](guides/authorization.md) |
-| **Terraform / GCP** | [terraform/modules.md](guides/terraform/modules.md), [terraform/iam-roles.md](guides/terraform/iam-roles.md) |
-| **Helm / K8s deploy** | [helm.md](guides/helm.md) |
-| **Docker** | [docker.md](guides/docker.md) |
-| **CI/CD** | [cicd/workflows.md](guides/cicd/workflows.md), [cicd/actions.md](guides/cicd/actions.md) |
-| **Self-service** | [self-service.md](guides/self-service.md) |
-| **Firebase** | [cicd/workflows.md](guides/cicd/workflows.md) (gha-firebase section) |
-| **Logging** | [logging.md](guides/logging.md) |
-| **Observability** | [observability.md](guides/observability.md) |
-| **Security** | [security.md](guides/security.md) |
-| **Code review** | [code-review.md](guides/code-review.md) |
-| **Markdown format** | [markdown.md](guides/markdown.md) |
-| **Writing docs** | [documentation.md](guides/documentation.md), [markdown.md](guides/markdown.md) |
+| I want to… | Read |
+|------------|------|
+| Bootstrap a new service | [playbooks/bootstrap-service.md](guides/playbooks/bootstrap-service.md) |
+| Provision Postgres | [playbooks/add-postgres.md](guides/playbooks/add-postgres.md) |
+| Add Redis (caching, locks, dedup) | [playbooks/add-redis.md](guides/playbooks/add-redis.md) |
+| Produce or consume Kafka events | [playbooks/add-kafka.md](guides/playbooks/add-kafka.md) |
+| Add authentication and authorization | [playbooks/set-up-auth.md](guides/playbooks/set-up-auth.md) |
+| Promote a service to prd | [playbooks/deploy-to-prd.md](guides/playbooks/deploy-to-prd.md) |
+| Deprecate or delete a service | [playbooks/deprecate-service.md](guides/playbooks/deprecate-service.md) |
+| Run the service locally | [playbooks/local-dev.md](guides/playbooks/local-dev.md) |
+
+### Platform capabilities (what the platform provides)
+
+| Capability | Doc |
+|------------|-----|
+| Self-service GCP provisioning | [platform/self-service.md](guides/platform/self-service.md) |
+| Common Helm chart | [platform/common-helm.md](guides/platform/common-helm.md) |
+| Reusable GitHub Actions workflows | [platform/gha-workflows.md](guides/platform/gha-workflows.md) |
+| Composite GHA actions | [platform/gha-actions.md](guides/platform/gha-actions.md) |
+| Terraform modules (init, SQL, Redis, GCS) | [platform/terraform-modules.md](guides/platform/terraform-modules.md) |
+| Allowed IAM roles | [platform/iam-roles.md](guides/platform/iam-roles.md) |
+| Permission Store + Permission Client | [platform/permission-store.md](guides/platform/permission-store.md) |
+| Entur Kafka Spring starter (Aiven) | [platform/entur-kafka-starter.md](guides/platform/entur-kafka-starter.md) |
+
+### Reference (language and topic standards)
+
+| Topic | Doc |
+|-------|-----|
+| Java code | [reference/java.md](guides/reference/java.md) |
+| Kotlin code | [reference/kotlin.md](guides/reference/kotlin.md) |
+| Go code | [reference/go.md](guides/reference/go.md) |
+| Docker / containerization | [reference/docker.md](guides/reference/docker.md) |
+| API design | [reference/api-design.md](guides/reference/api-design.md) |
+| Architecture principles | [reference/architecture.md](guides/reference/architecture.md) |
+| Logging | [reference/logging.md](guides/reference/logging.md) |
+| Observability (metrics, tracing, probes) | [reference/observability.md](guides/reference/observability.md) |
+| Security | [reference/security.md](guides/reference/security.md) |
+| Code review | [reference/code-review.md](guides/reference/code-review.md) |
+| Markdown format | [reference/markdown.md](guides/reference/markdown.md) |
+| Writing documentation | [reference/documentation.md](guides/reference/documentation.md) |
 
 ## Critical Rules
 
 1. **ALWAYS use Google Secret Manager** + ExternalSecrets in Helm for all secrets. Never hardcode secrets.
-2. **ALWAYS use roles from the [allowed list](guides/terraform/iam-roles.md).** Never grant IAM roles outside it. Request additions in `#talk-utviklerplattform`.
+2. **ALWAYS use roles from the [allowed list](guides/platform/iam-roles.md).** Never grant IAM roles outside it. Request additions in `#talk-utviklerplattform`.
 3. **ALWAYS use Entur Terraform modules** (`terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`).
 4. **ALWAYS use Entur reusable GitHub Actions workflows** for all CI/CD steps.
 5. **ALWAYS use the Entur `common` Helm chart** for K8s deployments.
@@ -92,4 +114,4 @@ Always read `CONVENTIONS.md` first for cross-cutting standards.
 8. **Default region**: `europe-west1`.
 9. **Conventional commits** -- enables automated semver via release-please.
 10. **Every PR ALWAYS passes**: lint, unit tests, security scan (CodeQL + Docker scan), Helm lint.
-11. **ALWAYS create GCP projects via self-service YAML manifests** in `.entur/` (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`). Never use Terraform `google_project` or `gcloud projects create`. See [self-service.md](guides/self-service.md). For help, ask in `#talk-utviklerplattform`.
+11. **ALWAYS create GCP projects via self-service YAML manifests** in `.entur/` (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`). Never use Terraform `google_project` or `gcloud projects create`. See [self-service.md](guides/platform/self-service.md). For help, ask in `#talk-utviklerplattform`.

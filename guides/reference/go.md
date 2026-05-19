@@ -1,6 +1,6 @@
 # Go Standards
 
-Go conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) first for cross-language standards.
+Go conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS.md) first for cross-language standards.
 
 ## Runtime and Build
 
@@ -105,7 +105,7 @@ Use environment variables for all configuration. Use `caarlos0/env` struct tags 
 
 ## Redis (Memorystore)
 
-Entur uses **Google Memorystore for Redis**. Infrastructure via `terraform-google-memorystore` (see [terraform/modules.md](terraform/modules.md#memorystore-redis)). Credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) injected via Kubernetes secrets.
+Entur uses **Google Memorystore for Redis**. Infrastructure via `terraform-google-memorystore` (see [terraform/modules.md](../platform/terraform-modules.md#memorystore-redis)). Credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) injected via Kubernetes secrets.
 
 For use cases, key naming conventions, and best practices, see [java.md](java.md#redis-memorystore). This section covers Go-specific implementation.
 

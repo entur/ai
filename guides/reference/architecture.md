@@ -37,14 +37,14 @@ Guidelines for application architecture at Entur. All services run on GKE in `eu
 | Relational data | Cloud SQL (PostgreSQL) | `terraform-google-sql-db` module |
 | Caching | Memorystore (Redis or Valkey) | `terraform-google-memorystore` module |
 | Object storage | Cloud Storage | [`terraform-google-cloud-storage`](https://github.com/entur/terraform-google-cloud-storage) module |
-| Event streaming | Apache Kafka (Aiven) | See [kafka.md](kafka.md) |
+| Event streaming | Apache Kafka (Aiven) | See [kafka.md](../platform/entur-kafka-starter.md) |
 | Analytics | BigQuery | `google_bigquery_dataset` / `table` resources |
 
 Always use Entur Terraform modules for Cloud SQL and Memorystore -- they handle naming, networking, secrets, and K8s integration.
 
 ### Asynchronous Messaging
 
-Entur uses Apache Kafka on Aiven. Use **Avro** (default) or **Protobuf** with Confluent Schema Registry. Keep messages self-contained with correlation IDs for tracing. See [kafka.md](kafka.md) for full documentation.
+Entur uses Apache Kafka on Aiven. Use **Avro** (default) or **Protobuf** with Confluent Schema Registry. Keep messages self-contained with correlation IDs for tracing. See [kafka.md](../platform/entur-kafka-starter.md) for full documentation.
 
 ## Database Design
 
@@ -66,7 +66,7 @@ Use circuit breakers, retry with backoff, and explicit timeouts for all external
 
 ## Production Hardening
 
-The common Helm chart handles most of this automatically. See [helm.md](helm.md) for configuration.
+The common Helm chart handles most of this automatically. See [helm.md](../platform/common-helm.md) for configuration.
 
 | Concern | Requirement |
 |---------|-------------|

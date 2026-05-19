@@ -395,6 +395,6 @@ Permission Store automatically cleans up resources not refreshed in 30 days (app
 5. Configure `entur.permission.permission-cache` with URL and application name
 6. Declare `businessCapabilities` used by your application
 7. Add `@PreAuthorize("hasPermission('operation', 'access')")` to protected endpoints
-8. Add `entur-springdoc-starter` to auto-document permissions in OpenAPI (see [api-design.md](api-design.md#x-entur-permissions-extension-automatic))
+8. Add `entur-springdoc-starter` to auto-document permissions in OpenAPI (see [api-design.md](../reference/api-design.md#x-entur-permissions-extension-automatic))
 9. Configure `LOCAL_TEST_CACHE` with test users in test `application.yml`
 10. Set environment-specific Permission Store URL and auth config via Helm configmap

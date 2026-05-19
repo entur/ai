@@ -104,7 +104,7 @@ If `auth0 M2M` is needed, add under `spec`:
 
 ## Step 4: Generate Helm Chart
 
-Read `guides/helm.md` in the entur/ai repository for the full common chart reference.
+Read `guides/platform/common-helm.md` in the entur/ai repository for the full common chart reference.
 
 ### `helm/{repoName}/Chart.yaml`
 
@@ -198,7 +198,7 @@ For prd, also set:
 
 ## Step 5: Generate Terraform Scaffolding
 
-Read `guides/terraform/modules.md` in the entur/ai repository for the full module reference.
+Read `guides/platform/terraform-modules.md` in the entur/ai repository for the full module reference.
 
 ### `terraform/main.tf`
 
@@ -268,7 +268,7 @@ environment = "{env}"
 
 ## Step 6: Generate Dockerfile
 
-Read `guides/docker.md` in the entur/ai repository for the full Docker reference.
+Read `guides/reference/docker.md` in the entur/ai repository for the full Docker reference.
 
 Select the Dockerfile template based on language:
 
@@ -303,7 +303,7 @@ Delegate to the **setup-cicd-workflows** skill if available, or generate:
 - `.github/workflows/codeql.yml` (security scanning)
 - `.github/dependabot.yml`
 
-Read `guides/cicd/workflows.md` in the entur/ai repository for the full workflow reference.
+Read `guides/platform/gha-workflows.md` in the entur/ai repository for the full workflow reference.
 
 ## Step 8: Generate Supporting Files
 

@@ -280,7 +280,7 @@ common:
 | Memory request | Set close to real usage including burst. |
 | Memory limit | **Set equal to request.** Incompressible -- exceeding causes OOM kills. |
 
-Use VPA recommendations (enabled on all clusters) to tune over time. See [observability](observability.md) for Grafana dashboards.
+Use VPA recommendations (enabled on all clusters) to tune over time. See [observability](../reference/observability.md) for Grafana dashboards.
 
 ## Local Debugging
 
@@ -334,7 +334,7 @@ common:
     connectionConfig: my-app-ep
 ```
 
-Deploy using matrix strategy in GitHub Actions (see [CI/CD workflows](cicd/workflows.md)).
+Deploy using matrix strategy in GitHub Actions (see [CI/CD workflows](gha-workflows.md)).
 
 ## Helm Values Naming Convention
 
