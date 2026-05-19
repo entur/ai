@@ -67,7 +67,7 @@ Always read `CONVENTIONS.md` first for cross-cutting standards.
 | **Architecture** | [architecture.md](guides/architecture.md) |
 | **Kafka** | [kafka.md](guides/kafka.md) |
 | **Authorization** | [authorization.md](guides/authorization.md) |
-| **Terraform / GCP** | [terraform/modules.md](guides/terraform/modules.md), [terraform/iam-roles.md](guides/terraform/iam-roles.md) |
+| **Terraform / GCP** | [terraform/modules.md](guides/terraform/modules.md), [terraform/iam-roles.md](guides/terraform/iam-roles.md), [terraform/state-management.md](guides/terraform/state-management.md) |
 | **Helm / K8s deploy** | [helm.md](guides/helm.md) |
 | **Docker** | [docker.md](guides/docker.md) |
 | **CI/CD** | [cicd/workflows.md](guides/cicd/workflows.md), [cicd/actions.md](guides/cicd/actions.md) |
