@@ -1,0 +1,22 @@
+{
+  "name": "entur-ai",
+  "version": "0.0.0",
+  "description": "Entur AI agent instructions, conventions, guides, skills, plugins, and test scenarios.",
+  "private": true,
+  "license": "EUPL-1.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/entur/ai.git"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "bugs": "https://github.com/entur/ai/issues",
+  "files": [
+    "AGENTS.md",
+    "CONVENTIONS.md",
+    "README.md",
+    "guides",
+    "skills",
+    "plugins",
+    "tests"
+  ]
+}
