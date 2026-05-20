@@ -15,6 +15,7 @@ Always use Entur reusable workflows instead of custom pipeline steps.
 | [gha-docs](https://github.com/entur/gha-docs) | Documentation publishing | `@v1` |
 | [gha-slack](https://github.com/entur/gha-slack) | Slack notifications | `@v2` |
 | [gha-artifactory](https://github.com/entur/gha-artifactory) | Artifactory publishing (Maven/Gradle) | `@v1` |
+| [gha-api](https://github.com/entur/gha-api) | API spec linting (Redocly) | `@v5` |
 
 ## Pipeline Architecture
 
@@ -388,7 +389,7 @@ jobs:
       image_artifact: ${{ needs.docker.outputs.image_artifact }}
 
   docker-push:
-    needs: [docker]
+    needs: [docker, docker-scan]
     uses: entur/gha-docker/.github/workflows/push.yml@v1
     secrets: inherit
 ```
