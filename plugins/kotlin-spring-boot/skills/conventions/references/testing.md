@@ -25,7 +25,6 @@ string shouldHaveLength 10
 
 // Exceptions
 shouldThrow<RouteNotFoundException> { service.findById(99L) }
-shouldThrow<RouteNotFoundException> { service.findById(99L) }
     .also { it.message shouldContain "99" }
 
 // Nullable
@@ -64,8 +63,8 @@ assertThatThrownBy { service.findById(99L) }
 ### `test_mocking=mockk`
 
 ```kotlin
-// In @WebMvcTest / @SpringBootTest
-@MockkBean
+// In @WebMvcTest / @WebFluxTest / @SpringBootTest
+@MockkBean                              // test_mocking=mockk
 lateinit var routeService: RouteService
 
 // Stubbing — regular functions
@@ -93,8 +92,8 @@ val routeDao = mockk<RouteDao>()
 ### `test_mocking=mockito-kotlin`
 
 ```kotlin
-// In @WebMvcTest / @SpringBootTest
-@MockBean
+// In @WebMvcTest / @WebFluxTest / @SpringBootTest
+@MockBean                               // test_mocking=mockito-kotlin
 lateinit var routeService: RouteService
 
 // Stubbing
@@ -335,3 +334,73 @@ class RouteControllerTest {
 ```
 
 For broader auth patterns (scopes, role mapping, config), see the `guides` plugin or https://github.com/entur/ai.
+
+---
+
+## Controller Tests (`@WebFluxTest`) — `spring_stack=webflux`
+
+Use `@WebFluxTest` and `WebTestClient` instead of `@WebMvcTest`/`MockMvc` when `spring_stack=webflux`. Suspend service functions are stubbed with `coEvery`/`coVerify` (mockk) or `whenever`/`verify` (mockito-kotlin).
+
+```kotlin
+@WebFluxTest(RouteController::class)
+@Import(SecurityConfig::class)
+@ExtendWith(TenantJsonWebToken::class)
+class RouteControllerTest(
+    @Autowired private val webTestClient: WebTestClient,
+) {
+
+    @MockkBean                          // or @MockBean for test_mocking=mockito-kotlin
+    lateinit var routeService: RouteService
+
+    @Test
+    @InternalTenant
+    fun `GET route returns 200 with route data`() {
+        val route = buildRoute(id = 1L, name = "Oslo - Bergen")
+        coEvery { routeService.findById(1L) } returns route
+
+        webTestClient.get().uri("/api/v1/routes/1")
+            .exchange()
+            .expectStatus().isOk
+            .expectBody()
+            .jsonPath("$.id").isEqualTo(1L)
+            .jsonPath("$.name").isEqualTo("Oslo - Bergen")
+    }
+
+    @Test
+    fun `GET route returns 401 when unauthenticated`() {
+        webTestClient.get().uri("/api/v1/routes/1")
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    @Test
+    @InternalTenant
+    fun `GET route returns 404 when not found`() {
+        coEvery { routeService.findById(99L) } throws RouteNotFoundException(99L)
+
+        webTestClient.get().uri("/api/v1/routes/99")
+            .exchange()
+            .expectStatus().isNotFound
+    }
+}
+```
+
+For POST/PUT with a request body, use `.bodyValue(request)` and `.contentType(MediaType.APPLICATION_JSON)`:
+
+```kotlin
+@Test
+@InternalTenant
+fun `POST route returns 201 with created route`() {
+    val request = CreateRouteRequest(name = "Oslo - Bergen", description = null)
+    val created = buildRoute(id = 1L, name = "Oslo - Bergen")
+    coEvery { routeService.create(any()) } returns created
+
+    webTestClient.post().uri("/api/v1/routes")
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(request)
+        .exchange()
+        .expectStatus().isCreated
+        .expectBody()
+        .jsonPath("$.id").isEqualTo(1L)
+}
+```
