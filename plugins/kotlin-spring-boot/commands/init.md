@@ -21,15 +21,17 @@ No match → not a Kotlin Spring Boot project. Write nothing. Stop.
 
 ### Check for existing file
 
-If `.claude/entur/kotlin-spring-boot.json` exists and `$ARGUMENTS` doesn't contain `--force`:
+If `.claude/entur/kotlin-spring-boot.json` exists:
 
-- Show current values
-- Ask: overwrite all, edit specific axes, or cancel
-- Cancel → stop. Edit → only re-prompt the chosen axes; keep the rest.
+- **Without `--force`**: show current values, then ask: overwrite all, edit specific axes, or cancel.
+  - Cancel → stop.
+  - Edit → re-prompt only the chosen axes; keep all other values unchanged.
+  - Overwrite → proceed to "Detect axes" as if no file existed.
+- **With `--force`**: skip this step entirely and proceed directly to "Detect axes".
 
 ### Detect axes
 
-Read `build.gradle.kts`, `build.gradle`, `pom.xml`, `gradle/libs.versions.toml`, `settings.gradle.kts`. Auto-fill confident detections; ask only when ambiguous or undetected.
+Read `build.gradle.kts`, `build.gradle`, `pom.xml`, `gradle/libs.versions.toml`. Auto-fill confident detections; ask only when ambiguous or undetected.
 
 | Axis | Signal | Default |
 |---|---|---|
@@ -61,7 +63,6 @@ Path: `.claude/entur/kotlin-spring-boot.json`. Two-space indent. Create parent d
 
 ```json
 {
-  "$schema": "https://entur.github.io/ai/schemas/kotlin-spring-boot-stack.json",
   "version": 1,
   "generated_at": "<ISO 8601 UTC>",
   "build_tool": "<value>",
