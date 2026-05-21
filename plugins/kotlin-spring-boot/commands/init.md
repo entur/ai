@@ -84,7 +84,7 @@ Print one axis per line. Then:
 > Stack file written. Commit so teammates pick it up:
 >
 >     git add .claude/entur/kotlin-spring-boot.json
->     git commit -m 'chore: initialize kotlin-spring-boot stack file'
+>     git commit -m 'chore(kotlin-spring-boot): initialize stack file'
 
 ## Constraints
 

@@ -169,7 +169,8 @@ class RouteServiceImpl(private val routeDao: RouteDao) : RouteService {
     override fun findById(id: Long): Route = routeDao.findById(id) ?: throw RouteNotFoundException(id)
 
     @CacheEvict("routes", key = "#id")
-    override fun update(id: Long, command: UpdateRouteCommand): Route = routeDao.update(id, command)!!
+    override fun update(id: Long, command: UpdateRouteCommand): Route =
+        routeDao.update(id, command) ?: throw RouteNotFoundException(id)
 }
 ```
 

@@ -28,6 +28,7 @@ Read `.claude/entur/kotlin-spring-boot.json` (committed, team-shared). Shape:
 ```json
 {
   "version": 1,
+  "generated_at": "<ISO 8601 UTC>",
   "build_tool": "gradle | maven",
   "spring_stack": "mvc | webflux",
   "api_approach": "contract-first | traditional",
@@ -105,14 +106,14 @@ Load the reference matching the file you're editing. Inside it, apply sections m
 
 ## Non-negotiable Entur rules
 
-These apply to every project. Kept here so devs who install only this plugin still see them.
+These apply to every project. Keep them here so this plugin still enforces correct behavior when installed alone.
 
 1. Secrets: Google Secret Manager + ExternalSecrets in Helm. Never hardcoded.
 2. IAM roles: only from the Entur approved list. Anything else needs platform-team approval (`#talk-utviklerplattform`).
 3. Terraform modules: `terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`.
 4. CI/CD: Entur reusable GitHub Actions workflows. No custom CI steps.
 5. K8s: Entur `common` Helm chart.
-6. Pin everything — Gradle catalog or Maven `<dependencyManagement>`, Terraform `?ref=TAG`, Actions `@vN`, Docker by exact tag.
+6. Pin everything, Gradle catalog or Maven `<dependencyManagement>`, Terraform `?ref=TAG`, Actions `@vN`, Docker by exact tag.
 7. Every service: liveness + readiness probes, structured logging via `entur/cloud-logging`, Prometheus metrics.
 8. GCP region: `europe-west1`.
 9. Conventional commits (release-please needs them).
