@@ -5,7 +5,7 @@ description: >
   testing, logging, build, config. Triggered when editing .kt/.kts, build.gradle.kts,
   gradle/libs.versions.toml, or pom.xml in a Spring Boot repo. Stack axes
   (mvc/webflux, jpa/exposed/jdbc, mockk/mockito, kotest/assertj, formatter)
-  read from .claude/entur/kotlin-spring-boot.json. Skip for plain Java (.java),
+  read from .entur/ai/kotlin-spring-boot.json. Skip for plain Java (.java),
   non-Spring Kotlin (Ktor, Android, CLI), and repos without spring-boot-starter-*.
 ---
 
@@ -23,7 +23,7 @@ Otherwise exit silently.
 
 ## Stack file
 
-Read `.claude/entur/kotlin-spring-boot.json` (committed, team-shared). Shape:
+Read `.entur/ai/kotlin-spring-boot.json` (committed, team-shared). Shape:
 
 ```json
 {
@@ -63,7 +63,7 @@ New code added to a legacy repo should follow the same patterns already present,
 
 Detect axes from build files using the table in [`commands/init.md`](../../commands/init.md). Once per session, tell the user:
 
-> `.claude/entur/kotlin-spring-boot.json` is missing. Run `/kotlin-spring-boot:init` to generate it.
+> `.entur/ai/kotlin-spring-boot.json` is missing. Run `/kotlin-spring-boot:init` to generate it.
 
 Then proceed. Don't block.
 

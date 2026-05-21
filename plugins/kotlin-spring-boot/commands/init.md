@@ -1,11 +1,11 @@
 ---
-description: Scan the repo and write .claude/entur/kotlin-spring-boot.json. Run once per repo, then commit it.
+description: Scan the repo and write .entur/ai/kotlin-spring-boot.json. Run once per repo, then commit it.
 argument-hint: "[--force]"
 ---
 
 # Initialize Kotlin Spring Boot stack file
 
-Write `.claude/entur/kotlin-spring-boot.json` so the conventions skill matches this repo's stack. Commit the file.
+Write `.entur/ai/kotlin-spring-boot.json` so the conventions skill matches this repo's stack. Commit the file.
 
 ## Steps
 
@@ -21,7 +21,7 @@ No match → not a Kotlin Spring Boot project. Write nothing. Stop.
 
 ### Check for existing file
 
-If `.claude/entur/kotlin-spring-boot.json` exists:
+If `.entur/ai/kotlin-spring-boot.json` exists:
 
 - **Without `--force`**: show current values, then ask: overwrite all, edit specific axes, or cancel.
   - Cancel → stop.
@@ -59,7 +59,7 @@ Ambiguity:
 
 ### Write the file
 
-Path: `.claude/entur/kotlin-spring-boot.json`. Two-space indent. Create parent dirs.
+Path: `.entur/ai/kotlin-spring-boot.json`. Two-space indent. Create parent dirs.
 
 ```json
 {
@@ -83,12 +83,12 @@ Print one axis per line. Then:
 
 > Stack file written. Commit so teammates pick it up:
 >
->     git add .claude/entur/kotlin-spring-boot.json
+>     git add .entur/ai/kotlin-spring-boot.json
 >     git commit -m 'chore(kotlin-spring-boot): initialize stack file'
 
 ## Constraints
 
-- Don't modify build files, source code, or anything outside `.claude/entur/`
+- Don't modify build files, source code, or anything outside `.entur/ai/`
 - Read values from the actual repo files; don't infer from training data
 - If a build file is unreadable or unparseable, ask the user; don't guess
 - Don't write secrets, internal URLs, or environment-specific values

@@ -5,8 +5,8 @@
 
 set -eu
 
-STACK_FILE=".claude/entur/kotlin-spring-boot.json"
-CHANGED_FILES_FILE=".claude/entur/kotlin-spring-boot.changed-files"
+STACK_FILE=".entur/ai/kotlin-spring-boot.json"
+CHANGED_FILES_FILE=".entur/ai/kotlin-spring-boot.changed-files"
 [ -f "$STACK_FILE" ] || exit 0
 
 FORMATTER=$(jq -r '.formatter // ""' "$STACK_FILE" 2>/dev/null) || exit 0

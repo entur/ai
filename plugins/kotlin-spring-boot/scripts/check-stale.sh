@@ -5,7 +5,7 @@
 
 set -eu
 
-STACK_FILE=".claude/entur/kotlin-spring-boot.json"
+STACK_FILE=".entur/ai/kotlin-spring-boot.json"
 [ -f "$STACK_FILE" ] || exit 0
 
 FILE=$(jq -r '.tool_input.file_path // empty' 2>/dev/null) || exit 0

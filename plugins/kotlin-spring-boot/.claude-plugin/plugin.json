@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "kotlin-spring-boot",
   "version": "0.2.0",
-  "description": "Entur Kotlin Spring Boot conventions, LSP, and formatting. Stack axes (build tool, spring stack, db, test libs, formatter) are configured per repo via /kotlin-spring-boot:init, which writes .claude/entur/kotlin-spring-boot.json.",
+  "description": "Entur Kotlin Spring Boot conventions, LSP, and formatting. Stack axes (build tool, spring stack, db, test libs, formatter) are configured per repo via /kotlin-spring-boot:init, which writes .entur/ai/kotlin-spring-boot.json.",
   "author": {
     "name": "Team Plattform",
     "email": "support@entur.org"
