@@ -14,16 +14,19 @@ Java conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS
 
 ### build.gradle.kts
 
+Use the version catalog (`gradle/libs.versions.toml`) for all versions, and apply Spring plugins via `alias(libs.plugins.x)`. See [kotlin.md](kotlin.md#version-catalog-gradlelibsversionstoml) for a full catalog example.
+
 ```kotlin
 plugins {
     java
-    id("org.springframework.boot") version libs.versions.springBoot
-    id("io.spring.dependency-management") version libs.versions.springDependencyManagement
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.mgmt)
 }
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
+        vendor = JvmVendorSpec.BELLSOFT          // Liberica JDK (preferred)
     }
 }
 
@@ -34,31 +37,21 @@ tasks.withType<Test> {
 
 ### Dockerfile
 
-See [docker.md](docker.md) for Dockerfile conventions, base images, and multi-stage builds. Simple example:
-
-```dockerfile
-FROM eclipse-temurin:25-jre-alpine
-WORKDIR /app
-COPY build/libs/*.jar app.jar
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
+See [docker.md](docker.md) for Dockerfile conventions, base images, and multi-stage builds. The preferred base image for Java/Kotlin is `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl` (Liberica with Class Data Sharing).
 
 ## Logging
 
-Use [entur/cloud-logging](https://github.com/entur/cloud-logging) for structured JSON logging on GCP. See [logging.md](logging.md) for general standards.
+Use `entur/cloud-logging` for structured JSON logging on GCP. See [logging.md](logging.md) for general standards.
 
 ### Setup
 
+Pin the cloud-logging version in `gradle/libs.versions.toml` (see [kotlin.md](kotlin.md#version-catalog-gradlelibsversionstoml) for the canonical catalog layout), then:
+
 ```kotlin
 // build.gradle.kts
-val cloudLoggingVersion = "x.y.z"  // check Maven Central for latest
-
 dependencies {
-    implementation(platform("no.entur.logging.cloud:bom:$cloudLoggingVersion"))
-    testImplementation(platform("no.entur.logging.cloud:bom:$cloudLoggingVersion"))
+    implementation(platform(libs.entur.cloud.logging.bom))
+    testImplementation(platform(libs.entur.cloud.logging.bom))
     implementation("no.entur.logging.cloud:spring-boot-starter-gcp-web")
     testImplementation("no.entur.logging.cloud:spring-boot-starter-gcp-web-test")
 }
@@ -159,10 +152,10 @@ management:
         liveness:
           include: livenessState
         readiness:
-          include: readinessState, db
+          include: readinessState     # add ',db' for services with a database; including 'db' without a DataSource breaks startup
   metrics:
     tags:
-      application: ${spring.application.name}
+      application: ${APPLICATION_NAME:my-application}
 ```
 
 ### Health Checks
@@ -180,7 +173,7 @@ These are defaults in the Entur common Helm chart. Do not change unless you also
 
 - Use constructor injection (not field injection with `@Autowired`)
 - Use Java records for DTOs and value objects
-- ALWAYS use `Optional` for return types that may be absent
+- Use `Optional` for return types only when absence is a normal outcome. Never use `Optional` for fields, parameters, or collection elements (return an empty collection instead).
 - Use `@Transactional(readOnly = true)` for read operations
 - Validate inputs at the controller boundary with `@Valid`
 - Use a mapper layer to convert between entities and DTOs
