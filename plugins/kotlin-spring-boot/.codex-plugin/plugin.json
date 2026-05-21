@@ -1,0 +1,34 @@
+{
+  "name": "kotlin-spring-boot",
+  "version": "0.2.0",
+  "description": "Entur Kotlin Spring Boot conventions, LSP, and formatting. Stack axes (build tool, spring stack, db, test libs, formatter) are configured per repo via /kotlin-spring-boot:init, which writes .claude/entur/kotlin-spring-boot.json.",
+  "author": {
+    "name": "Team Plattform",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "kotlin",
+    "spring-boot",
+    "gradle",
+    "maven",
+    "conventions",
+    "lsp",
+    "ktlint"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Kotlin Spring Boot",
+    "shortDescription": "Repo-scoped Kotlin Spring Boot conventions for Entur projects.",
+    "longDescription": "Applies Kotlin Spring Boot guidance scoped by a team-owned stack file, including Gradle/Maven-aware build conventions and formatter hooks.",
+    "developerName": "Team Plattform",
+    "category": "Conventions",
+    "capabilities": [
+      "Write"
+    ],
+    "websiteURL": "https://github.com/entur/ai"
+  }
+}
