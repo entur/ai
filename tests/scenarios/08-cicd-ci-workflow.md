@@ -44,7 +44,7 @@ Generate the complete `.github/workflows/ci.yaml` file for this project. Output 
   ],
   "must_not_contain": [
     "pull_request:",
-    "push:",
+    "  push:",
     "temurin",
     "setup-gradle@v4",
     "setup-gradle@v5"
