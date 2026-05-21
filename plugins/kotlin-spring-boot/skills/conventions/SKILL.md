@@ -23,7 +23,7 @@ Otherwise exit silently.
 
 ## Stack file
 
-Read `.claude/entur/kotlin-spring-boot.json` (committed, team-shared). Schema:
+Read `.claude/entur/kotlin-spring-boot.json` (committed, team-shared). Shape:
 
 ```json
 {
@@ -43,6 +43,18 @@ Read `.claude/entur/kotlin-spring-boot.json` (committed, team-shared). Schema:
 Use values as-is. Respect `notes` — if the team explained a non-default choice, don't argue with it.
 
 `legacy_mode: true` means: no toolchain upgrades, no version catalog migrations, no framework bumps, no pattern rewrites. Match existing style; fix bugs, add tests, make small additions.
+
+Patterns to tolerate without correction in `legacy_mode: true` repos:
+
+- `@Autowired` field injection — do not refactor to constructor injection
+- `Optional<T>` return types — do not replace with `T?`
+- `var` on injected fields — do not change to `val`
+- `WebSecurityConfigurerAdapter` Spring Security config — do not migrate to `SecurityFilterChain`
+- Spring Boot 2.x property names — do not rename to 3.x equivalents
+- Inline versions in `build.gradle.kts` without a version catalog — do not migrate to `libs.versions.toml`
+- JUnit 4 annotations (`@RunWith`, `@Before`, `@After`) — do not migrate to JUnit 5
+
+New code added to a legacy repo should follow the same patterns already present, not introduce Kotlin or Spring idioms that clash with the surrounding code.
 
 `version > 1`: stop. The plugin is older than the stack file and must be upgraded.
 
@@ -64,6 +76,8 @@ Then proceed. Don't block.
 
 Load the reference matching the file you're editing. Inside it, apply sections matching the active stack axes — skip the rest.
 
+`references/build.md` is split by `build_tool`. Never mix Gradle snippets into Maven repos or Maven XML into Gradle repos.
+
 | When editing | Read |
 |---|---|
 | `build.gradle.kts`, `build.gradle`, `pom.xml`, `gradle/libs.versions.toml`, `settings.gradle.kts` | `references/build.md` |
@@ -72,6 +86,7 @@ Load the reference matching the file you're editing. Inside it, apply sections m
 | `**/test/**/*.kt`, `*Test.kt`, `*IntegrationTest.kt`, `TestContainersConfig` | `references/testing.md` |
 | Code using SLF4J `Logger`/`LoggerFactory` or `entur.logging.*` config | `references/logging.md` |
 | `application.yml`, `application-*.yml` | `references/config.md` |
+| Code using `MeterRegistry`, `Counter`, `Timer`, `Gauge`, `@Timed` | `references/observability.md` |
 
 ## Kotlin principles
 
@@ -106,4 +121,4 @@ These apply to every project. Kept here so devs who install only this plugin sti
 
 ## Out of scope
 
-Kotlin Spring Boot code. For CI/CD, Helm, Terraform, Kafka, security, scaffolding, or writing formats, send the user to the Entur marketplace at https://github.com/entur/ai (`/plugin marketplace add entur/ai`).
+This skill covers Kotlin Spring Boot application code only. For CI/CD, Helm, Terraform, Kafka, security, scaffolding, or writing format conventions, direct the user to the Entur marketplace at https://github.com/entur/ai (`/plugin marketplace add entur/ai`).
