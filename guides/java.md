@@ -306,7 +306,7 @@ Credentials: `$HOME/.gradle/gradle.properties` locally, or `ARTIFACTORY_AUTH_USE
 
 Total DB connections = `number_of_pods * max_pool_size_per_pod`. HikariCP defaults to pool size 10. With 5 pods: `5 * 10 = 50` connections.
 
-Ensure Cloud SQL `max_connections` (minus 3 reserved) handles worst-case HPA pod count. See [Terraform modules](terraform/modules.md) for Cloud SQL sizing.
+Ensure Cloud SQL `max_connections` (minus 3 reserved) handles worst-case HPA pod count. See [Terraform modules](terraform/modules.md) for Cloud SQL sizing, and [sql.md](sql.md#connection-pooling) for tuning guidance.
 
 ## Rate Limiting
 
@@ -350,3 +350,5 @@ spring:
 ```
 
 `PG_USER`, `PG_PASSWORD`, `DB_NAME` come from Kubernetes secrets created by `terraform-google-sql-db`.
+
+For query performance, indexing, transactions, and migration patterns see [sql.md](sql.md).

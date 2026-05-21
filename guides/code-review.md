@@ -50,7 +50,19 @@ How was this tested? Any manual verification steps?
 - Input validated at boundaries
 - Error responses return only client-safe information
 - IAM roles from [approved list](terraform/iam-roles.md) only
+
+### Database
+
+See [sql.md](sql.md) for the full guideline.
+
 - SQL uses parameterized statements (no string concatenation)
+- No N+1 query patterns -- lazy loads outside loops; joins / `@EntityGraph` / `@BatchSize` where collections are traversed
+- New foreign-key columns are indexed; new indexes are justified by an actual query pattern
+- Transactions are short and contain no HTTP / Kafka / Redis calls
+- Read-only queries marked `readOnly = true`
+- Flyway migrations are forward-compatible; large-table index creation uses `CREATE INDEX CONCURRENTLY`
+- Already-applied migrations are not edited -- forward-fix in a new migration
+- Integration tests use Testcontainers Postgres, not an in-memory DB
 
 ### Entur Platform Compliance
 

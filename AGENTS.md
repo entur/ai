@@ -65,6 +65,7 @@ Always read `CONVENTIONS.md` first for cross-cutting standards.
 | **Go code** | [go.md](guides/go.md) |
 | **API design** | [api-design.md](guides/api-design.md) |
 | **Architecture** | [architecture.md](guides/architecture.md) |
+| **SQL / Database** | [sql.md](guides/sql.md) |
 | **Kafka** | [kafka.md](guides/kafka.md) |
 | **Authorization** | [authorization.md](guides/authorization.md) |
 | **Terraform / GCP** | [terraform/modules.md](guides/terraform/modules.md), [terraform/iam-roles.md](guides/terraform/iam-roles.md), [terraform/state-management.md](guides/terraform/state-management.md) |

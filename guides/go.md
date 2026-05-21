@@ -103,6 +103,37 @@ Use environment variables for all configuration. Use `caarlos0/env` struct tags 
 - Write mocks by hand or use `testify/mock`
 - Use `testcontainers-go` for integration tests with databases
 
+## Postgres (Cloud SQL)
+
+Entur uses **Google Cloud SQL for PostgreSQL**. Infrastructure via `terraform-google-sql-db` (see [terraform/modules.md](terraform/modules.md#cloud-sql-postgresql)). The app connects via the Cloud SQL Auth Proxy sidecar (configured in Helm, see [helm.md](helm.md#database-cloud-sql-proxy)) at `localhost:5432`. Credentials (`DB_NAME`, `PG_USER`, `PG_PASSWORD`) inject from Kubernetes secrets.
+
+For query design, indexing, transactions, migrations, and Cloud SQL operational patterns see [sql.md](sql.md). Go-specific notes below.
+
+### Driver
+
+Prefer [`jackc/pgx/v5`](https://github.com/jackc/pgx) (`pgxpool` for pooled access). `database/sql` + `lib/pq` is acceptable when an existing dependency requires the `sql.DB` interface.
+
+### Connection Pool
+
+Tune against worst-case HPA pod count -- total connections = `pods * MaxOpenConns` must stay below Cloud SQL `max_connections - 3`.
+
+```go
+pool.Config().MaxConns = 10
+pool.Config().MinConns = 2
+pool.Config().MaxConnLifetime = 30 * time.Minute
+pool.Config().MaxConnIdleTime = 10 * time.Minute
+```
+
+For `database/sql`: `db.SetMaxOpenConns`, `SetMaxIdleConns`, `SetConnMaxLifetime` -- keep `ConnMaxLifetime` ≤ 30 minutes so the pool tolerates Cloud SQL proxy restarts.
+
+### Migrations
+
+Use [`golang-migrate`](https://github.com/golang-migrate/migrate) with migration files in `db/migration/`. Run on application startup or as a dedicated K8s Job. See migration safety patterns in [sql.md](sql.md#migrations-flyway).
+
+### Testing
+
+Use `testcontainers-go` with the `postgres` module and run migrations during test setup so a broken migration fails CI rather than a deploy.
+
 ## Redis (Memorystore)
 
 Entur uses **Google Memorystore for Redis**. Infrastructure via `terraform-google-memorystore` (see [terraform/modules.md](terraform/modules.md#memorystore-redis)). Credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) injected via Kubernetes secrets.
