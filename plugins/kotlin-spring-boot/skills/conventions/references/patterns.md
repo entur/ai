@@ -223,7 +223,7 @@ when (val result = routeService.tryCreate(command)) {
 ```kotlin
 object RouteConstants {
     const val MAX_NAME_LENGTH = 100
-    const val DEFAULT_STATUS = "ACTIVE"
+    val DEFAULT_STATUS: RouteStatus = RouteStatus.ACTIVE
 }
 ```
 

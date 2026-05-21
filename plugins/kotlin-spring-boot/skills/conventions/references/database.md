@@ -127,7 +127,7 @@ Spring Data JDBC: simpler than JPA. No lazy loading, no entity lifecycle, no byt
 ```kotlin
 @Table("routes")
 data class RouteEntity(
-    @Id val id: Long = 0,
+    @Id val id: Long? = null,           // null = unsaved; set by database on insert
     val name: String,
     val description: String? = null,
     val status: String = RouteStatus.ACTIVE.name,
@@ -135,7 +135,7 @@ data class RouteEntity(
 )
 ```
 
-- No `@Entity`, no `@GeneratedValue` — Spring Data JDBC uses the database-generated ID automatically when `id = 0`
+- No `@Entity`, no `@GeneratedValue` — Spring Data JDBC detects a `null` `@Id` field as a new entity and uses the database-generated value after insert
 - No lazy loading to avoid — all associations are eager by default
 
 ### Repository
@@ -179,7 +179,7 @@ class RouteDaoImpl(
         ).toDomain()
 
     private fun RouteEntity.toDomain() = Route(
-        id          = id,
+        id          = requireNotNull(id) { "Entity missing persisted ID" },
         name        = name,
         description = description,
         status      = RouteStatus.valueOf(status),
