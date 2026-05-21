@@ -1,10 +1,20 @@
 # Build
 
-Gradle Kotlin DSL is the default. Maven uses equivalent plugins (`kotlin-maven-plugin`, `spring-boot-maven-plugin`, `openapi-generator-maven-plugin`).
+Follow the `build_tool` axis strictly.
+
+- `build_tool=gradle`: use only Gradle snippets.
+- `build_tool=maven`: use only Maven snippets.
+
+Never emit Gradle blocks in a Maven repo, and never emit Maven XML in a Gradle repo.
 
 ## Pin versions, never invent them
 
-Read versions from `gradle/libs.versions.toml` (Gradle) or `pom.xml` `<dependencyManagement>` (Maven). For new Entur libraries, fetch artifact list and BOM coordinates from the source repo:
+Read versions from repo sources:
+
+- Gradle: `gradle/libs.versions.toml`
+- Maven: `pom.xml` (`<properties>` and `<dependencyManagement>`)
+
+For new Entur libraries, fetch artifact names and BOM coordinates from:
 
 | Library | Repo |
 |---|---|
@@ -14,7 +24,9 @@ Read versions from `gradle/libs.versions.toml` (Gradle) or `pom.xml` `<dependenc
 
 Other Entur libraries: search https://github.com/entur for `*-spring-boot-starter` or `*-spring-starter`.
 
-## Base build.gradle.kts
+## Base build configuration
+
+### `build_tool=gradle`
 
 ```kotlin
 plugins {
@@ -43,9 +55,70 @@ tasks.withType<Test> {
 }
 ```
 
+### `build_tool=maven`
+
+```xml
+<properties>
+  <java.version>25</java.version>
+  <kotlin.version><!-- pin --></kotlin.version>
+  <spring-boot.version><!-- pin --></spring-boot.version>
+</properties>
+
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-dependencies</artifactId>
+      <version>${spring-boot.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-maven-plugin</artifactId>
+      <version>${kotlin.version}</version>
+      <configuration>
+        <args>
+          <arg>-Xjsr305=strict</arg>
+        </args>
+        <compilerPlugins>
+          <plugin>spring</plugin>
+        </compilerPlugins>
+      </configuration>
+      <executions>
+        <execution>
+          <id>compile</id>
+          <goals>
+            <goal>compile</goal>
+          </goals>
+        </execution>
+        <execution>
+          <id>test-compile</id>
+          <goals>
+            <goal>test-compile</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+
+    <plugin>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-maven-plugin</artifactId>
+    </plugin>
+  </plugins>
+</build>
+```
+
 ## Plugin additions
 
 ### `api_approach=contract-first`
+
+#### Gradle
 
 ```kotlin
 plugins {
@@ -55,7 +128,7 @@ plugins {
 openApiGenerate {
     generatorName.set("kotlin-spring")
     inputSpec.set("$rootDir/specs/api.yaml")
-    outputDir.set("$buildDir/generated")
+    outputDir.set(layout.buildDirectory.dir("generated").get().asFile.absolutePath)
     apiPackage.set("org.entur.myapp.api")
     modelPackage.set("org.entur.myapp.model")
     configOptions.set(mapOf(
@@ -66,7 +139,7 @@ openApiGenerate {
 }
 
 sourceSets.main {
-    kotlin.srcDir("$buildDir/generated/src/main/kotlin")
+    kotlin.srcDir(layout.buildDirectory.dir("generated/src/main/kotlin"))
 }
 
 tasks.compileKotlin {
@@ -74,17 +147,68 @@ tasks.compileKotlin {
 }
 ```
 
-Add `"reactive" to "true"` to `configOptions` when also `spring_stack=webflux`.
+#### Maven
+
+```xml
+<plugin>
+  <groupId>org.openapitools</groupId>
+  <artifactId>openapi-generator-maven-plugin</artifactId>
+  <version><!-- pin --></version>
+  <executions>
+    <execution>
+      <id>generate-openapi</id>
+      <phase>generate-sources</phase>
+      <goals>
+        <goal>generate</goal>
+      </goals>
+      <configuration>
+        <generatorName>kotlin-spring</generatorName>
+        <inputSpec>${project.basedir}/specs/api.yaml</inputSpec>
+        <output>${project.build.directory}/generated</output>
+        <apiPackage>org.entur.myapp.api</apiPackage>
+        <modelPackage>org.entur.myapp.model</modelPackage>
+        <configOptions>
+          <interfaceOnly>true</interfaceOnly>
+          <useSpringBoot3>true</useSpringBoot3>
+          <useTags>true</useTags>
+        </configOptions>
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+```
+
+Set reactive mode when `spring_stack=webflux`:
+
+- Gradle: add `"reactive" to "true"` in `configOptions`.
+- Maven: add `<reactive>true</reactive>` in `<configOptions>`.
 
 ### `database=jpa`
 
+#### Gradle
+
 ```kotlin
 plugins {
-    alias(libs.plugins.kotlin.jpa)   // generates no-arg constructors for @Entity
+    alias(libs.plugins.kotlin.jpa)
 }
 ```
 
+#### Maven
+
+Enable the Kotlin JPA compiler plugin in `kotlin-maven-plugin`:
+
+```xml
+<configuration>
+  <compilerPlugins>
+    <plugin>spring</plugin>
+    <plugin>jpa</plugin>
+  </compilerPlugins>
+</configuration>
+```
+
 ### Layered Boot JAR (all Spring Boot projects)
+
+#### Gradle
 
 ```kotlin
 tasks {
@@ -107,9 +231,31 @@ tasks {
 }
 ```
 
-## gradle/libs.versions.toml
+#### Maven
 
-Versions below are placeholders. Pin to the current stable release per library — never invent a version. Check the project's existing catalog first; for new libraries, check the source repo (Entur libs above; upstream on Maven Central or GitHub releases).
+```xml
+<plugin>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-maven-plugin</artifactId>
+  <configuration>
+    <layers>
+      <enabled>true</enabled>
+      <order>
+        <layer>dependencies</layer>
+        <layer>internal-dependencies</layer>
+        <layer>spring-boot-loader</layer>
+        <layer>application</layer>
+      </order>
+    </layers>
+  </configuration>
+</plugin>
+```
+
+## Version pinning layouts
+
+### `build_tool=gradle`: `gradle/libs.versions.toml`
+
+Versions below are placeholders. Pin to real released versions from repo state or upstream sources.
 
 ```toml
 [versions]
@@ -124,124 +270,101 @@ testcontainers          = "<pin>"
 openapi-generator       = "<pin>"
 spring-mockk            = "<pin>"
 mockito-kotlin          = "<pin>"
+```
 
-[libraries]
-exposed-java-time       = { group = "org.jetbrains.exposed", name = "exposed-java-time",           version.ref = "exposed" }
-exposed-spring-boot     = { group = "org.jetbrains.exposed", name = "exposed-spring-boot-starter", version.ref = "exposed" }
+### `build_tool=maven`: `<properties>` + `<dependencyManagement>`
 
-flyway-core             = { group = "org.flywaydb",          name = "flyway-core",                version.ref = "flyway" }
-flyway-postgres         = { group = "org.flywaydb",          name = "flyway-database-postgresql", version.ref = "flyway" }
+```xml
+<properties>
+  <kotlin.version><!-- pin --></kotlin.version>
+  <spring-boot.version><!-- pin --></spring-boot.version>
+  <entur-cloud-logging.version><!-- pin --></entur-cloud-logging.version>
+  <openapi-generator.version><!-- pin --></openapi-generator.version>
+  <flyway.version><!-- pin --></flyway.version>
+</properties>
 
-# Entur cloud-logging — exact artifact names: see repo README
-entur-logging-spring    = { group = "no.entur.logging.cloud", name = "<starter-name>",      version.ref = "entur-cloud-logging" }
-entur-logging-test      = { group = "no.entur.logging.cloud", name = "<test-starter-name>", version.ref = "entur-cloud-logging" }
-
-kotest-assertions-core  = { group = "io.kotest",          name = "kotest-assertions-core", version.ref = "kotest" }
-spring-mockk            = { group = "com.ninja-squad",    name = "springmockk",            version.ref = "spring-mockk" }
-mockito-kotlin          = { group = "org.mockito.kotlin", name = "mockito-kotlin",         version.ref = "mockito-kotlin" }
-
-[bundles]
-exposed             = ["exposed-java-time", "exposed-spring-boot"]
-flyway              = ["flyway-core", "flyway-postgres"]
-entur-cloud-logging = ["entur-logging-spring"]
-
-[plugins]
-kotlin-jvm              = { id = "org.jetbrains.kotlin.jvm",           version.ref = "kotlin" }
-kotlin-spring           = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
-kotlin-jpa              = { id = "org.jetbrains.kotlin.plugin.jpa",    version.ref = "kotlin" }
-openapi-generator       = { id = "org.openapi.generator",              version.ref = "openapi-generator" }
-spring-boot             = { id = "org.springframework.boot",           version.ref = "spring-boot" }
-spring-dependency-mgmt  = { id = "io.spring.dependency-management",    version.ref = "spring-dependency-mgmt" }
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>no.entur.logging.cloud</groupId>
+      <artifactId>bom</artifactId>
+      <version>${entur-cloud-logging.version}</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
 ```
 
 ## Dependencies by configuration
 
+Use dependencies that match the active axes. AssertJ and Mockito core are transitively available from `spring-boot-starter-test`.
+
 ### Always
 
-```kotlin
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation(platform("no.entur.logging.cloud:bom:${libs.versions.enturCloudLogging.get()}"))
-    implementation(libs.enturLoggingSpring)        // exact starter from cloud-logging README
-    implementation("io.micrometer:micrometer-registry-prometheus")
-
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation(platform("no.entur.logging.cloud:bom:${libs.versions.enturCloudLogging.get()}"))
-    testImplementation(libs.enturLoggingTest)      // exact test starter from cloud-logging README
-    testImplementation("org.testcontainers:junit-jupiter")
-}
-```
-
-For OIDC auth, add the Entur resource-server starter and test starter from https://github.com/entur/oidc-auth-resource-server. For Kafka, use the Entur Kafka Spring starter from https://github.com/entur/entur-kafka-spring-starter. Pin both via the version catalog.
+- `org.springframework.boot:spring-boot-starter-actuator`
+- `org.springframework.boot:spring-boot-starter-validation`
+- `io.micrometer:micrometer-registry-prometheus`
+- Entur cloud-logging BOM + matching runtime/test starter artifacts
+- `org.springframework.boot:spring-boot-starter-test`
+- `org.testcontainers:junit-jupiter`
 
 ### `spring_stack=mvc`
-```kotlin
-implementation("org.springframework.boot:spring-boot-starter-web")
-```
+
+- `org.springframework.boot:spring-boot-starter-web`
 
 ### `spring_stack=webflux`
-```kotlin
-implementation("org.springframework.boot:spring-boot-starter-webflux")
-implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-```
+
+- `org.springframework.boot:spring-boot-starter-webflux`
+- `org.jetbrains.kotlinx:kotlinx-coroutines-reactor`
 
 ### `database=exposed`
-```kotlin
-implementation(libs.bundles.exposed)
-implementation(libs.bundles.flyway)
-runtimeOnly("org.postgresql:postgresql")
-testImplementation("org.testcontainers:postgresql")
-```
+
+- `org.jetbrains.exposed:exposed-java-time`
+- `org.jetbrains.exposed:exposed-spring-boot-starter`
+- `org.flywaydb:flyway-core`
+- `org.flywaydb:flyway-database-postgresql`
+- `org.postgresql:postgresql` (runtime)
+- `org.testcontainers:postgresql` (test)
 
 ### `database=spring-data-jdbc`
-```kotlin
-implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-implementation(libs.bundles.flyway)
-runtimeOnly("org.postgresql:postgresql")
-testImplementation("org.testcontainers:postgresql")
-```
+
+- `org.springframework.boot:spring-boot-starter-data-jdbc`
+- `org.flywaydb:flyway-core`
+- `org.flywaydb:flyway-database-postgresql`
+- `org.postgresql:postgresql` (runtime)
+- `org.testcontainers:postgresql` (test)
 
 ### `database=jpa`
-```kotlin
-implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-implementation(libs.bundles.flyway)
-runtimeOnly("org.postgresql:postgresql")
-testImplementation("org.testcontainers:postgresql")
-```
+
+- `org.springframework.boot:spring-boot-starter-data-jpa`
+- `org.flywaydb:flyway-core`
+- `org.flywaydb:flyway-database-postgresql`
+- `org.postgresql:postgresql` (runtime)
+- `org.testcontainers:postgresql` (test)
 
 ### Test libraries
 
-AssertJ and mockito-core come transitively via `spring-boot-starter-test`. Add only the entries matching the active config.
-
 | Config | Dependency |
 |---|---|
-| `test_mocking=mockk` | `testImplementation(libs.springMockk)` |
-| `test_mocking=mockito-kotlin` | `testImplementation(libs.mockitoKotlin)` |
-| `test_assertions=kotest` | `testImplementation(libs.kotestAssertionsCore)` |
-| `test_assertions=assertj` | (transitive) |
+| `test_mocking=mockk` | `com.ninja-squad:springmockk` |
+| `test_mocking=mockito-kotlin` | `org.mockito.kotlin:mockito-kotlin` |
+| `test_assertions=kotest` | `io.kotest:kotest-assertions-core` |
+| `test_assertions=assertj` | (transitive from `spring-boot-starter-test`) |
+
+For OIDC auth and Kafka, add the matching Entur starters from their source repos and pin versions via catalog/properties.
 
 ## Artifactory (JFrog)
 
-Entur-internal release artifacts live in JFrog. Treat the URL as deployment config — read it from a project-specific `gradle.properties`, an env var, or an existing repo's build script. Don't hardcode internal URLs in skill output.
+Entur-internal release artifacts live in JFrog. Treat the URL as environment config; do not hardcode internal URLs in generated output.
 
-```kotlin
-repositories {
-    val artifactoryUrl: String? by project        // pin in gradle.properties or pass via -P
-    val artifactoryUser: String? by project
-    val artifactoryPassword: String? by project
+### `build_tool=gradle`
 
-    if (!artifactoryUrl.isNullOrBlank()) {
-        maven {
-            name = "Entur JFrog"
-            url = URI(artifactoryUrl)
-            credentials {
-                username = artifactoryUser ?: System.getenv("ARTIFACTORY_AUTH_USER")
-                password = artifactoryPassword ?: System.getenv("ARTIFACTORY_AUTH_TOKEN")
-            }
-        }
-    }
-}
-```
+Read URL/credentials from `gradle.properties` and/or environment variables:
 
-Credentials: `~/.gradle/gradle.properties` locally, `ARTIFACTORY_AUTH_USER` / `ARTIFACTORY_AUTH_TOKEN` org secrets in CI. Ask the team or check an existing repo for the current Artifactory URL.
+- local: `~/.gradle/gradle.properties`
+- CI: `ARTIFACTORY_AUTH_USER`, `ARTIFACTORY_AUTH_TOKEN`
+
+### `build_tool=maven`
+
+Read repository URL from project POM/profiles, and credentials from `~/.m2/settings.xml` (local) or CI secrets.
