@@ -11,7 +11,9 @@ For request-level HTTP metrics (request counts, latency by status code, error ra
 class RouteServiceImpl(
     private val routeDao: RouteDao,
     private val meterRegistry: MeterRegistry,
-) : RouteService
+) : RouteService {
+    // ...
+}
 ```
 
 Spring Boot auto-configures and injects `MeterRegistry`. Add it as a constructor parameter on any Spring-managed class.

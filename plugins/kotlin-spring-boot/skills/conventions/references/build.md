@@ -90,6 +90,7 @@ tasks.withType<Test> {
           <plugin>spring</plugin>
         </compilerPlugins>
       </configuration>
+      <!-- compile and test-compile are sufficient for pure Kotlin; add all-compile if mixing Kotlin and Java -->
       <executions>
         <execution>
           <id>compile</id>
