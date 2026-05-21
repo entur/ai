@@ -385,7 +385,7 @@ class RouteControllerTest(
 }
 ```
 
-For POST/PUT with a request body, use `.bodyValue(request)` and `.contentType(MediaType.APPLICATION_JSON)`:
+For POST/PUT with a request body, use `.bodyValue(request)` and `.contentType(MediaType.APPLICATION_JSON)`. Add inside `RouteControllerTest`:
 
 ```kotlin
 @Test
