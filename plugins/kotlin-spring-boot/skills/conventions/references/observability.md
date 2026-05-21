@@ -2,6 +2,8 @@
 
 Micrometer is on the classpath via `spring-boot-starter-actuator`. Metrics are exposed at `/actuator/prometheus` and scraped by the Entur platform. No extra dependency is needed to use `MeterRegistry`.
 
+For request-level HTTP metrics (request counts, latency by status code, error rates), check the cloud-logging library first — it ships built-in integrations via the same BOM. See `references/logging.md` and https://github.com/entur/cloud-logging. The patterns below cover custom business metrics that cloud-logging does not provide.
+
 ## Injecting MeterRegistry
 
 ```kotlin
@@ -41,7 +43,7 @@ private val findTimer = Timer.builder("route.find.duration")
     .register(meterRegistry)
 
 override fun findById(id: Long): Route =
-    findTimer.recordCallable {
+    findTimer.record {
         routeDao.findById(id) ?: throw RouteNotFoundException(id)
     }!!
 ```
