@@ -50,7 +50,6 @@ How was this tested? Any manual verification steps?
 - Input validated at boundaries
 - Error responses return only client-safe information
 - IAM roles from [approved list](terraform/iam-roles.md) only
-- SQL uses parameterized statements (no string concatenation)
 
 ### Database
 
