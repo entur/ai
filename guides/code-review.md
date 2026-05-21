@@ -52,6 +52,19 @@ How was this tested? Any manual verification steps?
 - IAM roles from [approved list](terraform/iam-roles.md) only
 - SQL uses parameterized statements (no string concatenation)
 
+### Database
+
+See [sql.md](sql.md) for the full guideline.
+
+- SQL uses parameterized statements (no string concatenation)
+- No N+1 query patterns -- lazy loads outside loops; joins / `@EntityGraph` / `@BatchSize` where collections are traversed
+- New foreign-key columns are indexed; new indexes are justified by an actual query pattern
+- Transactions are short and contain no HTTP / Kafka / Redis calls
+- Read-only queries marked `readOnly = true`
+- Flyway migrations are forward-compatible; large-table index creation uses `CREATE INDEX CONCURRENTLY`
+- Already-applied migrations are not edited -- forward-fix in a new migration
+- Integration tests use Testcontainers Postgres, not an in-memory DB
+
 ### Entur Platform Compliance
 
 - Uses Entur shared Terraform modules (not raw GCP resources)

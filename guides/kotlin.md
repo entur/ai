@@ -147,6 +147,8 @@ For simpler projects without OpenAPI Generator, use extension functions (e.g., `
 
 ### Database Access with Exposed SQL-DSL
 
+For Postgres performance, indexing, transactions, and migration patterns see [sql.md](sql.md). Exposed-specific patterns below.
+
 Exposed provides a typesafe SQL DSL without ORM magic.
 
 #### Entity Definition
