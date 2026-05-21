@@ -80,6 +80,7 @@ Always read `CONVENTIONS.md` first for cross-cutting standards.
 | **Code review** | [code-review.md](guides/code-review.md) |
 | **Markdown format** | [markdown.md](guides/markdown.md) |
 | **Writing docs** | [documentation.md](guides/documentation.md), [markdown.md](guides/markdown.md) |
+| **UI / Design system / Branding** | Load skill: `https://raw.githubusercontent.com/entur/design-system/main/skills/entur-linje/SKILL.md` |
 
 ## Critical Rules
 
