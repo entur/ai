@@ -82,9 +82,11 @@ Path: `.entur/ai/kotlin-spring-boot.json`. Two-space indent. Create parent dirs.
 Print one axis per line. Then:
 
 > Stack file written. Commit so teammates pick it up:
->
->     git add .entur/ai/kotlin-spring-boot.json
->     git commit -m 'chore(kotlin-spring-boot): initialize stack file'
+
+```bash
+git add .entur/ai/kotlin-spring-boot.json
+git commit -m 'chore(kotlin-spring-boot): initialize stack file'
+```
 
 ## Constraints
 

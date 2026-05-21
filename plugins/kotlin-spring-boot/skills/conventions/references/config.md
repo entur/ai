@@ -176,7 +176,7 @@ class RouteServiceImpl(private val routeDao: RouteDao) : RouteService {
 
 ### Key naming convention
 
-```
+```text
 {app}:{domain}:{id}          → route cache: products-api:route:42
 {app}:rate:{clientId}        → rate limiting: products-api:rate:partner-xyz
 {app}:lock:{resource}        → distributed locks: products-api:lock:route-42
@@ -192,4 +192,3 @@ class RouteServiceImpl(private val routeDao: RouteDao) : RouteService {
 - Values under ~100 KB. Use Cloud Storage for larger objects.
 - Pipeline batch operations.
 - Messaging goes through Kafka, not Redis Pub/Sub. Pub/Sub has no persistence or delivery guarantees.
-
