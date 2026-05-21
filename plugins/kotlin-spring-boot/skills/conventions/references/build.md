@@ -240,16 +240,12 @@ tasks {
   <configuration>
     <layers>
       <enabled>true</enabled>
-      <order>
-        <layer>dependencies</layer>
-        <layer>internal-dependencies</layer>
-        <layer>spring-boot-loader</layer>
-        <layer>application</layer>
-      </order>
     </layers>
   </configuration>
 </plugin>
 ```
+
+Maven uses Spring Boot's default layer order. For custom ordering matching the Gradle setup above, define a `layers.xml` and reference it via `<configuration>` — see the Spring Boot Maven plugin docs.
 
 ## Version pinning layouts
 
