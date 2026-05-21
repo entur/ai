@@ -81,6 +81,7 @@ Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (
 | Reusable GitHub Actions workflows | [platform/gha-workflows.md](guides/platform/gha-workflows.md) |
 | Composite GHA actions | [platform/gha-actions.md](guides/platform/gha-actions.md) |
 | Terraform modules (init, SQL, Redis, GCS) | [platform/terraform-modules.md](guides/platform/terraform-modules.md) |
+| Terraform state management | [platform/state-management.md](guides/platform/state-management.md) |
 | Allowed IAM roles | [platform/iam-roles.md](guides/platform/iam-roles.md) |
 | Permission Store + Permission Client | [platform/permission-store.md](guides/platform/permission-store.md) |
 | Entur Kafka Spring starter (Aiven) | [platform/entur-kafka-starter.md](guides/platform/entur-kafka-starter.md) |
