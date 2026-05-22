@@ -119,42 +119,58 @@ For agents that cannot fetch URLs, the most important rules are already inline i
 
 ## Documentation Structure
 
+The `guides/` folder is split into three layers along the internal developer platform value chain:
+
+- **`platform/`** -- what the platform provides (self-service, common Helm chart, reusable workflows, Terraform modules, Permission Store, Kafka starter).
+- **`playbooks/`** -- end-to-end tasks (bootstrap, add a database, deploy to prd, etc). These are the agent's recommended entry point for multi-step work.
+- **`reference/`** -- language and topic standards (Java, Kotlin, Go, Docker, observability, security, code review, docs).
+
 ```text
-AGENTS.md                       # Top-level agent routing and critical rules
-CONVENTIONS.md                  # Cross-language coding conventions
+AGENTS.md                              # Top-level agent routing and critical rules
+CONVENTIONS.md                         # Cross-language coding conventions
 guides/
-  java.md                       # Java standards (Spring Boot, Gradle)
-  kotlin.md                     # Kotlin standards
-  go.md                         # Go standards
-  docker.md                     # Containerization with Docker
-  api-design.md                 # REST and gRPC API design
-  architecture.md               # Service and infrastructure architecture
-  logging.md                    # Structured logging
-  observability.md              # Health checks, metrics, tracing
-  security.md                   # Secrets, scanning, IAM
-  code-review.md                # Review checklist
-  helm.md                       # Entur common Helm chart reference
-  self-service.md               # Self-service provisioning, manifests, onboarding
-  markdown.md                   # Markdown standards and linting
-  terraform/
-    modules.md                  # Terraform modules (init, SQL, Redis, GCS)
-    iam-roles.md                # Approved IAM roles
-  cicd/
-    workflows.md                # CI/CD pipeline reference
-    actions.md                  # Composite actions reference
+  platform/
+    self-service.md                    # GitOps provisioning, manifests, onboarding
+    common-helm.md                     # Entur common Helm chart reference
+    gha-workflows.md                   # Reusable GitHub Actions workflows
+    gha-actions.md                     # Composite GitHub Actions
+    terraform-modules.md               # Terraform modules (init, SQL, Redis, GCS)
+    iam-roles.md                       # Approved IAM roles
+    permission-store.md                # Permission Store + Permission Client
+    entur-kafka-starter.md             # Entur Kafka Spring starter (Aiven)
+  playbooks/
+    bootstrap-service.md               # New service on the platform
+    add-postgres.md                    # Managed PostgreSQL
+    add-redis.md                       # Memorystore Redis
+    add-kafka.md                       # Aiven Kafka producer/consumer
+    set-up-auth.md                     # OIDC + Permission Store authorization
+    deploy-to-prd.md                   # Promote to production
+    deprecate-service.md               # Retire an application
+    local-dev.md                       # Run the service locally
+  reference/
+    java.md                            # Java standards (Spring Boot, Gradle)
+    kotlin.md                          # Kotlin standards
+    go.md                              # Go standards
+    docker.md                          # Containerization
+    api-design.md                      # REST and gRPC API design
+    architecture.md                    # Architecture principles, lifecycle
+    logging.md                         # Structured logging
+    observability.md                   # Health checks, metrics, tracing
+    security.md                        # Secrets, scanning, IAM
+    code-review.md                     # Review checklist
+    markdown.md                        # Markdown standards and linting
+    documentation.md                   # Writing user-facing docs
 skills/
-  README.md                     # Skill catalogue, usage guide, and how to contribute
-  entur-project-bootstrap/      # Bootstrap a new app (self-service, Helm, TF, Docker, CI/CD)
-  setup-cicd-workflows/         # Generate CI/CD workflows by language
+  README.md                            # Skill catalogue, usage guide, how to contribute
+  entur-project-bootstrap/             # Bootstrap a new app (self-service, Helm, TF, Docker, CI/CD)
+  setup-cicd-workflows/                # Generate CI/CD workflows by language
 tests/
-  README.md                     # Test usage guide and how to add scenarios
-  main.go                       # Test runner (Go, stdlib only)
-  scenario.go                   # Scenario parser and assertion evaluator
-  scenario_test.go              # Unit tests for the parser
-  scenarios/                    # Test scenarios (one .md file per test)
+  README.md                            # Test usage guide and how to add scenarios
+  main.go                              # Test runner (Go, stdlib only)
+  scenarios/                           # Test scenarios (one .md file per test)
 ```
 
-AI agents read `AGENTS.md` first, which routes them to the relevant sub-documents based on the task.
+AI agents read `AGENTS.md` first, which routes them by goal: a playbook for a multi-step task, a platform doc for a specific capability, or a reference doc for language and topic standards.
 
 ## Shared Tooling Referenced
 
@@ -178,7 +194,7 @@ A few ways to contribute:
 When submitting changes:
 
 1. Use Conventional Commits format (`<type>(<scope>): <description>`) for commit messages
-2. Do **not** introduce links to non-Entur external URLs -- see [External Links](guides/documentation.md#external-links) for the allow-list and how to handle the cases where you would have linked out
+2. Do **not** introduce links to non-Entur external URLs -- see [External Links](guides/reference/documentation.md#external-links) for the allow-list and how to handle the cases where you would have linked out
 3. Keep in mind the audience is AI agents, not humans -- be precise and structured
 4. **Run the comprehension tests** before opening a PR (see below)
 5. Get a review from the platform team

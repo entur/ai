@@ -1,6 +1,6 @@
 # Entur Terraform Modules
 
-> **GCP projects are ALWAYS provisioned through self-service manifests in `.entur/`.** Terraform manages resources _within_ an existing GCP project. See [self-service.md](../self-service.md). For help, ask in `#talk-utviklerplattform`.
+> **GCP projects are ALWAYS provisioned through self-service manifests in `.entur/`.** Terraform manages resources _within_ an existing GCP project. See [self-service.md](self-service.md). For help, ask in `#talk-utviklerplattform`.
 
 Always use Entur shared modules instead of raw `google_*` resources for managed services.
 
@@ -31,7 +31,7 @@ terraform/
 
 Data-only module that discovers GCP platform and application attributes. All other Entur modules depend on it.
 
-The `app_id` variable **must match your self-service manifest `metadata.id`**. The init module uses it to discover the GCP project (`ent-{app_id}-{env}`) provisioned by the Platform Orchestrator. See [self-service.md](../self-service.md#gcp-project-naming).
+The `app_id` variable **must match your self-service manifest `metadata.id`**. The init module uses it to discover the GCP project (`ent-{app_id}-{env}`) provisioned by the Platform Orchestrator. See [self-service.md](self-service.md#gcp-project-naming).
 
 ```hcl
 module "init" {

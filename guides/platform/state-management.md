@@ -153,6 +153,6 @@ Do not store the state bucket name in public documentation or commit credentials
 1. **Always verify your workspace** before running `apply` — applying `prd` tfvars in the `dev` workspace targets the wrong project
 2. **Use `-var-file`** explicitly; do not rely on default variable values for environment-specific config
 3. **Never edit state manually** — use `terraform state mv`, `rm`, or `import` instead
-4. **Run `terraform plan` in CI** and `terraform apply` in CD via the `gha-terraform` workflow; see [cicd/workflows.md](../cicd/workflows.md)
+4. **Run `terraform plan` in CI** and `terraform apply` in CD via the `gha-terraform` workflow; see [gha-workflows.md](gha-workflows.md)
 5. **Prefer tfvars over workspace conditionals** for environment differences — easier to review and audit
 6. **Do not share state buckets** across applications — each app has its own `ent-gcs-tfa-{app_id}` bucket

@@ -1,6 +1,6 @@
 # General Coding Conventions
 
-Cross-language conventions that apply to all Entur projects. Language-specific additions are in `guides/java.md`, `guides/kotlin.md`, and `guides/go.md`.
+Cross-language conventions that apply to all Entur projects. Language-specific additions are in `guides/reference/java.md`, `guides/reference/kotlin.md`, and `guides/reference/go.md`.
 
 ## Naming Conventions
 
@@ -184,7 +184,7 @@ raise Exception("not found")
 - Use `cleanup.sql` scripts to ensure clean state between tests
 - Upload test results in CI using `dorny/test-reporter` for visibility in GitHub
 
-For test libraries and test structure conventions, see [kotlin.md](guides/kotlin.md#testing-in-kotlin) and [java.md](guides/java.md#testing).
+For test libraries and test structure conventions, see [kotlin.md](guides/reference/kotlin.md#testing-in-kotlin) and [java.md](guides/reference/java.md#testing).
 
 ## Dependency Management
 
@@ -272,7 +272,7 @@ enter = 'mise install'
 
 ### Docker Compose and Local Spring Profile
 
-Use `compose.yaml` at the repository root for running the full application locally. Use `application-local.yml` for local development overrides (human-readable logging, local database URL, Swagger UI enabled). See [docker.md](guides/docker.md) for Dockerfile conventions and [java.md](guides/java.md) for Spring Boot configuration.
+Use `compose.yaml` at the repository root for running the full application locally. Use `application-local.yml` for local development overrides (human-readable logging, local database URL, Swagger UI enabled). See [docker.md](guides/reference/docker.md) for Dockerfile conventions and [java.md](guides/reference/java.md) for Spring Boot configuration.
 
 ## Architecture Decision Records (ADRs)
 

@@ -73,7 +73,7 @@ Every repository root `README.md` must contain:
 
 ### Architecture Decision Records
 
-AsciiDoc in `doc/adr/`. See [CONVENTIONS.md](../CONVENTIONS.md) for format.
+AsciiDoc in `doc/adr/`. See [CONVENTIONS.md](../../CONVENTIONS.md) for format.
 
 ### Configuration Documentation
 
@@ -124,7 +124,7 @@ Place in README or `docs/configuration.md`.
 
 ## File Organization
 
-Per standard layout in [CONVENTIONS.md](../CONVENTIONS.md):
+Per standard layout in [CONVENTIONS.md](../../CONVENTIONS.md):
 
 - `docs/` -- published documentation shared beyond the team
 - `doc/adr/` -- Architecture Decision Records

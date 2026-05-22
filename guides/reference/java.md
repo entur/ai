@@ -1,6 +1,6 @@
 # Java Standards
 
-Java conventions for Entur applications. Read [CONVENTIONS.md](../CONVENTIONS.md) first for cross-language standards.
+Java conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS.md) first for cross-language standards.
 
 ## Runtime and Build
 
@@ -194,7 +194,7 @@ Use `@RestControllerAdvice` with `@ExceptionHandler` methods for centralized err
 
 ## Redis (Memorystore)
 
-Entur uses **Google Memorystore for Redis** as a managed key-value store. Infrastructure via `terraform-google-memorystore` (see [terraform/modules.md](terraform/modules.md#memorystore-redis)). Credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) injected via Kubernetes secrets.
+Entur uses **Google Memorystore for Redis** as a managed key-value store. Infrastructure via `terraform-google-memorystore` (see [terraform-modules.md](../platform/terraform-modules.md#memorystore-redis)). Credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) injected via Kubernetes secrets.
 
 ### When to Use Redis
 
@@ -306,7 +306,7 @@ Credentials: `$HOME/.gradle/gradle.properties` locally, or `ARTIFACTORY_AUTH_USE
 
 Total DB connections = `number_of_pods * max_pool_size_per_pod`. HikariCP defaults to pool size 10. With 5 pods: `5 * 10 = 50` connections.
 
-Ensure Cloud SQL `max_connections` (minus 3 reserved) handles worst-case HPA pod count. See [Terraform modules](terraform/modules.md) for Cloud SQL sizing, and [sql.md](sql.md#connection-pooling) for tuning guidance.
+Ensure Cloud SQL `max_connections` (minus 3 reserved) handles worst-case HPA pod count. See [Terraform modules](../platform/terraform-modules.md) for Cloud SQL sizing, and [sql.md](sql.md#connection-pooling) for tuning guidance.
 
 ## Rate Limiting
 
@@ -333,7 +333,7 @@ Client-side connection timeout must be shorter than server-side timeout.
 | `spring-cloud-gcp-starter-secretmanager` | Secret Manager integration |
 | `flyway-core` | Database migrations |
 | `postgresql` | PostgreSQL driver |
-| `org.entur.data:entur-kafka-spring-starter` | Kafka producer/consumer ([docs](kafka.md)) |
+| `org.entur.data:entur-kafka-spring-starter` | Kafka producer/consumer ([docs](../platform/entur-kafka-starter.md)) |
 | `org.entur.openapi:entur-springdoc-starter` | OpenAPI extensions ([docs](api-design.md#entur-springdoc-starter)) |
 | `org.entur.metrics:metrics-spring-boot-starter` | Prometheus metrics with Entur defaults ([docs](observability.md#entur-metrics-starter-spring-boot)) |
 

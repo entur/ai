@@ -49,7 +49,7 @@ How was this tested? Any manual verification steps?
 - All secrets managed via Secret Manager, no hardcoded credentials
 - Input validated at boundaries
 - Error responses return only client-safe information
-- IAM roles from [approved list](terraform/iam-roles.md) only
+- IAM roles from [approved list](../platform/iam-roles.md) only
 
 ### Database
 

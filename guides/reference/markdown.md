@@ -32,6 +32,8 @@ Add markdownlint to CI or use a pre-commit hook. All markdown files must pass be
 
 ## Rules Summary
 
+Full reference: [markdownlint rules v0.40.0](https://github.com/DavidAnson/markdownlint/tree/v0.40.0/doc).
+
 ### Headings
 
 - **MD001**: Heading levels increment by one (no skipping `#` to `###`)
@@ -117,7 +119,7 @@ Use `text` for blocks with no specific language. Common tags: `yaml`, `json`, `h
 - Use relative paths for internal links, full URLs for external:
 
 ```markdown
-[CONVENTIONS.md](../CONVENTIONS.md)
+[CONVENTIONS.md](../../CONVENTIONS.md)
 [java.md](java.md)
 [entur/helm-charts](https://github.com/entur/helm-charts)
 ```

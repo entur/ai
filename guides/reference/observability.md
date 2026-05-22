@@ -23,7 +23,7 @@ Answers "is the application ready to serve traffic?"
 - **ALWAYS check only private resources** (own DB, internal cache) -- shared service failures would remove all pods simultaneously
 - Default path: `/actuator/health/readiness` (Spring Boot) or custom path for Go/Python
 
-For Helm probe configuration, see [helm.md](helm.md#health-probes).
+For Helm probe configuration, see [common-helm.md](../platform/common-helm.md#health-probes).
 
 ## Prometheus Metrics
 
@@ -77,7 +77,7 @@ Constants from `org.entur.metrics.config.Defaults`:
 
 #### Kafka Consumer Metrics
 
-Record processing time and consumption delay using standard metric names. Works alongside automatic Micrometer listeners (see [kafka.md](kafka.md#observability)):
+Record processing time and consumption delay using standard metric names. Works alongside automatic Micrometer listeners (see [kafka.md](../platform/entur-kafka-starter.md#observability)):
 
 - **Processing time**: Annotate the `@KafkaListener` method with `@Timed(value = KAFKA_CONSUMER_PROCESS_TIME, percentiles = [0.50, 0.75, 0.95, 0.99], extraTags = ["source", "MY_APP"])`
 - **Consumption delay**: As the first step in each consumer, compute the delay between event timestamp and current time, then record it using `Timer.builder(KAFKA_CONSUMER_CONSUME_DELAY)` with `eventType` and `partition` tags
@@ -99,7 +99,7 @@ Use `prometheus_client` package. Define metrics (e.g., `Counter('http_requests_t
 
 ### Metrics Helm Configuration
 
-See [helm.md](helm.md#prometheus-metrics) for Prometheus Helm values.
+See [common-helm.md](../platform/common-helm.md#prometheus-metrics) for Prometheus Helm values.
 
 ### Standard Metrics
 
