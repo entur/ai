@@ -403,7 +403,7 @@ Use `KafkaContainer` (from `confluentinc/cp-kafka` image) with `@Testcontainers`
 
 ## Redis as Kafka State Store
 
-Redis (Memorystore) is commonly paired with Kafka consumers for deduplication, state caching, and idempotent processing. For Redis infrastructure, see [terraform/modules.md](terraform-modules.md#memorystore-redis). For general Redis patterns, see [java.md](../reference/java.md#redis-memorystore) or [go.md](../reference/go.md#redis-memorystore).
+Redis (Memorystore) is commonly paired with Kafka consumers for deduplication, state caching, and idempotent processing. For Redis infrastructure, see [terraform-modules.md](terraform-modules.md#memorystore-redis). For general Redis patterns, see [java.md](../reference/java.md#redis-memorystore) or [go.md](../reference/go.md#redis-memorystore).
 
 ### Idempotent Consumer (Deduplication)
 

@@ -66,7 +66,7 @@ Use circuit breakers, retry with backoff, and explicit timeouts for all external
 
 ## Production Hardening
 
-The common Helm chart handles most of this automatically. See [helm.md](../platform/common-helm.md) for configuration.
+The common Helm chart handles most of this automatically. See [common-helm.md](../platform/common-helm.md) for configuration.
 
 | Concern | Requirement |
 |---------|-------------|

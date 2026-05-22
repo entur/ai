@@ -23,7 +23,7 @@ Answers "is the application ready to serve traffic?"
 - **ALWAYS check only private resources** (own DB, internal cache) -- shared service failures would remove all pods simultaneously
 - Default path: `/actuator/health/readiness` (Spring Boot) or custom path for Go/Python
 
-For Helm probe configuration, see [helm.md](../platform/common-helm.md#health-probes).
+For Helm probe configuration, see [common-helm.md](../platform/common-helm.md#health-probes).
 
 ## Prometheus Metrics
 
@@ -99,7 +99,7 @@ Use `prometheus_client` package. Define metrics (e.g., `Counter('http_requests_t
 
 ### Metrics Helm Configuration
 
-See [helm.md](../platform/common-helm.md#prometheus-metrics) for Prometheus Helm values.
+See [common-helm.md](../platform/common-helm.md#prometheus-metrics) for Prometheus Helm values.
 
 ### Standard Metrics
 
