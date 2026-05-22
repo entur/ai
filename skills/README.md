@@ -72,15 +72,7 @@ codex plugin marketplace add entur/ai
 codex # then run /plugins to browse
 ```
 
-### Option 3 — `npx skills` (any agent)
-
-`skills` is a third-party npm CLI (Vercel Labs experimental) run via `npx` -- no install step, the package is fetched on demand. It clones the target GitHub repo, walks `skills/` for `SKILL.md` files, and lets you pick which to copy into your local agent skill folder.
-
-```shell
-npx skills add entur/ai
-```
-
-### Option 4 — `gh skill install` (any agent)
+### Option 3 — `gh skill install` (any agent)
 
 `gh skill` is a third-party `gh` CLI extension. Install the extension once via `gh extension install <owner>/gh-skill` (see `gh extension --help`), then the command below walks the repo for `SKILL.md` files recursively and lets you pick which to install.
 
@@ -88,7 +80,7 @@ npx skills add entur/ai
 gh skill install entur/ai
 ```
 
-### Option 5 — Manual upload (Claude Code UI)
+### Option 4 — Manual upload (Claude Code UI)
 
 1. Clone or download this repo.
 2. In Claude Code, open Customize → Skills → + Upload a skill.

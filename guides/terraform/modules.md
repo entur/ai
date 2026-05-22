@@ -264,7 +264,7 @@ resource "google_sql_user" "iam_user" {
 
 # IAM group:
 resource "google_sql_user" "iam_group" {
-  name     = "sg-dig-team-name@entur.org"
+  name     = "your-iam-group@example.com"
   instance = module.postgresql.instance.name
   type     = "CLOUD_IAM_GROUP"
 }

@@ -94,17 +94,14 @@ codex # then run /plugins to browse
 
 ## Install individual skills (any agent)
 
-For agents without a plugin marketplace, two third-party CLIs can pull skills directly from this repo:
+For agents without a plugin marketplace, the `gh skill` extension for the `gh` CLI can pull skills directly from this repo:
 
 ```shell
-# Vercel Labs `skills` npm CLI -- no install, fetched on demand by npx
-npx skills add entur/ai
-
-# `gh skill` extension for the gh CLI -- install once via `gh extension install`
+# Install the extension once via `gh extension install`, then:
 gh skill install entur/ai
 ```
 
-Both walk the repo for `SKILL.md` files and let you pick which to install into your local agent skill folder. See [`skills/README.md`](skills/README.md) for the full install matrix.
+It walks the repo for `SKILL.md` files and lets you pick which to install into your local agent skill folder. See [`skills/README.md`](skills/README.md) for the full install matrix.
 
 ## Agent Compatibility
 
