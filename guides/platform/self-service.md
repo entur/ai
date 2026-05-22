@@ -81,7 +81,6 @@ Common setup: containerized application on Kubernetes in Google Cloud.
 
 ### Prerequisites
 
-- Read the [DevOps Handbook](https://enturnett.atlassian.net/wiki/spaces/ESP/overview) Plan section
 - Onboard to GitHub and create a repository
 - Build a web application listening on port `8080` with:
   - `GET /actuator/health/liveness` → HTTP 200
@@ -112,7 +111,7 @@ metadata:
   displayName: My Application
   name: my-unique-app  # 3-30 chars, lowercase alphanumeric + hyphens, becomes your K8s namespace
   owner: team-excellence
-  trigger: 1747398600  # current unix timestamp, see https://unixtime.org/
+  trigger: 1747398600  # current unix timestamp (e.g. `date +%s` on macOS/Linux)
 spec:
   environments: [dev, tst, prd]
   repositories: [myuniquerepo]  # repos that can deploy to this application

@@ -130,15 +130,33 @@ Per standard layout in [CONVENTIONS.md](../../CONVENTIONS.md):
 - `doc/adr/` -- Architecture Decision Records
 - Inline comments -- implementation-level documentation
 
+## External Links
+
+Do **not** introduce links to third-party documentation, tooling sites, spec pages, or repositories outside the Entur GitHub organisation. External URLs create supply-chain and link-rot risk and require security review on every addition.
+
+**Allowed:**
+
+- Public Entur GitHub repositories: `github.com/entur/*`, `raw.githubusercontent.com/entur/*`, `entur.github.io`, `github.com/orgs/entur/*`
+- Entur-owned domains: `*.entur.io`, `*.entur.org`, `*.entur.internal`, `entur2.jfrog.io`, `grafana.entur.org`
+- The EUPL license URL: `eupl.eu/1.2/en/`
+
+**Not allowed:**
+
+- Third-party documentation (cloud vendor docs, framework guides, language references, style guides)
+- External GitHub repositories (anything outside `github.com/entur/*`)
+- External tool, package, or spec pages (e.g. npm/PyPI pages, `conventionalcommits.org`, vendor-hosted PDFs)
+- Confluence and any `*.atlassian.net` URL -- handbooks live behind auth and rot quickly
+
+When you would have linked to an external resource, instead:
+
+- Name the tool, package, or spec inline (e.g. `markdownlint`, `helm-unittest`, Conventional Commits).
+- Inline a short summary of any normative information readers would have followed the link to find (e.g. the message structure for Conventional Commits, the breaking-change rule).
+- For shell commands, give the command directly (e.g. `date +%s`, `gh extension install <owner>/<extension>`).
+- For third-party CLIs you must mention (e.g. install instructions), name the maintainer and any prerequisite step explicitly so a reader cannot mistake a typosquat for the real package.
+
 ## Maintaining Documentation
 
 - Review docs in every PR where code changes
 - Delete docs for removed features
 - Run `markdownlint-cli2 "**/*.md"` before committing (see [markdown.md](markdown.md))
 - Treat doc lint failures the same as code lint failures
-
-## Further Reading
-
-- [Google developer documentation style guide](https://developers.google.com/style)
-- [Google Technical Writing -- Active voice](https://developers.google.com/tech-writing/one/active-voice)
-- [Microsoft Writing Style Guide](https://learn.microsoft.com/en-us/style-guide/welcome/)

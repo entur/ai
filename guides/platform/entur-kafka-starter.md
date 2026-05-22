@@ -2,8 +2,6 @@
 
 Entur uses **Apache Kafka** on **Aiven** for event streaming. The standard library is **`entur-kafka-spring-starter`** (`org.entur.data:entur-kafka-spring-starter`), providing Spring Boot autoconfiguration with sensible defaults.
 
-For advanced topics, see the [Data Handbook](https://enturas.atlassian.net/wiki/spaces/TD/pages/4962451517/2+-+Data+Streaming+Kafka).
-
 ## When to Use Kafka vs REST
 
 | Pattern | Use |

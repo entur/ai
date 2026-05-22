@@ -10,6 +10,7 @@ If a role you need is not listed here, request it to be added in the #talk-utvik
 
 | Role                                   | Service                  |
 | -------------------------------------- | ------------------------ |
+| `roles/appengine.appViewer`            | App Engine               |
 | `roles/bigquery.admin`                 | BigQuery                 |
 | `roles/bigquery.connectionAdmin`       | BigQuery                 |
 | `roles/bigquery.dataEditor`            | BigQuery                 |
@@ -20,6 +21,7 @@ If a role you need is not listed here, request it to be added in the #talk-utvik
 | `roles/bigquery.readSessionUser`       | BigQuery                 |
 | `roles/bigquery.user`                  | BigQuery                 |
 | `roles/cloudfunctions.invoker`         | Cloud Functions          |
+| `roles/cloudfunctions.viewer`          | Cloud Functions          |
 | `roles/cloudsql.admin`                 | Cloud SQL                |
 | `roles/cloudsql.client`                | Cloud SQL                |
 | `roles/dataform.editor`                | Dataform                 |
@@ -29,6 +31,7 @@ If a role you need is not listed here, request it to be added in the #talk-utvik
 | `roles/firebaseauth.admin`             | Firebase Auth            |
 | `roles/firebasecloudmessaging.admin`   | Firebase Cloud Messaging |
 | `roles/firebasehosting.admin`          | Firebase Hosting         |
+| `roles/firebasehosting.viewer`         | Firebase Hosting         |
 | `roles/iam.serviceAccountTokenCreator` | IAM                      |
 | `roles/iam.serviceAccountViewer`       | IAM                      |
 | `roles/logging.logWriter`              | Cloud Logging            |

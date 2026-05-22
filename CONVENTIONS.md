@@ -208,7 +208,7 @@ For test libraries and test structure conventions, see [kotlin.md](guides/refere
 
 ### Commit Messages
 
-Follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/):
+Follow Conventional Commits -- a structured commit message format where each message starts with a type, optional scope, and short description. The type prefix drives automated semver bumps via release-please.
 
 ```text
 <type>(<scope>): <description>
@@ -219,6 +219,8 @@ Follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/):
 ```
 
 **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+
+Append `!` after the type/scope (e.g. `feat!:` or `feat(api)!:`) **or** add a `BREAKING CHANGE: <description>` footer to mark a breaking change.
 
 Examples:
 
@@ -248,7 +250,7 @@ This enables automated semantic versioning via release-please:
 
 ### Tool Version Management (mise)
 
-Use [mise](https://mise.jdx.dev/) (formerly rtx) for consistent tool versions across the team. Define required tools in `.mise.toml`:
+Use mise (formerly rtx) for consistent tool versions across the team. Define required tools in `.mise.toml`:
 
 ```toml
 [tools]

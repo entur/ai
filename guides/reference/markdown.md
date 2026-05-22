@@ -1,6 +1,6 @@
 # Markdown Standards
 
-All Entur docs must pass [markdownlint](https://github.com/DavidAnson/markdownlint).
+All Entur docs must pass `markdownlint`.
 
 ## Linting
 

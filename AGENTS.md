@@ -34,7 +34,7 @@ Repository name = application name = Docker image name = Kubernetes namespace = 
 - CI: `.github/workflows/ci.yml`, CD: `.github/workflows/cd.yml`
 - Security allowlists: `.entur/security/`
 - Documentation: `./guides/`
-- [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/)
+- Conventional Commits format (`<type>(<scope>): <description>`, e.g. `feat(api): add endpoint`)
 
 ## How to Use This Repository
 
@@ -103,6 +103,7 @@ Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (
 | Code review | [reference/code-review.md](guides/reference/code-review.md) |
 | Markdown format | [reference/markdown.md](guides/reference/markdown.md) |
 | Writing documentation | [reference/documentation.md](guides/reference/documentation.md) |
+| UI / Design system / Branding | Load skill: `https://raw.githubusercontent.com/entur/design-system/main/skills/entur-linje/SKILL.md` |
 
 ## Critical Rules
 

@@ -45,7 +45,7 @@ Output the YAML content for each file, clearly labeled.
     "deploy-prd"
   ],
   "must_match": [
-    "docker.*needs.*test.*docker-lint"
+    "needs:\\s*\\[test,\\s*docker-lint\\]"
   ]
 }
 ```

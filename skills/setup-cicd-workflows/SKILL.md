@@ -404,6 +404,11 @@ jobs:
 
 ### Deploy jobs (for each environment):
 
+> **No Helm chart? Skip this entire section.** If the project has no `helm/` directory,
+> `cd.yaml` ALWAYS omits all `deploy-*` jobs. The workflow only resolves and tags the
+> image -- there is nothing to deploy without a Helm chart. Do NOT generate `deploy-dev`,
+> `deploy-tst`, or `deploy-prd` jobs in that case.
+
 Generate deploy jobs for all environments. This example shows the standard three-environment setup:
 
 ```yaml
@@ -608,6 +613,14 @@ jobs:
 
 Manages Terraform infrastructure changes across all environments. On PR: lint, plan all environments, apply dev. On merge: lint, plan tst+prd, apply tst, apply prd.
 
+> **Required job names** (use these exact identifiers):
+> `terraform-lint`, `tf-plan-dev`, `tf-plan-tst`, `tf-plan-prd`,
+> `tf-apply-dev`, `tf-apply-tst`, `tf-apply-prd`.
+>
+> **Required conditional**: `tf-plan-dev` MUST be gated with `if: github.event_name != 'push'`
+> (it is PR/dispatch only). `tf-apply-dev` runs on PR/dispatch; `tf-apply-tst` and
+> `tf-apply-prd` run on push/dispatch.
+
 ```yaml
 # Terraform Infrastructure Workflow -- apply on PR, promote on merge
 #
@@ -724,6 +737,17 @@ jobs:
 ```
 
 ## Step 9: Generate `.github/workflows/terraform-drift-detection.yaml` (if `terraform/` exists)
+
+> **This is a separate file from `terraform.yaml`.** When the user asks for Terraform
+> workflows, ALWAYS generate BOTH `terraform.yaml` (Step 8) AND
+> `terraform-drift-detection.yaml` (Step 9).
+>
+> **Required job names**: `tf-plan-dev`, `tf-plan-tst`, `tf-plan-prd`, `drift-check`.
+>
+> **Required schedule**: `cron: '0 10 * * 4'` (Thursdays at 10:00 UTC).
+>
+> **Required outputs** on `drift-check`: `has_drift`, `drifted_envs`, plus a step that
+> calls `gh issue create` when drift is detected.
 
 Weekly scheduled Terraform plan to detect infrastructure drift. Creates a GitHub issue and sends a Slack notification if drift is found.
 
