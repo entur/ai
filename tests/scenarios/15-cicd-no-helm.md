@@ -23,7 +23,7 @@ Generate:
 1. The complete `.github/workflows/ci.yaml`
 2. The complete `.github/workflows/cd.yaml`
 
-Output the YAML content for each file, clearly labeled.
+Output ONLY the YAML content for each file, prefixed with a single line giving the filename (e.g. `# .github/workflows/ci.yaml`). Do NOT include any prose, commentary, or explanation -- just the filename headers and YAML.
 
 ## Assertions
 

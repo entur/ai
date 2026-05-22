@@ -164,6 +164,8 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
 
 **Python:**
 
+> Use this block verbatim. Do NOT add `dorny/test-reporter`, `upload-artifact`, `--junit-xml`, or any Java/Kotlin steps. Those belong only in the Kotlin/Java variant above. Python is intentionally a simple `pip install && pytest`.
+
 ```yaml
   # --- Build and Test ---
 
@@ -405,9 +407,12 @@ jobs:
 ### Deploy jobs (for each environment):
 
 > **No Helm chart? Skip this entire section.** If the project has no `helm/` directory,
-> `cd.yaml` ALWAYS omits all `deploy-*` jobs. The workflow only resolves and tags the
-> image -- there is nothing to deploy without a Helm chart. Do NOT generate `deploy-dev`,
-> `deploy-tst`, or `deploy-prd` jobs in that case.
+> `cd.yaml` ALWAYS omits all `deploy-*` jobs **and** `ci.yaml` ALWAYS omits the
+> `helm-lint` job. The Docker job's `needs:` must then be `[test, docker-lint]` only,
+> with no `helm-lint` entry. The cd workflow still keeps `resolve-image:` (so the
+> built image is tagged for downstream consumers) but has no deploy jobs at all.
+> Do NOT generate `deploy-dev`, `deploy-tst`, `deploy-prd`, `helm-lint`,
+> `gha-helm` references, or `values-kub-ent-*` paths in that case.
 
 Generate deploy jobs for all environments. This example shows the standard three-environment setup:
 

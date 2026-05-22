@@ -53,7 +53,7 @@ Output the YAML content for each file, clearly labeled.
     "liberica",
     "temurin",
     "gradle",
-    "pip",
+    "pip install",
     "setup-python"
   ],
   "must_match": [

@@ -22,7 +22,7 @@ Get a minimal "hello world" service running in `dev` with the standard golden-pa
 
 4. **Add the Helm chart.** `helm/<repo-name>/` with `Chart.yaml` depending on the Entur `common` chart, `values.yaml`, and `env/values-kub-ent-{dev,tst,prd}.yaml`. Set `common.shortname` to your **App ID** (must match `metadata.id` from step 1). See [common-helm.md](../platform/common-helm.md) for required values.
 
-5. **Add CI/CD workflows.** Split into focused files: `ci.yaml` (reusable build), `build.yaml` (PR), `cd.yaml` (deploy on merge), `pr.yaml`, `codeql.yaml`, `dependabot-pr.yaml`. Use Entur reusable workflows for every step. See [gha-workflows.md](../platform/gha-workflows.md) for the canonical templates.
+5. **Add CI/CD workflows.** Split into focused files: `ci.yaml` (reusable build), `build.yaml` (PR), `cd.yaml` (deploy on merge), `pr.yaml`, `codeql.yaml`, `dependabot-pr.yaml`, and (if `terraform/` exists) `terraform.yaml` + `terraform-drift-detection.yaml`. Generate them by loading the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill -- it produces the canonical templates per language. See [gha-workflows.md](../platform/gha-workflows.md) for the inventory of available reusable workflows and their inputs.
 
 6. **Add `AGENTS.md` and a symlink for Claude.** Tell agents where the Entur standards live so they generate platform-compliant code. See [README.md](../../README.md#quick-start) for the recommended template, then `ln -s AGENTS.md CLAUDE.md`.
 
