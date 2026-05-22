@@ -96,6 +96,7 @@ Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (
 | Docker / containerization | [reference/docker.md](guides/reference/docker.md) |
 | API design | [reference/api-design.md](guides/reference/api-design.md) |
 | Architecture principles | [reference/architecture.md](guides/reference/architecture.md) |
+| SQL / Postgres | [reference/sql.md](guides/reference/sql.md) |
 | Logging | [reference/logging.md](guides/reference/logging.md) |
 | Observability (metrics, tracing, probes) | [reference/observability.md](guides/reference/observability.md) |
 | Security | [reference/security.md](guides/reference/security.md) |
