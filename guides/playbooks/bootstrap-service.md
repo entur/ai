@@ -9,7 +9,7 @@ Get a minimal "hello world" service running in `dev` with the standard golden-pa
 ## Prerequisites
 
 - A GitHub repository exists in the `entur` org. Repository name = application name (lowercase kebab-case, max 30 chars).
-- Your team has read the [DevOps Handbook](https://enturnett.atlassian.net/wiki/spaces/ESP/overview) Plan section.
+- Your team has read the [DevOps Handbook](https://entur.atlassian.net/wiki/spaces/ESP/overview) Plan section.
 - You can list the **App ID** you want (3--10 lowercase alphanumeric chars, unique across Entur). See [self-service.md](../platform/self-service.md#gcp-project-naming) for the identity chain.
 
 ## Steps
