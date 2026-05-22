@@ -64,6 +64,7 @@ Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (
 | I want to… | Read |
 |------------|------|
 | Bootstrap a new service | [playbooks/bootstrap-service.md](guides/playbooks/bootstrap-service.md) |
+| Set up CI/CD workflows | Load skill: [`skills/setup-cicd-workflows/SKILL.md`](skills/setup-cicd-workflows/SKILL.md) |
 | Provision Postgres | [playbooks/add-postgres.md](guides/playbooks/add-postgres.md) |
 | Add Redis (caching, locks, dedup) | [playbooks/add-redis.md](guides/playbooks/add-redis.md) |
 | Produce or consume Kafka events | [playbooks/add-kafka.md](guides/playbooks/add-kafka.md) |

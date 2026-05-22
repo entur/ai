@@ -2,6 +2,8 @@
 
 Always use Entur reusable workflows instead of custom pipeline steps.
 
+> **Setting up CI/CD for a project?** This file is a reference index of the available reusable workflows and their inputs. For the canonical, copy-pasteable templates and assembly recipe (ci.yaml, build.yaml, cd.yaml with image promotion, codeql.yaml, dependabot-pr.yaml, terraform.yaml, terraform-drift-detection.yaml), load the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill. The skill is the source of truth; the snippets below only illustrate inputs.
+
 ## Available Workflows
 
 | Repository | Purpose | Version |
@@ -61,7 +63,7 @@ All other jobs (docker-lint, docker-build, docker-scan, docker-push) are identic
 ## Security Scanning (`.github/workflows/codeql.yaml`)
 
 ```yaml
-name: CodeQL
+name: CodeQL Analysis
 
 on:
   push:
@@ -314,6 +316,8 @@ Split into focused workflow files instead of a monolithic pipeline:
 | `terraform.yaml` | PR/push changes to `terraform/` | Terraform lint/plan/apply |
 | `terraform-drift-detection.yaml` | Weekly schedule, `workflow_dispatch` | Terraform drift detection with issue creation |
 | `lint-api.yaml` | PR changes to `specs/` | API spec linting |
+
+> **For the full templates, generate them via the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill.** The skill is the canonical source for ci.yaml, build.yaml, cd.yaml, pr.yaml, codeql.yaml, dependabot-pr.yaml, terraform.yaml (with `tf-plan-{env}`/`tf-apply-{env}` job names and `has_changes` gating), terraform-drift-detection.yaml (with `drift-check` job, weekly cron `0 10 * * 4`, and `gh issue create` on drift), and dependabot.yml -- with the per-language test job variants (Kotlin/Java with `dorny/test-reporter` and `upload-artifact`; Go and Python with neither). The snippets in the remainder of this section are illustrative; if they conflict with the skill, the skill wins.
 
 ### ci.yaml (Reusable Build Workflow)
 
