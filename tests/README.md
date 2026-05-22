@@ -5,19 +5,20 @@ Automated tests that verify AI agents correctly understand Entur's platform docu
 ## Quick Start
 
 ```bash
-# From the repository root:
+# The tests/ directory is its own Go module -- run commands from inside it.
+cd tests
 
 # Dry run -- validate scenarios parse correctly, no API calls
-go run ./tests --dry-run
+go run . --dry-run
 
-# Run all tests (~$0.35, ~90 seconds)
-go run ./tests --verbose
+# Run all tests (~$0.70, ~3-5 minutes)
+go run . --verbose
 
 # Run a specific scenario
-go run ./tests --scenario "05-*" --verbose
+go run . --scenario "05-*" --verbose
 
 # Use a different model
-go run ./tests --model sonnet
+go run . --model sonnet
 ```
 
 ## What It Tests
@@ -44,7 +45,7 @@ go run ./tests --model sonnet
 ## CLI Options
 
 ```text
-go run ./tests [OPTIONS]
+go run . [OPTIONS]      # run from inside the tests/ directory
 
   --scenario PATTERN   Glob pattern to filter scenarios (e.g. "01-*")
   --model MODEL        Claude model: haiku (default), sonnet, opus

@@ -208,14 +208,17 @@ The `tests/` directory contains automated tests that verify AI agents correctly 
 ```bash
 # Prerequisite: Go 1.25+ and claude CLI installed
 
-# Dry run -- validate scenario syntax, no API calls
-go run ./tests --dry-run
+# The tests/ directory is its own Go module, so run the commands from inside it.
+cd tests
 
-# Full suite -- ~$0.18, ~90 seconds
-go run ./tests --verbose
+# Dry run -- validate scenario syntax, no API calls
+go run . --dry-run
+
+# Full suite -- ~$0.70, ~3-5 minutes
+go run . --verbose
 
 # Run a single scenario for faster iteration
-go run ./tests --scenario "05-*" --verbose
+go run . --scenario "05-*" --verbose
 ```
 
 The tests cover:
