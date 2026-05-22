@@ -433,7 +433,7 @@ common:
 
 ## Helm Unit Testing
 
-Use [helm-unittest](https://github.com/helm-unittest/helm-unittest):
+Use `helm-unittest`:
 
 ```yaml
 # tests/deployment_test.yaml

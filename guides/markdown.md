@@ -1,6 +1,6 @@
 # Markdown Standards
 
-All Entur docs must pass [markdownlint](https://github.com/DavidAnson/markdownlint).
+All Entur docs must pass `markdownlint`.
 
 ## Linting
 
@@ -31,8 +31,6 @@ markdownlint-cli2 "**/*.md"
 Add markdownlint to CI or use a pre-commit hook. All markdown files must pass before merge.
 
 ## Rules Summary
-
-Full reference: [markdownlint rules v0.40.0](https://github.com/DavidAnson/markdownlint/tree/v0.40.0/doc).
 
 ### Headings
 
