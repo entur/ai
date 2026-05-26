@@ -1,0 +1,17 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    uses: entur/gha-meta/.github/workflows/release.yml@v1
+    with:
+      release_type: manifest
+      config_file: .github/release-please-config.json
+      manifest_file: .github/.release-please-manifest.json
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
