@@ -5,8 +5,7 @@
   "include-component-in-tag": false,
   "packages": {
     ".": {
-      "release-type": "simple",
-      "release-as": "0.0.1"
+      "release-type": "simple"
     }
   }
 }
