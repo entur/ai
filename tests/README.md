@@ -2,6 +2,11 @@
 
 Automated tests that verify AI agents correctly understand Entur's platform documentation. Each test scenario sends a prompt to Claude, lets it read the docs, and validates the response against expected patterns.
 
+Two suites live here:
+
+- `scenarios/` -- this suite. Claude reads the markdown files in this repo directly via `Read`/`Grep`/`Glob`. Measures whether the docs are precise enough for an agent with full file access.
+- [`mcp/`](mcp/README.md) -- companion suite. Claude can only call the `entur-kb` MCP server. Measures retrieval quality + whether the surfaced doc actually contains the answer. Run with `./mcp/run.sh`.
+
 ## Quick Start
 
 ```bash

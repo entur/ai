@@ -295,15 +295,23 @@ Use multi-stage with layered JAR and CDS:
 
 ## Step 7: Generate CI/CD Workflows
 
-Delegate to the **setup-cicd-workflows** skill if available, or generate:
+Delegate to the **setup-cicd-workflows** skill (`skills/setup-cicd-workflows/SKILL.md` in the entur/ai repository) -- it is the canonical source for workflow file names, structure, and reusable-workflow `@vN` pins. Do not generate these files from this skill: keeping two sources of truth has already caused drift.
 
-- `.github/workflows/ci.yml` (reusable build)
-- `.github/workflows/ci-pr.yml` (PR verification)
-- `.github/workflows/deploy.yml` (dev → tst → prd)
-- `.github/workflows/codeql.yml` (security scanning)
-- `.github/dependabot.yml`
+For reference, the canonical set is:
 
-Read `guides/platform/gha-workflows.md` in the entur/ai repository for the full workflow reference.
+- `.github/workflows/ci.yaml` -- reusable build (called by `build.yaml` and `cd.yaml`)
+- `.github/workflows/build.yaml` -- PR trigger
+- `.github/workflows/cd.yaml` -- deploy chain (dev → tst → prd via image promotion)
+- `.github/workflows/pr.yaml` -- PR verification
+- `.github/workflows/codeql.yaml` -- security scanning
+- `.github/workflows/dependabot-pr.yaml` -- dependabot approval gate
+- `.github/workflows/terraform.yaml` -- terraform lint/plan/apply (if `terraform/` exists)
+- `.github/workflows/terraform-drift-detection.yaml` -- weekly drift check (if `terraform/` exists)
+- `.github/dependabot.yml` -- dependabot ecosystem config (note: `.yml`, this is the only one)
+
+Workflow files use `.yaml`; the dependabot config uses `.yml`.
+
+For background on each workflow's role, read `guides/platform/gha-workflows.md` in the entur/ai repository.
 
 ## Step 8: Generate Supporting Files
 
