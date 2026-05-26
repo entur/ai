@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.2](https://github.com/entur/ai/compare/v0.0.1...v0.0.2) (2026-05-26)
+
+
+### Bug Fixes
+
+* switch release-please to node type so package.json is bumped ([#44](https://github.com/entur/ai/issues/44)) ([e6aad5c](https://github.com/entur/ai/commit/e6aad5cd66cec24a35d97ec593fad91d9b99f8d4))
+
 ## 0.0.1 (2026-05-26)
 
 
