@@ -1,10 +1,10 @@
 # Self-Service Platform Provisioning
 
-Define YAML manifests in `.entur/` and apply through a GitOps PR workflow.
+Define YAML manifests in the repository's `.entur/` directory and apply through a GitOps PR workflow. This is the **only** supported way to create GCP projects, GitHub Actions OIDC trust, Firebase apps, and BigQuery data projects at Entur -- **never** use Terraform `google_project`, `gcloud projects create`, or any other path.
 
 ## How It Works
 
-1. Create/modify YAML manifests in `.entur/`.
+1. Create/modify YAML manifests in `.entur/` (e.g. `.entur/<appid>.yaml` for a `GoogleCloudApplication`, `.entur/cicd.yaml` for `GitHubActions`).
 2. Open a PR. The orchestrator validates and presents a **plan**.
 3. Comment `entur apply` on the PR.
 4. Wait for apply to succeed, then merge.

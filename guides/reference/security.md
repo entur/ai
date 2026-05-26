@@ -8,6 +8,8 @@ Security conventions for all Entur services. Entur uses OWASP ASVS three-tier mo
 
 ## Secret Management
 
+**Never hardcode secrets** in source code, config files, Dockerfiles, or CI workflows. **Never commit secrets** to Git -- not even in "test" configurations. All secrets (passwords, API keys, tokens) live in **Google Secret Manager** and reach the running pod via **ExternalSecrets** referenced from the Helm values. The Entur Terraform modules create the Secret Manager entries automatically for most managed services, so application code only sees the resulting environment variables.
+
 ### Rules
 
 - **Never hardcode secrets** in source code, config files, Dockerfiles, or CI workflows

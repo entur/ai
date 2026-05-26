@@ -13,6 +13,7 @@ Use these as the agent's entry point for any non-trivial task. They exist precis
 | [add-redis.md](add-redis.md) | Adding Memorystore Redis for caching, locks, or dedup |
 | [add-kafka.md](add-kafka.md) | Producing or consuming events via Aiven Kafka |
 | [set-up-auth.md](set-up-auth.md) | Adding OIDC + Permission Store authorization |
+| [add-custom-domain.md](add-custom-domain.md) | Exposing a service on a `*.entur.{no,io,org}` hostname with managed TLS |
 | [deploy-to-prd.md](deploy-to-prd.md) | Promoting a service from dev/tst to production |
 | [deprecate-service.md](deprecate-service.md) | Retiring an application gracefully |
 | [local-dev.md](local-dev.md) | Running the application locally with the right tooling |

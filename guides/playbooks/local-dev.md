@@ -16,7 +16,7 @@ A developer (or agent) can clone the repo and run `./gradlew bootRun` (or `go ru
 
 1. **Pin tool versions in `.mise.toml`.** Declare Java/Kotlin/Go/Terraform versions, then `mise install` once provisions everything. See [CONVENTIONS.md](../../CONVENTIONS.md#tool-version-management-mise).
 
-2. **Add a `compose.yaml` at the repository root.** Spin up Postgres, Redis, and any other local dependencies. Use minimal images (`postgres:16-alpine`, `redis:7-alpine`). See [CONVENTIONS.md](../../CONVENTIONS.md#docker-compose-and-local-spring-profile).
+2. **Add a `compose.yaml` at the repository root and run it with `docker compose up`.** Spin up Postgres, Redis, and any other local dependencies. Use minimal images (`postgres:16-alpine`, `redis:7-alpine`). For ephemeral fixtures used from inside the JVM (rather than a long-lived dev loop), prefer **Testcontainers** -- see [java.md](../reference/java.md) and [go.md](../reference/go.md) for the integration-test patterns. See [CONVENTIONS.md](../../CONVENTIONS.md#docker-compose-and-local-spring-profile) for the Spring profile + Compose conventions.
 
 3. **Add `application-local.yml` for Spring Boot.** Human-readable logging (`entur.logging.style: humanReadablePlain`), local DB URL pointing at the Compose Postgres, Swagger UI enabled, `FULL_ACCESS` permission cache or `LOCAL_TEST_CACHE` with named test users. See [permission-store.md](../platform/permission-store.md#full_access-development) and [logging.md](../reference/logging.md#local-development).
 

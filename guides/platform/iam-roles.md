@@ -1,12 +1,10 @@
 # Assignable IAM Roles
 
-These are the IAM roles that CD service accounts are allowed to **grant to other identities**
-(e.g. service accounts used by your application at runtime) via `google_project_iam_member`
-or `google_project_iam_binding` in your Terraform code.
+This page is the **authoritative allowlist** of IAM roles that CD service accounts may **grant to other identities** (e.g. the service account your application runs as) via `google_project_iam_member` or `google_project_iam_binding` in your Terraform code. Roles outside this list will be rejected by the platform's policy guard.
 
-If a role you need is not listed here, request it to be added in the #talk-utviklerplattform channel on Slack.
+If a role you need is not on this allowlist, request it to be added in the #talk-utviklerplattform channel on Slack.
 
-## Allowed roles
+## Allowed roles (allowlist)
 
 | Role                                   | Service                  |
 | -------------------------------------- | ------------------------ |
