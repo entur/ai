@@ -5,7 +5,7 @@
   "include-component-in-tag": false,
   "packages": {
     ".": {
-      "release-type": "simple"
+      "release-type": "node"
     }
   }
 }
