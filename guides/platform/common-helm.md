@@ -185,6 +185,7 @@ common:
   ingress:
     enabled: true                    # Default: true
     trafficType: api                 # Required: "api", "public", or "http2"
+    host: products-api.dev.entur.io  # Per-env override; see hostname pattern below
 ```
 
 | Traffic Type | Description |
@@ -192,6 +193,16 @@ common:
 | `api` | Internal API traffic (default for backend services) |
 | `public` | Public-facing traffic (internet-accessible) |
 | `http2` | gRPC / HTTP/2 traffic |
+
+The platform serves hostnames only under `entur.no`, `entur.io`, and `entur.org`. The `host` value is environment-specific and typically lives in `env/values-kub-ent-<env>.yaml`:
+
+| Environment | Hostname |
+|-------------|----------|
+| `dev`       | `<app>.dev.entur.{no,io,org}` |
+| `tst`       | `<app>.staging.entur.{no,io,org}` -- note `staging`, not `tst` |
+| `prd`       | `<app>.entur.{no,io,org}` -- no env token |
+
+TLS is Google-managed and auto-renewed; no certificate work is required. For the full end-to-end flow (request, verify, off-golden-path Firebase / Cloud Run setups), see [playbooks/add-custom-domain.md](../playbooks/add-custom-domain.md).
 
 ### gRPC
 

@@ -144,6 +144,7 @@ guides/
     add-redis.md                       # Memorystore Redis
     add-kafka.md                       # Aiven Kafka producer/consumer
     set-up-auth.md                     # OIDC + Permission Store authorization
+    add-custom-domain.md               # *.entur.{no,io,org} hostname + managed TLS
     deploy-to-prd.md                   # Promote to production
     deprecate-service.md               # Retire an application
     local-dev.md                       # Run the service locally

@@ -65,7 +65,7 @@ The main function should:
 
 ### Health Checks
 
-Register liveness (`GET /health/liveness`) and readiness (`GET /health/readiness`) endpoints. Liveness returns `200 OK` unconditionally. Readiness checks private dependencies (e.g., DB ping) and returns `503` if unavailable.
+Services bind to **port 8080** (Entur convention; matches the common Helm chart default and the Dockerfile `EXPOSE 8080`). Register liveness (`GET /health/liveness`) and readiness (`GET /health/readiness`) endpoints on that port. Liveness returns `200 OK` unconditionally. Readiness checks private dependencies (e.g., DB ping) and returns `503` if unavailable.
 
 Helm values for custom health paths:
 
