@@ -4,6 +4,8 @@ Reference: [entur/helm-charts](https://github.com/entur/helm-charts)
 
 The Entur `common` Helm chart is the standard base chart for deploying applications to Kubernetes. **ALWAYS use the `common` chart for all Kubernetes deployments** -- do not create custom charts from scratch. It provides sensible defaults for Spring Boot and can be configured for Go, Python, or any containerized service.
 
+> **Scope:** this page is a reference for chart values. For provisioning workflows see the playbooks: [add-postgres.md](../playbooks/add-postgres.md), [add-redis.md](../playbooks/add-redis.md), [add-kafka.md](../playbooks/add-kafka.md), [add-custom-domain.md](../playbooks/add-custom-domain.md).
+
 ## Naming Convention
 
 Application name = Git repository name = backend URL (`yourapp.entur.io`). Must be unique across Entur, max 63 characters, only `[a-z0-9-]`.
@@ -374,12 +376,13 @@ common:
     memoryLimit: 1000
     prometheus:
       enabled: true
-  postgres:
-    enabled: true
-    connectionConfig: products-api
   secrets:
-    psql-credentials: [PGINSTANCES, PGHOST, PGPORT, PGPASSWORD, PGUSER]
+    products-api-secrets:
+      - PRODUCTS_API_KEY
+      - EXTERNAL_SERVICE_KEY
 ```
+
+> Adding a database, cache, message broker, or custom domain? Those values are documented in their respective playbooks rather than here -- see the **Scope** note at the top of this page.
 
 ```yaml
 # env/values-kub-ent-dev.yaml
