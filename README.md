@@ -183,57 +183,7 @@ AI agents read `AGENTS.md` first, which routes them by goal: a playbook for a mu
 
 ## Contributing
 
-This is a shared resource for all of Entur, and we'd love your help making it better! Every contribution matters -- whether it's fixing a typo, clarifying a confusing section, adding a new skill, or sharing a pattern that works well for your team.
-
-A few ways to contribute:
-
-- **Found something wrong or unclear?** Open an issue or just submit a PR directly
-- **Have a pattern or skill that works great for your team?** Share it! Others will benefit
-- **Not sure if something belongs here?** Open an issue and let's figure it out together
-- **Want to improve the AI output for your stack?** Try tweaking the relevant `guides/` file and see how your agent responds -- that's the fastest feedback loop
-
-When submitting changes:
-
-1. Use Conventional Commits format (`<type>(<scope>): <description>`) for commit messages
-2. Do **not** introduce links to non-Entur external URLs -- see [External Links](guides/reference/documentation.md#external-links) for the allow-list and how to handle the cases where you would have linked out
-3. Keep in mind the audience is AI agents, not humans -- be precise and structured
-4. **Run the comprehension tests** before opening a PR (see below)
-5. Get a review from the platform team
-
-### Comprehension Tests (required)
-
-The `tests/` directory contains automated tests that verify AI agents correctly understand the documentation. These tests send real prompts to Claude, let it read the docs, and validate that the answers are correct.
-
-**You must run these tests before submitting changes to any guide.** A documentation change that humans can read but AI agents misinterpret is a regression.
-
-```bash
-# Prerequisite: Go 1.25+ and claude CLI installed
-
-# The tests/ directory is its own Go module, so run the commands from inside it.
-cd tests
-
-# Dry run -- validate scenario syntax, no API calls
-go run . --dry-run
-
-# Full suite -- ~$0.70, ~3-5 minutes
-go run . --verbose
-
-# Run a single scenario for faster iteration
-go run . --scenario "05-*" --verbose
-```
-
-The tests cover:
-
-| Scenario | What it verifies |
-|----------|-----------------|
-| 01-kotlin-api | Identity chain: metadata.id → GCP projects, Helm shortname, Terraform app_id |
-| 02-go-service | Go-specific: health paths, distroless image, metrics path |
-| 03-data-project | Data project naming: `ent-data-{id}-{int\|ext}-{env}` |
-| 04-firebase-app | Firebase uses standard `ent-{id}-{env}`, not a special prefix |
-| 05-derive-from-manifest | Distinguishes metadata.id from metadata.name (the #1 confusion) |
-| 06-critical-rules | Refuses to create GCP projects via Terraform |
-
-If you change a guide and a test starts failing, either fix the guide or update the test scenario. See [`tests/README.md`](tests/README.md) for how to add new scenarios.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute, how to write good AI-facing documentation, and how to run the comprehension tests that every doc change must pass.
 
 For questions, ideas, or just to say hi, find us in `#talk-utviklerplattform` on Slack.
 
