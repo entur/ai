@@ -634,6 +634,7 @@ Manages Terraform infrastructure changes across all environments. On PR: lint, p
 > `contents: read`.
 >
 > Two failure modes to avoid:
+>
 > 1. Declaring `permissions:` at the **workflow** level (or on the caller's job)
 >    that omits any required scope -- GitHub clamps the unlisted scopes to
 >    `none` and the called workflow fails with `startup_failure`
