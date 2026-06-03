@@ -625,6 +625,26 @@ Manages Terraform infrastructure changes across all environments. On PR: lint, p
 > **Required conditional**: `tf-plan-dev` MUST be gated with `if: github.event_name != 'push'`
 > (it is PR/dispatch only). `tf-apply-dev` runs on PR/dispatch; `tf-apply-tst` and
 > `tf-apply-prd` run on push/dispatch.
+>
+> **Required per-job `permissions:` (do NOT omit, do NOT declare at workflow level).**
+> `entur/gha-terraform/.github/workflows/{plan,apply}.yml@v2` declare
+> `contents: read`, `id-token: write`, `pull-requests: write` on their inner job.
+> A reusable workflow cannot grant itself more than the caller provides, so the
+> caller MUST also declare these at the job level. `lint.yml@v2` only needs
+> `contents: read`.
+>
+> Two failure modes to avoid:
+>
+> 1. Declaring `permissions:` at the **workflow** level (or on the caller's job)
+>    that omits any required scope -- GitHub clamps the unlisted scopes to
+>    `none` and the called workflow fails with `startup_failure`
+>    ("Refusing to allow a GitHub App to create or update workflow ... without
+>    `pull-requests` permission").
+> 2. Omitting `permissions:` entirely -- works while the repo's default
+>    `GITHUB_TOKEN` is `write-all`, breaks the moment that default is tightened.
+>
+> Always keep `permissions:` on the **calling job** (as shown below) and never
+> add a workflow-level `permissions:` block to `terraform.yaml`.
 
 ```yaml
 # Terraform Infrastructure Workflow -- apply on PR, promote on merge
@@ -663,6 +683,8 @@ jobs:
   # --- Lint ---
   terraform-lint:
     uses: entur/gha-terraform/.github/workflows/lint.yml@v2
+    permissions:
+      contents: read
     concurrency:
       group: terraform-lint-${{ github.ref }}
       cancel-in-progress: true
@@ -675,6 +697,10 @@ jobs:
     needs: [terraform-lint]
     if: github.event_name != 'push'
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-plan-dev-${{ github.ref }}
       cancel-in-progress: true
@@ -684,6 +710,10 @@ jobs:
   tf-plan-tst:
     needs: [terraform-lint]
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-plan-tst-${{ github.ref }}
       cancel-in-progress: true
@@ -693,6 +723,10 @@ jobs:
   tf-plan-prd:
     needs: [terraform-lint]
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-plan-prd-${{ github.ref }}
       cancel-in-progress: true
@@ -707,6 +741,10 @@ jobs:
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-dev]
     uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-apply-dev
       cancel-in-progress: false
@@ -722,6 +760,10 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-tst]
     uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-apply-tst
       cancel-in-progress: false
@@ -733,6 +775,10 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-prd, tf-apply-tst]
     uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-apply-prd
       cancel-in-progress: false
@@ -772,18 +818,32 @@ on:
 
 jobs:
   # --- Plan all environments ---
+  # Per-job permissions are required: plan.yml@v2 needs contents:read,
+  # id-token:write, pull-requests:write. See Step 8 for the full rationale.
   tf-plan-dev:
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     with:
       environment: dev
 
   tf-plan-tst:
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     with:
       environment: tst
 
   tf-plan-prd:
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     with:
       environment: prd
 

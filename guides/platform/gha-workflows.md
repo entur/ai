@@ -272,20 +272,32 @@ helm-deploy:
 
 ### Terraform
 
+`plan.yml@v2` and `apply.yml@v2` require `contents:read`, `id-token:write`, and `pull-requests:write` at the **calling job** level (a reusable workflow can't grant itself more than the caller provides). Omitting any of these -- or declaring `permissions:` at the workflow level so unlisted scopes default to `none` -- causes `startup_failure`.
+
 ```yaml
 # Lint
 terraform-lint:
   uses: entur/gha-terraform/.github/workflows/lint.yml@v2
+  permissions:
+    contents: read
 
 # Plan (outputs: has_changes, plan_summary)
 terraform-plan:
   uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+  permissions:
+    contents: read
+    id-token: write
+    pull-requests: write
   with:
     environment: dev
 
 # Apply
 terraform-apply:
   uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+  permissions:
+    contents: read
+    id-token: write
+    pull-requests: write
   with:
     environment: dev
     has_changes: ${{ needs.terraform-plan.outputs.has_changes }}
