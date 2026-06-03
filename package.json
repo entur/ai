@@ -10,6 +10,9 @@
   },
   "homepage": "https://github.com/entur/ai",
   "bugs": "https://github.com/entur/ai/issues",
+  "scripts": {
+    "lint:md": "npx --yes markdownlint-cli2@0.17.2 --fix \"**/*.md\" \"!tmp/**\" \"!CHANGELOG.md\""
+  },
   "files": [
     "AGENTS.md",
     "CONVENTIONS.md",

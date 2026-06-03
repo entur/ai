@@ -21,14 +21,17 @@ MD013 (line length) disabled -- tables, code blocks, and URLs frequently exceed 
 
 ### Running Locally
 
+From the repo root:
+
 ```bash
-npm install -g markdownlint-cli2
-markdownlint-cli2 "**/*.md"
+npm run lint:md
 ```
+
+This runs `markdownlint-cli2 --fix` over all tracked markdown files. Auto-fixable issues (trailing whitespace, blank lines, list markers, heading spacing) are corrected in place -- commit the result before pushing.
 
 ### Running in CI
 
-Add markdownlint to CI or use a pre-commit hook. All markdown files must pass before merge.
+`.github/workflows/pr.yml` runs the same `--fix` invocation on every PR and then fails the build if any file changed. The job error message points the contributor at `npm run lint:md`. Non-fixable rule violations (e.g. MD040 missing code-block language) fail the lint step directly.
 
 ## Rules Summary
 

@@ -114,7 +114,7 @@ What's right: imperative opening, wrong paths named and forbidden, runnable exam
 
 - Use outcome-oriented headings ("Provision a Cloud SQL instance"), not topic dumps ("Cloud SQL").
 - State target audience, intent, and scope at the top of each guide.
-- Follow [guides/reference/markdown.md](guides/reference/markdown.md) for formatting and run `markdownlint-cli2 "**/*.md"` before committing.
+- Follow [guides/reference/markdown.md](guides/reference/markdown.md) for formatting and run `npm run lint:md` before committing -- it auto-fixes trailing whitespace, list markers, blank lines, and other mechanical issues, then fails the PR check if any fix would still apply.
 
 ## Comprehension Tests
 
@@ -123,7 +123,7 @@ The `tests/` directory contains automated tests that verify AI agents correctly 
 Run these tests before submitting changes to any existing guides.
 A documentation change that humans can read but AI agents misinterpret is a regression.
 
-*NB* For new documentation this is *optional*! 
+*NB* For new documentation this is *optional*!
 
 ```bash
 # Prerequisite: Go 1.25+ and claude CLI installed
