@@ -9,6 +9,7 @@ Use these as the agent's entry point for any non-trivial task. They exist precis
 | Playbook | Use when… |
 |----------|-----------|
 | [bootstrap-service.md](bootstrap-service.md) | Standing up a brand-new application on the platform |
+| [cloud-run-service.md](cloud-run-service.md) | Running a stateless service on Cloud Run instead of GKE |
 | [add-postgres.md](add-postgres.md) | Adding a managed PostgreSQL database to an existing service |
 | [add-redis.md](add-redis.md) | Adding Memorystore Redis for caching, locks, or dedup |
 | [add-kafka.md](add-kafka.md) | Producing or consuming events via Aiven Kafka |
