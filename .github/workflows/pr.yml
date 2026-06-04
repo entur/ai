@@ -11,7 +11,17 @@ concurrency:
 jobs:
   verify-pr:
     name: Verify PR title
-    uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
+    steps:
+      # Validate only the PR title against Conventional Commits. We squash-merge,
+      # so the PR title becomes the commit subject on main; checking individual
+      # commits (validateSingleCommit) is redundant and produces noisy warnings
+      # on single-commit PRs.
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   markdown-lint:
     name: Lint Markdown
