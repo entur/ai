@@ -123,7 +123,7 @@ The `guides/` folder is split into three layers along the internal developer pla
 
 - **`platform/`** -- what the platform provides (self-service, common Helm chart, reusable workflows, Terraform modules, Permission Store, Kafka starter).
 - **`playbooks/`** -- end-to-end tasks (bootstrap, add a database, deploy to prd, etc). These are the agent's recommended entry point for multi-step work.
-- **`reference/`** -- language and topic standards (Java, Kotlin, Go, Docker, observability, security, code review, docs).
+- **`reference/`** -- language and topic standards (Java, Kotlin, Go, Docker, observability, tracing, security, code review, docs).
 
 ```text
 AGENTS.md                              # Top-level agent routing and critical rules
@@ -156,7 +156,8 @@ guides/
     api-design.md                      # REST and gRPC API design
     architecture.md                    # Architecture principles, lifecycle
     logging.md                         # Structured logging
-    observability.md                   # Health checks, metrics, tracing
+    observability.md                   # Health checks, metrics, profiler
+    tracing.md                         # OpenTelemetry + Cloud Trace
     security.md                        # Secrets, scanning, IAM
     code-review.md                     # Review checklist
     markdown.md                        # Markdown standards and linting

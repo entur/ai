@@ -127,31 +127,7 @@ Follow Prometheus naming conventions:
 
 ## Distributed Tracing
 
-### Tracing with Spring Boot
-
-Use Micrometer Tracing with OpenTelemetry:
-
-```yaml
-# application.yml
-management:
-  tracing:
-    sampling:
-      probability: 1.0    # 100% sampling in dev/tst, lower in prd
-
-# Add dependencies:
-# micrometer-tracing-bridge-otel
-# opentelemetry-exporter-otlp
-```
-
-### Tracing with Go
-
-Use `go.opentelemetry.io/otel` to create a tracer and start spans. Always `defer span.End()`.
-
-### Trace Propagation
-
-- Use W3C Trace Context headers (`traceparent`, `tracestate`)
-- Include `traceId` in all log entries for log-trace correlation
-- Google Cloud Trace ingests traces from the OpenTelemetry exporter
+See [tracing.md](tracing.md) for the full playbook: per-project trace storage initialization, Terraform wiring (API + `roles/cloudtrace.agent`), OpenTelemetry SDK setup for Spring Boot and Go, propagation, sampling, and Cloud Trace project routing.
 
 ## Google Cloud Profiler
 

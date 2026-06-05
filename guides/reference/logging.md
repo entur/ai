@@ -68,9 +68,7 @@ Use standard `logging` with `json_log_formatter.JSONFormatter()` for structured 
 
 ### Distributed Tracing
 
-- Spring Boot: use Micrometer Tracing for trace context propagation
-- Go: propagate `X-Cloud-Trace-Context` header
-- Include `traceId` and `spanId` in all log entries
+Include `traceId` and `spanId` in every log entry inside a traced request. Cloud Logging joins logs to traces in Trace Explorer when both fields are present. See [tracing.md](tracing.md) for propagation headers, sampling, and the OpenTelemetry SDK setup that produces these IDs.
 
 ### Request IDs
 
