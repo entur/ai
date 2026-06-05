@@ -10,8 +10,8 @@ You are helping an Entur engineer investigate a heap leak in a Kubernetes-runtim
 
 Details:
 
-- Repository: `entur/journey-planner`
-- App ID (metadata.id): `jrnplan`
+- Repository: `entur/some-repo`
+- App ID (metadata.id): `someapp`
 - Runtime: Kubernetes (deployed via the common Helm chart)
 - Environment: prd
 - Cluster host project: `ent-kub-prd`
@@ -30,13 +30,13 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 ```json
 {
   "must_contain": [
-    "profiler_project_id: ent-jrnplan-prd",
+    "profiler_project_id: ent-someapp-prd",
     "logs_project_id: ent-kub-prd",
     "K_REVISION"
   ],
   "must_not_contain": [
     "profiler_project_id: ent-kub-prd",
-    "logs_project_id: ent-jrnplan-prd"
+    "logs_project_id: ent-someapp-prd"
   ],
   "must_match": [
     "(workload|application|app|agent).*(report|stamp|write|emit|upload|own).*project|kubelet.*cluster"

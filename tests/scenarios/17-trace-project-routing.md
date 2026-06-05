@@ -10,8 +10,8 @@ You are helping an Entur engineer debug a slow request in a Kubernetes-runtime s
 
 Details:
 
-- Repository: `entur/journey-planner`
-- App ID (metadata.id): `jrnplan`
+- Repository: `entur/some-repo`
+- App ID (metadata.id): `someapp`
 - Runtime: Kubernetes (deployed via the common Helm chart)
 - Environment: prd
 - Cluster host project: `ent-kub-prd`
@@ -29,12 +29,12 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 ```json
 {
   "must_contain": [
-    "trace_project_id: ent-jrnplan-prd",
+    "trace_project_id: ent-someapp-prd",
     "logs_project_id: ent-kub-prd"
   ],
   "must_not_contain": [
     "trace_project_id: ent-kub-prd",
-    "logs_project_id: ent-jrnplan-prd"
+    "logs_project_id: ent-someapp-prd"
   ],
   "must_match": [
     "(workload|application|app).*(report|stamp|write|emit|own).*project|kubelet.*cluster|trace.*agent.*workload|exporter.*workload"
