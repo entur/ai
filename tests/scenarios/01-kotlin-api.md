@@ -10,9 +10,9 @@ You are setting up a new Kotlin Spring Boot REST API service at Entur.
 
 Details:
 
-- Repository name: journey-planner-api
+- Repository name: some-repo
 - Team: team-reise
-- App ID (metadata.id for self-service): jpapi
+- App ID (metadata.id for self-service): someapp
 - Environments: dev, tst, prd
 - Needs: PostgreSQL, Secret Manager, Auth0 M2M
 
@@ -33,21 +33,21 @@ Output each answer in `key: value` format on its own line:
 ```json
 {
   "must_contain": [
-    "ent-jpapi-dev",
-    "ent-jpapi-tst",
-    "ent-jpapi-prd",
-    "ent-gcs-tfa-jpapi"
+    "ent-someapp-dev",
+    "ent-someapp-tst",
+    "ent-someapp-prd",
+    "ent-gcs-tfa-someapp"
   ],
   "must_not_contain": [
-    "ent-journey-planner-api-dev",
-    "ent-jpapi-prod",
-    "ent-jpapi-staging",
-    "ent-jpapi-test"
+    "ent-some-repo-dev",
+    "ent-someapp-prod",
+    "ent-someapp-staging",
+    "ent-someapp-test"
   ],
   "must_match": [
-    "helm_shortname.*jpapi",
-    "terraform_app_id.*jpapi",
-    "secret_manager_project_dev.*ent-jpapi-dev",
+    "helm_shortname.*someapp",
+    "terraform_app_id.*someapp",
+    "secret_manager_project_dev.*ent-someapp-dev",
     "liberica|bellsoft"
   ]
 }
