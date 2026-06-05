@@ -100,10 +100,14 @@ import (
     "go.opentelemetry.io/otel/sdk/resource"
     sdktrace "go.opentelemetry.io/otel/sdk/trace"
     semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+    "google.golang.org/api/option"
 )
 
 func Init(ctx context.Context, projectID, serviceName, serviceVersion string) (func(context.Context) error, error) {
-    exp, err := texporter.New(texporter.WithProjectID(projectID))
+    exp, err := texporter.New(
+        texporter.WithProjectID(projectID),
+        texporter.WithTraceClientOptions([]option.ClientOption{option.WithTelemetryDisabled()}),
+    )
     if err != nil {
         return nil, fmt.Errorf("cloud trace exporter: %w", err)
     }
@@ -116,7 +120,7 @@ func Init(ctx context.Context, projectID, serviceName, serviceVersion string) (f
     tp := sdktrace.NewTracerProvider(
         sdktrace.WithBatcher(exp),
         sdktrace.WithResource(res),
-        sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.AlwaysSample())),
+        sdktrace.WithSampler(sdktrace.AlwaysSample()),
     )
     otel.SetTracerProvider(tp)
     otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
@@ -149,6 +153,8 @@ http.ListenAndServe(":8080", handler)
 
 Always `defer span.End()` on any manual span created via `tracer.Start(ctx, ...)`. An unended span never exports.
 
+`option.WithTelemetryDisabled()` on the exporter's client options is mandatory. Without it, the `google.golang.org/api/transport/grpc` package auto-attaches `otelgrpc.NewClientHandler()` to the exporter's own gRPC dial. Every `BatchWriteSpans` export then records itself as a root span and ships on the next exporter tick -- a self-feeding loop that fills `list_cloud_traces` results with exporter noise (one root span per ~5s tick) and burns the 2.5M-spans/month free-tier budget. The option scopes only to this client and does not disable any other instrumentation in the app.
+
 For a working end-to-end example see the [entur/ai-portal-mcp](https://github.com/entur/ai-portal-mcp) `internal/tracing` package.
 
 ## Set runtime environment variables
@@ -178,11 +184,15 @@ Use a composite TextMapPropagator with three propagators, in this order on extra
 
 This lets inbound Cloud Run traffic continue an upstream trace while outbound HTTP calls speak modern W3C. Do **not** drop W3C in favor of `X-Cloud-Trace-Context` alone -- the GCP header is non-standard and breaks federation with any non-GCP callee.
 
-## Sample at 100% with parent-based decisions
+## Pick the sampler to match your runtime
 
-Default to `ParentBased(AlwaysSample)`. Every entry-point request produces a trace; downstream services honor the upstream sampling decision.
+Use bare `AlwaysSample()` on Cloud Run services that include `CloudTraceOneWayPropagator` (see [Propagate trace context](#propagate-trace-context)). Use `ParentBased(AlwaysSample())` everywhere else.
 
-Switch to `ParentBased(TraceIDRatioBased(0.1))` only when sustained span volume exceeds Cloud Trace's free tier (2.5M spans/month). Do **not** use bare `AlwaysSample` or `TraceIDRatioBased` without the `ParentBased` wrapper -- they ignore upstream decisions and produce orphaned partial traces.
+The Cloud Run load balancer injects an `X-Cloud-Trace-Context` header carrying its own sample decision -- ~0.1 % of inbound requests. `CloudTraceOneWayPropagator` reads that header, and `ParentBased` then honors the LB's bit, so your app traces almost nothing despite asking for 100 %. Bare `AlwaysSample` makes a local decision per request. Trace continuity from the inbound headers (`trace_id`, `parent_span_id`) is preserved independently of the sampler, so cross-service traces remain linked.
+
+On Kubernetes / GKE, or any service without Cloud Run's LB upstream, there is no synthetic sample bit to inherit and `ParentBased` extends existing sampled traces from real upstream W3C callers (other Entur services) into yours without splitting them.
+
+Switch the inner sampler to `TraceIDRatioBased(0.1)` only when sustained span volume exceeds Cloud Trace's free tier (2.5M spans/month) -- keep the same wrapper (bare vs `ParentBased`) you picked above.
 
 ## Correlate logs with traces
 
