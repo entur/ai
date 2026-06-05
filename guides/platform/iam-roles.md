@@ -8,6 +8,7 @@ If a role you need is not on this allowlist, request it to be added in the #talk
 
 | Role                                   | Service                  |
 | -------------------------------------- | ------------------------ |
+| `roles/aiplatform.user`                | Vertex AI                |
 | `roles/appengine.appViewer`            | App Engine               |
 | `roles/bigquery.admin`                 | BigQuery                 |
 | `roles/bigquery.connectionAdmin`       | BigQuery                 |
@@ -20,9 +21,13 @@ If a role you need is not on this allowlist, request it to be added in the #talk
 | `roles/bigquery.user`                  | BigQuery                 |
 | `roles/cloudfunctions.invoker`         | Cloud Functions          |
 | `roles/cloudfunctions.viewer`          | Cloud Functions          |
+| `roles/cloudprofiler.agent`            | Cloud Profiler           |
 | `roles/cloudsql.admin`                 | Cloud SQL                |
 | `roles/cloudsql.client`                | Cloud SQL                |
+| `roles/cloudtrace.agent`               | Cloud Trace              |
 | `roles/dataform.editor`                | Dataform                 |
+| `roles/discoveryengine.editor`         | Vertex AI Search         |
+| `roles/discoveryengine.viewer`         | Vertex AI Search         |
 | `roles/eventarc.eventReceiver`         | Eventarc                 |
 | `roles/firebase.developAdmin`          | Firebase                 |
 | `roles/firebase.developViewer`         | Firebase                 |
@@ -34,6 +39,7 @@ If a role you need is not on this allowlist, request it to be added in the #talk
 | `roles/iam.serviceAccountViewer`       | IAM                      |
 | `roles/logging.logWriter`              | Cloud Logging            |
 | `roles/logging.viewer`                 | Cloud Logging            |
+| `roles/monitoring.metricWriter`        | Cloud Monitoring         |
 | `roles/monitoring.viewer`              | Cloud Monitoring         |
 | `roles/pubsub.publisher`               | Pub/Sub                  |
 | `roles/pubsub.subscriber`              | Pub/Sub                  |
