@@ -46,6 +46,7 @@ go run . --model sonnet
 | 14-cicd-go-variant | Go CI: setup-go, go test, no artifact upload, no test-reporter, gomod dependabot |
 | 15-cicd-no-helm | No Helm: ci.yaml omits helm-lint, cd.yaml omits deploy jobs |
 | 16-cicd-python-variant | Python CI: setup-python, pytest, no artifact upload, pip dependabot |
+| 17-trace-project-routing | Cloud Trace project routing: k8s workload traces land in `ent-<app>-<env>`, not `ent-kub-<env>` |
 
 ## CLI Options
 
