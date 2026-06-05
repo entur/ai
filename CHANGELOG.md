@@ -2,11 +2,9 @@
 
 ## [0.1.0](https://github.com/entur/ai/compare/v0.0.2...v0.1.0) (2026-06-05)
 
-
 ### Features
 
 * Cloud Run - 'bronze' path ([#52](https://github.com/entur/ai/issues/52)) ([9c9df81](https://github.com/entur/ai/commit/9c9df81debabeecbbcf35ef96e1860ca3eb0f241))
-
 
 ### Documentation
 
@@ -21,13 +19,11 @@
 
 ## [0.0.2](https://github.com/entur/ai/compare/v0.0.1...v0.0.2) (2026-05-26)
 
-
 ### Bug Fixes
 
 * switch release-please to node type so package.json is bumped ([#44](https://github.com/entur/ai/issues/44)) ([e6aad5c](https://github.com/entur/ai/commit/e6aad5cd66cec24a35d97ec593fad91d9b99f8d4))
 
 ## 0.0.1 (2026-05-26)
-
 
 ### Features
 
@@ -37,7 +33,6 @@
 * **plugins:** Support existing guides through plugin ([#22](https://github.com/entur/ai/issues/22)) ([80d27b7](https://github.com/entur/ai/commit/80d27b76c4ff832e5c321b1524b65b23aaa0d711))
 * PoC of plugin marketplace support ([#18](https://github.com/entur/ai/issues/18)) ([d128243](https://github.com/entur/ai/commit/d128243d8016c0c5f8bb426f4257bffe9532c296))
 * **tests:** add MCP knowledge-base quality test suite ([#39](https://github.com/entur/ai/issues/39)) ([f4c8a9c](https://github.com/entur/ai/commit/f4c8a9c79498995d4fe1dc2f21e58578ffe5522a))
-
 
 ### Bug Fixes
 
