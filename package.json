@@ -1,6 +1,6 @@
 {
   "name": "entur-ai",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Entur AI agent instructions, conventions, guides, skills, and plugins.",
   "private": true,
   "license": "EUPL-1.2",
