@@ -131,23 +131,7 @@ See [tracing.md](tracing.md) for the full playbook: per-project trace storage in
 
 ## Google Cloud Profiler
 
-Continuous, low-overhead production profiling for CPU, memory allocation, and lock contention.
-
-### Enabling Profiler
-
-1. Enable the Profiler API via `.entur` directory trigger
-2. Attach the profiler agent:
-
-```bash
-java \
-  -agentpath:/path/to/profiler_java_agent.so \
-  -Dcom.google.cprof.service=my-service-name \
-  -Dcom.google.cprof.service_version=1.0.0 \
-  -cprof_project_id <your_app_project_id> \
-  -jar app.jar
-```
-
-Use the **application's own GCP project ID**, not the cluster project. View in Cloud Console under **Profiler**.
+See [profiler.md](profiler.md) for the full playbook: Terraform wiring (API + `roles/cloudprofiler.agent`), Java and Go agent setup, the `SERVICE_VERSION = K_REVISION` pattern for clean growth analysis, and Cloud Profiler project routing.
 
 ## Grafana Dashboards
 

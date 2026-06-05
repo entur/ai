@@ -47,6 +47,7 @@ go run . --model sonnet
 | 15-cicd-no-helm | No Helm: ci.yaml omits helm-lint, cd.yaml omits deploy jobs |
 | 16-cicd-python-variant | Python CI: setup-python, pytest, no artifact upload, pip dependabot |
 | 17-trace-project-routing | Cloud Trace project routing: k8s workload traces land in `ent-<app>-<env>`, not `ent-kub-<env>` |
+| 18-profiler-project-routing | Cloud Profiler project routing: k8s workload profiles land in `ent-<app>-<env>`, not `ent-kub-<env>` |
 
 ## CLI Options
 

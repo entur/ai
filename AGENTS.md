@@ -55,7 +55,7 @@ See https://github.com/entur/ai for Entur-wide standards.
 
 - **[`guides/platform/`](guides/platform/)** -- what the platform provides (self-service orchestrator, common Helm chart, reusable Actions workflows, Terraform modules, Permission Store, Kafka starter).
 - **[`guides/playbooks/`](guides/playbooks/)** -- end-to-end tasks (bootstrap, add a database, deploy to prd, etc). Prefer these as your entry point for multi-step work.
-- **[`guides/reference/`](guides/reference/)** -- language and topic standards (Java, Kotlin, Go, Docker, observability, logging, tracing, security, code review, docs).
+- **[`guides/reference/`](guides/reference/)** -- language and topic standards (Java, Kotlin, Go, Docker, observability, logging, tracing, profiler, security, code review, docs).
 
 Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (naming, repo layout, testing, conventional commits).
 
@@ -100,8 +100,9 @@ Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (
 | Architecture principles | [reference/architecture.md](guides/reference/architecture.md) |
 | SQL / Postgres | [reference/sql.md](guides/reference/sql.md) |
 | Logging | [reference/logging.md](guides/reference/logging.md) |
-| Observability (metrics, probes, profiler) | [reference/observability.md](guides/reference/observability.md) |
+| Observability (metrics, probes) | [reference/observability.md](guides/reference/observability.md) |
 | Distributed tracing (OpenTelemetry, Cloud Trace) | [reference/tracing.md](guides/reference/tracing.md) |
+| Cloud Profiler (CPU, heap) | [reference/profiler.md](guides/reference/profiler.md) |
 | Security | [reference/security.md](guides/reference/security.md) |
 | Code review | [reference/code-review.md](guides/reference/code-review.md) |
 | Markdown format | [reference/markdown.md](guides/reference/markdown.md) |
