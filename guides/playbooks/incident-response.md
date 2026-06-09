@@ -45,23 +45,6 @@ High-volume periods: incidents affecting single services during high-volume peri
 | 4.3.6 | **B -- Alvorlig** | Feedback to reporter within **60 minutes** that work has started. Status feedback when resolved. |
 | 4.3.7 | **C -- Mindre alvorlig** | **98.5%** of cases acknowledged within **2 business days**. Status feedback when resolved. |
 
-### Data Errors Not Corrected Before Departure
-
-This categorization applies when Entur has received correct information from the operator but the error was not corrected before the train departed.
-
-| Nivå | Plassreservasjon impact | Rutedata impact |
-|------|------------------------|-----------------|
-| **1** | > 50% of seats unoccupied due to data error | > 50% of seats unoccupied due to route data error |
-| **2** | 25--50% of seats unoccupied | 20--50% of seats unoccupied |
-| **3** | 1--25% of seats unoccupied | 1--25% of seats unoccupied |
-
-### SLA -- Data Management Errors
-
-| Avtale | Nivå | Resolution time |
-|--------|------|-----------------|
-| 4.3.8 | **1 -- Svært alvorlig** | Within **2 hours** (during business hours). Status feedback when resolved. |
-| 4.3.9 | **2 -- Alvorlig** | ASAP, latest by **next business day**. Status feedback when resolved. |
-| 4.3.10 | **3 -- Mindre alvorlig** | Within **5 business days**. Status feedback when resolved. |
 
 ## Detection
 
