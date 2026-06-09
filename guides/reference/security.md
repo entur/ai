@@ -19,7 +19,7 @@ Security conventions for all Entur services. Entur uses OWASP ASVS three-tier mo
 
 ### Creating Secrets (Terraform)
 
-Entur Terraform modules create secrets automatically (e.g. `terraform-google-sql-db` creates `PG_USER`/`PG_PASSWORD`). For custom secrets:
+Entur Terraform modules create secrets automatically (e.g. `terraform-google-sql-db` creates `PGUSER`/`PGPASSWORD`). For custom secrets:
 
 ```hcl
 resource "google_secret_manager_secret" "api_key" {

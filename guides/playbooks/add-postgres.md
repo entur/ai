@@ -13,9 +13,9 @@ A managed PostgreSQL instance, accessed via Cloud SQL proxy sidecar, with creden
 
 ## Steps
 
-1. **Provision the instance via the Entur Terraform module.** Use `terraform-google-sql-db//modules/postgresql?ref=v1`. The module creates the instance, application user, `PG_USER`/`PG_PASSWORD` secrets in Secret Manager, and Kubernetes resources. Default sizing is environment-aware (zonal in dev/tst, regional HA in prd). See [terraform-modules.md](../platform/terraform-modules.md#cloud-sql-postgresql).
+1. **Provision the instance via the Entur Terraform module.** Use `terraform-google-sql-db//modules/postgresql?ref=v1`. The module creates the instance, application user, `PGUSER`/`PGPASSWORD` secrets in Secret Manager, and Kubernetes resources. Default sizing is environment-aware (zonal in dev/tst, regional HA in prd). See [terraform-modules.md](../platform/terraform-modules.md#cloud-sql-postgresql).
 
-2. **Enable the Cloud SQL proxy sidecar in Helm.** Set `common.postgres.enabled: true` in `values.yaml`. The application connects to `localhost:5432`. Do **not** add `PG_USER`/`PG_PASSWORD` to `common.secrets` -- they are injected automatically. See [common-helm.md](../platform/common-helm.md#database-cloud-sql-proxy).
+2. **Enable the Cloud SQL proxy sidecar in Helm.** Set `common.postgres.enabled: true` in `values.yaml`. The application connects to `localhost:5432`. Do **not** add `PGUSER`/`PGPASSWORD` to `common.secrets` -- they are injected automatically. See [common-helm.md](../platform/common-helm.md#database-cloud-sql-proxy).
 
 3. **Configure the application datasource.** Spring Boot: set `spring.datasource.url`, `username`, `password` from the injected env vars. See [java.md](../reference/java.md#cloud-sql-connectivity). Go: use `database/sql` with the `pgx` driver and read the same env vars.
 
