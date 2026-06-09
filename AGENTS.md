@@ -72,6 +72,7 @@ Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (
 | Expose service on a custom `*.entur.{no,io,org}` domain | [playbooks/add-custom-domain.md](guides/playbooks/add-custom-domain.md) |
 | Promote a service to prd | [playbooks/deploy-to-prd.md](guides/playbooks/deploy-to-prd.md) |
 | Deprecate or delete a service | [playbooks/deprecate-service.md](guides/playbooks/deprecate-service.md) |
+| Handle a critical incident | [playbooks/incident-response.md](guides/playbooks/incident-response.md) |
 | Run the service locally | [playbooks/local-dev.md](guides/playbooks/local-dev.md) |
 
 ### Platform capabilities (what the platform provides)
