@@ -45,7 +45,6 @@ High-volume periods: incidents affecting single services during high-volume peri
 | 4.3.6 | **B -- Alvorlig** | Feedback to reporter within **60 minutes** that work has started. Status feedback when resolved. |
 | 4.3.7 | **C -- Mindre alvorlig** | **98.5%** of cases acknowledged within **2 business days**. Status feedback when resolved. |
 
-
 ## Detection
 
 Incidents are typically detected through:
