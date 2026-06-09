@@ -11,7 +11,7 @@ Restore service as fast as possible, communicate clearly to operators and stakeh
 | Role | Responsibility |
 |------|----------------|
 | **Utvikler / Utviklervakt** | Analyses and remediates the fault. Updates progress on `#talk-incidents`. Contacts the relevant team for fixes. Documents and writes the Post Mortem. |
-| **Incident Manager (IM) / Bakvakt** | Leads the critical incident process. Drives communication (SMS to operators and Entur leadership). Documents the incident timeline. Creates the Post Mortem page. Creates a ticket in the KHH project. |
+| **Incident Manager (IM) / Bakvakt** | Leads the critical incident process. Drives communication via status.entur.org. Documents the incident timeline. Creates the Post Mortem page. Creates a ticket in the KHH project. |
 | **Support** | Sends first-line notifications to operators (Vy Drops, SJ OPS, GoA Ops). Notifies the KS shift leader. Answers all inbound queries related to the incident. Keeps OPS centres informed via phone or email. |
 | **Beredskapsledergruppe (BLG)** | Crisis leadership group. Activated by Administrerende direktør (or ELG) for incidents involving økonomiske tap, omdømmetap, or GDPR-brudd. Shall be involved after 6 hours per Beredskapsplanen, but assessed earlier for GDPR, payment card, and security incidents. |
 
@@ -39,19 +39,11 @@ High-volume periods: incidents affecting single services during high-volume peri
 
 ## SLA -- Operational Incidents (Operator Agreements)
 
-| Avtale | Nivå | Resolution time | Communication requirements |
-|--------|------|-----------------|---------------------------|
-| 4.3.5 | **A -- Kritisk** | Within **6 hours** (regardless of business hours) | Notify reporter within **30 minutes**. Work continuously until resolved or a satisfactory workaround is established. Affected parties informed immediately and kept updated. Status feedback to reporter within **2 hours** after case is closed or downgraded. |
-| 4.3.6 | **B -- Alvorlig** | Within **2 business days** | Feedback to reporter within **60 minutes** that work has started. Status feedback when resolved. |
-| 4.3.7 | **C -- Mindre alvorlig** | No resolution time requirement | **98.5%** of cases acknowledged within **2 business days**. Status feedback when resolved. |
-
-## Categorization of Content and Data Management Errors
-
-| Nivå | Kategori | Description |
-|------|----------|-------------|
-| **1** | Svært alvorlig feil | Data errors that may cause significant inconvenience to the operator or travelers, affect customer satisfaction, and/or have negative economic consequences for the operator |
-| **2** | Alvorlig feil | Data errors that may cause inconvenience to travelers and the operator |
-| **3** | Mindre alvorlig feil | Data errors where few or no travelers are negatively affected |
+| Avtale | Nivå | Communication requirements |
+|--------|------|---------------------------|
+| 4.3.5 | **A -- Kritisk** | Notify reporter within **30 minutes**. Work continuously until resolved or a satisfactory workaround is established. Affected parties informed immediately and kept updated. Status feedback to reporter within **2 hours** after case is closed or downgraded. |
+| 4.3.6 | **B -- Alvorlig** | Feedback to reporter within **60 minutes** that work has started. Status feedback when resolved. |
+| 4.3.7 | **C -- Mindre alvorlig** | **98.5%** of cases acknowledged within **2 business days**. Status feedback when resolved. |
 
 ### Data Errors Not Corrected Before Departure
 
@@ -138,7 +130,7 @@ Incidents are typically detected through:
 
 **Incident Manager / Bakvakt:**
 
-- SMS "feil løst" to operators and Entur leadership
+- Update status.entur.org
 - Create a ticket in the **KHH project**
 - Create the Post Mortem page
 
@@ -232,8 +224,7 @@ Utvikler / Utviklervakt
 - `#talk-incidents` has status updates throughout the incident.
 - Incident log captures the full timeline.
 - Grafana dashboards confirm metrics returned to baseline after resolution.
-- SMS notifications were sent to operators and Entur leadership at incident start and at resolution ("feil løst").
-- Nivå A resolved within 6 hours; status feedback to reporter within 2 hours of closure or downgrade.
+- status.entur.org were updated at incident start, every 30 minutes and at resolution ("feil løst").
 - GDPR, payment card, or security incidents were escalated to the correct party (Personvernleder / Virksomhetsstyring / Team Sikkerhet).
 - BLG escalation was assessed at 6 hours, or earlier for GDPR/payment/security incidents.
 - Post Mortem page created and ticket filed in the KHH project.
