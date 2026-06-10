@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.1](https://github.com/entur/ai/compare/v0.1.0...v0.1.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* add alerting reference ([#62](https://github.com/entur/ai/issues/62)) ([2b66982](https://github.com/entur/ai/commit/2b6698252614b6481a0ec9b6fcf99dcae171fff3))
+* add incident response playbook ([#61](https://github.com/entur/ai/issues/61)) ([968a528](https://github.com/entur/ai/commit/968a528228d7666ac58e70a4b3443580b9c4c8a9))
+* update PSQL cred's ([#63](https://github.com/entur/ai/issues/63)) ([e4eb933](https://github.com/entur/ai/commit/e4eb933bb285237d9793e0c5111ed3667036666f))
+
 ## [0.1.0](https://github.com/entur/ai/compare/v0.0.2...v0.1.0) (2026-06-05)
 
 ### Features
