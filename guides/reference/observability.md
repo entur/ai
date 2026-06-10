@@ -145,15 +145,4 @@ CLI: `kubectl describe vpa <deployment-name> -n <namespace>`. VPA recommendation
 
 ## Alerting
 
-### Recommended Alerts
-
-| Alert | Condition | Severity |
-|-------|-----------|----------|
-| High error rate | 5xx rate > 5% for 5 minutes | Critical |
-| High latency | p99 latency > 5s for 10 minutes | Warning |
-| Pod restarts | > 3 restarts in 15 minutes | Warning |
-| CPU saturation | CPU usage > 80% for 10 minutes | Warning |
-| Memory saturation | Memory usage > 85% for 5 minutes | Critical |
-| Health check failing | Readiness probe failing for 3 minutes | Critical |
-
-Configure alerts in Google Cloud Monitoring or Prometheus AlertManager.
+See [alerting.md](alerting.md) for the full playbook: Grafana alert rules (golden path), PromQL query patterns for the shared Prometheus/Thanos stack, PagerDuty routing via the `entur-pagerduty` contact point, notification policies, and recommended starting alerts for every production service.
