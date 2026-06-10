@@ -104,6 +104,7 @@ Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (
 | Observability (metrics, probes) | [reference/observability.md](guides/reference/observability.md) |
 | Distributed tracing (OpenTelemetry, Cloud Trace) | [reference/tracing.md](guides/reference/tracing.md) |
 | Cloud Profiler (CPU, heap) | [reference/profiler.md](guides/reference/profiler.md) |
+| Alerting (Grafana, PromQL, PagerDuty) | [reference/alerting.md](guides/reference/alerting.md) |
 | Security | [reference/security.md](guides/reference/security.md) |
 | Code review | [reference/code-review.md](guides/reference/code-review.md) |
 | Markdown format | [reference/markdown.md](guides/reference/markdown.md) |
