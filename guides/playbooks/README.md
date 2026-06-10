@@ -17,6 +17,7 @@ Use these as the agent's entry point for any non-trivial task. They exist precis
 | [add-custom-domain.md](add-custom-domain.md) | Exposing a service on a `*.entur.{no,io,org}` hostname with managed TLS |
 | [deploy-to-prd.md](deploy-to-prd.md) | Promoting a service from dev/tst to production |
 | [deprecate-service.md](deprecate-service.md) | Retiring an application gracefully |
+| [incident-response.md](incident-response.md) | Handling a critical incident from detection through post mortem |
 | [local-dev.md](local-dev.md) | Running the application locally with the right tooling |
 
 ## How a playbook is structured
