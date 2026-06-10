@@ -225,7 +225,7 @@ common:
     enabled: true
 ```
 
-Injects a Cloud SQL proxy sidecar. Application connects to `localhost:5432`. Credentials provided as env vars from K8s secrets (created by `terraform-google-sql-db` module): `PG_USER`, `PG_PASSWORD`. Database name configured via application config. Do NOT add `PG_USER`/`PG_PASSWORD` to ExternalSecrets — they are already injected automatically.
+Injects a Cloud SQL proxy sidecar. Application connects to `localhost:5432`. Credentials provided as env vars from K8s secrets (created by `terraform-google-sql-db` module): `PGUSER`, `PGPASSWORD`. Database name configured via application config. Do NOT add `PGUSER`/`PGPASSWORD` to ExternalSecrets — they are already injected automatically.
 
 ## Secrets (ExternalSecrets)
 

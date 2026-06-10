@@ -345,10 +345,10 @@ Connects via Cloud SQL proxy sidecar (configured in Helm):
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/${DB_NAME}
-    username: ${PG_USER}
-    password: ${PG_PASSWORD}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
 ```
 
-`PG_USER`, `PG_PASSWORD`, `DB_NAME` come from Kubernetes secrets created by `terraform-google-sql-db`.
+`PGUSER`, `PGPASSWORD`, `DB_NAME` come from Kubernetes secrets created by `terraform-google-sql-db`.
 
 For query performance, indexing, transactions, and migration patterns see [sql.md](sql.md).

@@ -140,7 +140,7 @@ module "postgresql" {
 
 - Cloud SQL PostgreSQL instance + database(s)
 - Application user with password
-- Secret Manager secrets: `PG_USER`, `PG_PASSWORD`
+- Secret Manager secrets: `PGUSER`, `PGPASSWORD`
 - Kubernetes ConfigMap (connection info) + Secret (credentials)
 
 ### Application Configuration (Spring Boot)
@@ -149,8 +149,8 @@ module "postgresql" {
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/${DB_NAME}
-    username: ${PG_USER}
-    password: ${PG_PASSWORD}
+    username: ${PGUSER}
+    password: ${PGPASSWORD}
 ```
 
 The Cloud SQL proxy sidecar (enabled via `postgres.enabled: true` in Helm) handles connectivity. The application connects to `localhost:5432`.

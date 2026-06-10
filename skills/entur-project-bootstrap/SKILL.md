@@ -166,7 +166,7 @@ If database is needed, add:
     connectionConfig: {repoName}
 ```
 
-If secrets are needed (do NOT add `PG_USER`/`PG_PASSWORD` here — those are already provided by `postgres.enabled`), add:
+If secrets are needed (do NOT add `PGUSER`/`PGPASSWORD` here — those are already provided by `postgres.enabled`), add:
 
 ```yaml
   secrets:
