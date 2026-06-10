@@ -50,17 +50,17 @@ The labels `service_name` and `env` are sent as `custom_details` to PagerDuty an
 
 Entur runs self-hosted Prometheus with Thanos for long-term storage and cross-cluster queries. All PromQL queries in Grafana run against Thanos.
 
-### The `prometheus_group` Selector
+### Select the environment
 
-Always include `prometheus_group` in alert queries to scope to a specific cluster. This avoids cross-cluster fan-out and significantly reduces query cost.
+Always include `prometheus_group` or `cluster_environment` in alert queries to scope to a specific cluster or environment.
 
-| Environment | `prometheus_group` value |
+| `cluster_environment` | `prometheus_group` example |
 |-------------|--------------------------|
 | dev         | `kub-ent-dev-001`        |
 | tst         | `kub-ent-tst-001`        |
 | prd         | `kub-ent-prd-001`        |
 
-Production alerts should always filter on `prometheus_group="kub-ent-prd-001"`.
+Production alerts should always filter on `cluster_environment="prd"`.
 
 ### Standard Labels
 
@@ -79,7 +79,12 @@ These labels are available on most metrics from Kubernetes workloads:
 |--------|-----------------|----------|
 | cAdvisor / kubelet | `container_*` | Container CPU, memory, network, filesystem |
 | kube-state-metrics | `kube_*` | Pod status, replica counts, resource requests/limits |
-| Micrometer (Spring Boot) | `http_server_requests_*`, `jvm_*`, `process_*` | Application-level HTTP, JVM, and process metrics |
+| Kafka | `kafka_` | Kafka details |
+| Http | `http_(server|client)` | HTTP details |
+| gRPC | `gprc_(server|client)` | gRPC details |
+| Micrometer (Spring Boot) | `jvm_*`, `process_*` | Application-level HTTP, JVM, and process metrics |
+| Hikari connnection pool | `hikaricp_` | Connection pool details |
+| Logging (logback) | `logback_` | Log details |
 | Custom application metrics | Varies | Business-specific counters, gauges, histograms |
 
 ### PromQL Examples for Common Alerts
@@ -107,15 +112,13 @@ Fires when more than 5% of HTTP requests return 5xx for 5 minutes:
 
 #### High p99 Latency
 
-Fires when the 99th percentile request duration exceeds 5 seconds:
+Fires when the 99th percentile request duration exceeds 5 seconds. Use the pre-calculated recording rule `entur_service_latency_seconds:p99` instead of computing `histogram_quantile` over raw buckets -- it is cheaper to evaluate and consistent across dashboards and alerts:
 
 ```promql
-histogram_quantile(0.99,
-  sum by (le) (rate(http_server_requests_seconds_bucket{
-    prometheus_group="kub-ent-prd-001",
-    kubernetes_namespace="my-service"
-  }[5m]))
-) > 5
+entur_service_latency_seconds:p99{
+  prometheus_group="kub-ent-prd-001",
+  kubernetes_namespace="my-service"
+} > 5
 ```
 
 #### Pod Restarts
