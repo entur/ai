@@ -2,7 +2,6 @@
 
 ## [0.1.1](https://github.com/entur/ai/compare/v0.1.0...v0.1.1) (2026-06-10)
 
-
 ### Bug Fixes
 
 * add alerting reference ([#62](https://github.com/entur/ai/issues/62)) ([2b66982](https://github.com/entur/ai/commit/2b6698252614b6481a0ec9b6fcf99dcae171fff3))
