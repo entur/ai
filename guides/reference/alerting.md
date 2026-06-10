@@ -80,8 +80,8 @@ These labels are available on most metrics from Kubernetes workloads:
 | cAdvisor / kubelet | `container_*` | Container CPU, memory, network, filesystem |
 | kube-state-metrics | `kube_*` | Pod status, replica counts, resource requests/limits |
 | Kafka | `kafka_` | Kafka details |
-| Http | `http_(server|client)` | HTTP details |
-| gRPC | `gprc_(server|client)` | gRPC details |
+| Http | `http_(server\|client)` | HTTP details |
+| gRPC | `grpc_(server\|client)` | gRPC details |
 | Micrometer (Spring Boot) | `jvm_*`, `process_*` | Application-level HTTP, JVM, and process metrics |
 | Hikari connnection pool | `hikaricp_` | Connection pool details |
 | Logging (logback) | `logback_` | Log details |
