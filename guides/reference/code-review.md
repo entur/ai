@@ -1,5 +1,9 @@
 # Code Review
 
+- **Target audience**: PR authors, reviewers, and AI agents reviewing code changes.
+- **Intent**: reviews catch correctness, security, operational, and maintainability risks before merge.
+- **Scope**: review checklists for common Entur service changes. Language-specific standards live in [java.md](java.md), [kotlin.md](kotlin.md), and [go.md](go.md).
+
 ## For Authors
 
 ### Before Opening a PR

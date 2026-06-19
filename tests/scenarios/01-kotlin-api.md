@@ -48,7 +48,7 @@ Output each answer in `key: value` format on its own line:
     "helm_shortname.*someapp",
     "terraform_app_id.*someapp",
     "secret_manager_project_dev.*ent-someapp-dev",
-    "liberica|bellsoft"
+    "docker_base_image.*gcr\\.io/distroless/java25-debian13:nonroot"
   ]
 }
 ```

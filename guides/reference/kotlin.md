@@ -2,9 +2,13 @@
 
 Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS.md) first for cross-language standards, and [java.md](java.md) for shared JVM patterns (Spring Boot, logging, Redis, testing, dependencies, Dockerfile).
 
+- **Target audience**: developers and AI agents building Kotlin services for Entur.
+- **Intent**: Kotlin services use a CodeQL-compatible Kotlin baseline and consistent Spring Boot, OpenAPI, data access, validation, and testing patterns.
+- **Scope**: Kotlin runtime/build setup, version catalog examples, layered Boot JARs, Kotlin-specific coding patterns, Exposed data access, validation, exception handling, coroutines, and tests. Shared JVM rules live in [java.md](java.md).
+
 ## Runtime and Build
 
-- **Kotlin version**: latest patch version in the newest Kotlin release line supported by Entur's CodeQL workflow, Spring Boot, and Gradle baseline
+- **Kotlin version**: latest patch version in the newest Kotlin release line supported by Entur's CodeQL workflow, Spring Boot, and Gradle baseline. Current baseline example: Kotlin 2.3.x.
 - **Java target**: 25 (or latest LTS/stable)
 - **Build tool**: Gradle with Kotlin DSL (`build.gradle.kts`)
 - **Framework**: Spring Boot 3.x with Kotlin support

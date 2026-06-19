@@ -2,6 +2,10 @@
 
 Java conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS.md) first for cross-language standards.
 
+- **Target audience**: developers and AI agents building Java services for Entur.
+- **Intent**: Java services use the Entur JVM, Spring Boot, logging, health, Redis, and dependency conventions consistently.
+- **Scope**: Java runtime/build setup, Spring Boot configuration, coding patterns, testing, Redis, Artifactory, MVC/WebFlux, database connections, and common dependencies. Kotlin-specific rules live in [kotlin.md](kotlin.md).
+
 ## Runtime and Build
 
 - **Java version**: 25 or newer

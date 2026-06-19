@@ -2,6 +2,10 @@
 
 All services must produce structured JSON logs to stdout. GCP Cloud Logging automatically ingests stdout from Kubernetes pods.
 
+- **Target audience**: developers and AI agents adding or reviewing service logging.
+- **Intent**: logs are structured, queryable, correlated with requests/traces, and safe to emit in GCP.
+- **Scope**: required log fields, Java/Kotlin and Go logging setup, log levels, sensitive data rules, and operational logging patterns. Metrics and tracing live in [observability.md](observability.md) and [tracing.md](tracing.md).
+
 ## Required Fields
 
 | Field | Description | Example |
