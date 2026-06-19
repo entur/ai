@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/entur/ai/compare/v0.1.1...v0.1.2) (2026-06-19)
+
+
+### Documentation
+
+* **guides:** align reference guidance with golden path ([#66](https://github.com/entur/ai/issues/66)) ([f937eee](https://github.com/entur/ai/commit/f937eee5523da8a97dd917975429059841fc7827))
+* standardise guide metadata and fix CI/CD references ([#68](https://github.com/entur/ai/issues/68)) ([30fc89d](https://github.com/entur/ai/commit/30fc89df1d908856e8324f2e9fcc9173b663ce21))
+
 ## [0.1.1](https://github.com/entur/ai/compare/v0.1.0...v0.1.1) (2026-06-10)
 
 ### Bug Fixes
