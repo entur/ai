@@ -265,7 +265,7 @@ Use mise (formerly rtx) for consistent tool versions across the team. Define req
 ```toml
 [tools]
 java        = 'temurin-25'
-terraform   = '1.9.8'
+terraform   = '1.15.6'
 python      = '3.13.10'
 kotlin      = '2.3.0'
 

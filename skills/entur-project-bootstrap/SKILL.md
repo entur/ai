@@ -321,7 +321,7 @@ For background on each workflow's role, read `guides/platform/gha-workflows.md` 
 [tools]
 java        = 'liberica-25.0.2+12'    # Kotlin/Java
 # go        = '1.25'                   # Go
-terraform   = '1.9.8'
+terraform   = '1.15.6'
 
 [settings]
 experimental = true
