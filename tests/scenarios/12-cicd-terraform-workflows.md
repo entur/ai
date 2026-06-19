@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies terraform.yaml is a separate workflow (not mixed into cd.yaml) with correct lint/plan/apply structure: plan all envs, apply dev on PR, apply tst+prd on merge. Verifies terraform-drift-detection.yaml runs weekly with drift-check job that creates GitHub issues.
+Verifies terraform.yml is a separate workflow (not mixed into cd.yml) with correct lint/plan/apply structure: plan all envs, apply dev on PR, apply tst+prd on merge. Verifies terraform-drift-detection.yml runs weekly with drift-check job that creates GitHub issues.
 
 ## Prompt
 
@@ -16,8 +16,8 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 
 Generate two files:
 
-1. The complete `.github/workflows/terraform.yaml`
-2. The complete `.github/workflows/terraform-drift-detection.yaml`
+1. The complete `.github/workflows/terraform.yml`
+2. The complete `.github/workflows/terraform-drift-detection.yml`
 
 Output the YAML content for each file, clearly labeled.
 

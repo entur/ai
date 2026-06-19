@@ -27,7 +27,7 @@ The same Docker image that was built and tested in `dev` is deployed to `tst` an
    - Memory request **equal to** memory limit (incompressible -- OOM kill protection)
    - VPA enabled (recommendations stabilize over weeks)
 
-4. **Confirm CD pipeline uses image promotion.** `cd.yaml` on push to `main` resolves the PR-built image via git tag and deploys `dev → tst → prd` with `cancel-in-progress: false` on the deploy concurrency group. Manual `workflow_dispatch` for re-deploying specific tags. See [gha-workflows.md](../platform/gha-workflows.md#cdyaml-continuous-deployment).
+4. **Confirm CD pipeline uses image promotion.** `cd.yml` on push to `main` resolves the PR-built image via git tag and deploys `dev → tst → prd` with `cancel-in-progress: false` on the deploy concurrency group. Manual `workflow_dispatch` for re-deploying specific tags. See [gha-workflows.md](../platform/gha-workflows.md#cdyaml-continuous-deployment).
 
 5. **Confirm observability is wired.** Liveness verifies the process only; readiness only checks **private** dependencies. Prometheus endpoint enabled. Tracing sampling lowered for prd (often 0.1--1%). See [observability.md](../reference/observability.md).
 

@@ -14,7 +14,7 @@ Get a minimal "hello world" service running in `dev` with the standard golden-pa
 
 ## Steps
 
-1. **Provision GCP projects via self-service.** Create `.entur/cicd.yaml` (`GitHubActions`) and `.entur/<appid>.yaml` (`GoogleCloudApplication`). Open a PR, comment `entur apply`, merge. See [self-service.md](../platform/self-service.md) for manifest fields and the apply flow.
+1. **Provision GCP projects via self-service.** Create `.entur/cicd.yml` (`GitHubActions`) and `.entur/<appid>.yaml` (`GoogleCloudApplication`). Open a PR, comment `entur apply`, merge. See [self-service.md](../platform/self-service.md) for manifest fields and the apply flow.
 
 2. **Lay out the repository per the golden path.** Repository name = application name = Docker image name = Kubernetes namespace = Helm release name. See [CONVENTIONS.md](../../CONVENTIONS.md#project-structure) for the full directory layout.
 
@@ -22,7 +22,7 @@ Get a minimal "hello world" service running in `dev` with the standard golden-pa
 
 4. **Add the Helm chart.** `helm/<repo-name>/` with `Chart.yaml` depending on the Entur `common` chart, `values.yaml`, and `env/values-kub-ent-{dev,tst,prd}.yaml`. Set `common.shortname` to your **App ID** (must match `metadata.id` from step 1). See [common-helm.md](../platform/common-helm.md) for required values.
 
-5. **Add CI/CD workflows.** Split into focused files: `ci.yaml` (reusable build), `build.yaml` (PR), `cd.yaml` (deploy on merge), `pr.yaml`, `codeql.yml`, `dependabot-pr.yaml`, and (if `terraform/` exists) `terraform.yaml` + `terraform-drift-detection.yaml`. Generate them by loading the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill -- it produces the canonical templates per language. See [gha-workflows.md](../platform/gha-workflows.md) for the inventory of available reusable workflows and their inputs.
+5. **Add CI/CD workflows.** Generate the canonical workflow files by loading the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill. Do not hand-write the workflow inventory in this playbook; the skill owns file names, workflow structure, and language variants. See [gha-workflows.md](../platform/gha-workflows.md) for reusable workflow inputs.
 
 6. **Add `AGENTS.md` and a symlink for Claude.** Tell agents where the Entur standards live so they generate platform-compliant code. See [README.md](../../README.md#quick-start) for the recommended template, then `ln -s AGENTS.md CLAUDE.md`.
 
@@ -31,7 +31,7 @@ Get a minimal "hello world" service running in `dev` with the standard golden-pa
 ## Verify
 
 - `helm lint helm/<repo-name>/ -f helm/<repo-name>/env/values-kub-ent-dev.yaml` passes locally.
-- After merging to `main`, the `cd.yaml` workflow deploys a pod to the `dev` namespace.
+- After merging to `main`, the `cd.yml` workflow deploys a pod to the `dev` namespace.
 - `kubectl get pods -n <repo-name>` in `kub-ent-dev` shows the pod `Running` with both probes passing.
 - The application appears in `grafana.entur.org` dashboards.
 

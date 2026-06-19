@@ -2,6 +2,10 @@
 
 Entur uses **Cloud SQL for PostgreSQL** as the standard relational database. Apps connect through the **Cloud SQL Auth Proxy** sidecar on `localhost:5432`. This guide covers application-side query design, schema, transactions, pooling, migrations, and operational practices that affect performance and reliability.
 
+- **Target audience**: developers and AI agents designing or changing relational data access.
+- **Intent**: database schemas, queries, transactions, migrations, and connection pools stay safe for rolling deploys and production load.
+- **Scope**: PostgreSQL schema design, indexes, query performance, migrations, connection pooling, security, testing, and observability. Provisioning lives in [terraform-modules.md](../platform/terraform-modules.md#cloud-sql-postgresql).
+
 For provisioning and machine sizing see [terraform-modules.md](../platform/terraform-modules.md#cloud-sql-postgresql). For the proxy sidecar see [common-helm.md](../platform/common-helm.md#database-cloud-sql-proxy). For language-specific access patterns see [java.md](java.md), [kotlin.md](kotlin.md), and [go.md](go.md).
 
 > **About this guide**: *Schema Design*, *Indexing*, *Query Performance*, and the *Online-safe patterns* under *Migrations* are general Postgres practice we expect in Entur services -- not unique to our platform. The genuinely Entur-specific operational requirements start at *Connection Pooling* (HPA pod-count math, Cloud SQL proxy restart window) and continue through *Security*, *Testing*, and *Observability*. If you already know Postgres well, skim the early sections and read the later ones carefully.

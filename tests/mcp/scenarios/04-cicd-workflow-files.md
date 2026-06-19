@@ -2,11 +2,9 @@
 
 ## Description
 
-The setup-cicd-workflows skill canonically uses `.yaml` (not `.yml`) for
-GitHub Actions workflows. There is a known inconsistency in
-`skills/entur-project-bootstrap/SKILL.md` that mentions `ci.yml` and
-`deploy.yml`. This scenario probes for the right list AND for the .yaml
-extension; failure here can flag the inconsistency.
+The setup-cicd-workflows skill canonically uses `.yml` for GitHub Actions
+workflow files. This scenario probes for the right list and extension; failure
+here can flag drift between the workflow skill and reference docs.
 
 ## Prompt
 
@@ -28,15 +26,24 @@ Each `id` must be copied verbatim from the MCP response (e.g. `guides_platform_s
 ```json
 {
   "must_contain": [
-    "ci.yaml",
-    "cd.yaml",
-    "build.yaml",
-    "pr.yaml"
-  ],
-  "must_not_contain": [
     "ci.yml",
     "cd.yml",
     "build.yml",
+    "pr.yml",
+    "codeql.yml",
+    "dependabot-pr.yml",
+    "terraform.yml",
+    "terraform-drift-detection.yml"
+  ],
+  "must_not_contain": [
+    "ci.yaml",
+    "cd.yaml",
+    "build.yaml",
+    "pr.yaml",
+    "codeql.yaml",
+    "dependabot-pr.yaml",
+    "terraform.yaml",
+    "terraform-drift-detection.yaml",
     "deploy.yml",
     "deploy.yaml"
   ],

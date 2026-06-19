@@ -1,5 +1,9 @@
 # API Design Standards
 
+- **Target audience**: developers and AI agents designing or changing REST APIs.
+- **Intent**: APIs follow Entur API guidelines, publish valid OpenAPI contracts, and expose required authentication and permission metadata.
+- **Scope**: REST API design and OpenAPI conventions. CI linting is covered in [gha-workflows.md](../platform/gha-workflows.md) and [gha-actions.md](../platform/gha-actions.md).
+
 ## API guidelines
 
 <https://raw.githubusercontent.com/entur/api-guidelines/refs/heads/main/guidelines.md>

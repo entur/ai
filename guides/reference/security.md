@@ -2,6 +2,10 @@
 
 Security conventions for all Entur services. Entur uses OWASP ASVS three-tier model:
 
+- **Target audience**: developers and AI agents implementing or reviewing security-sensitive service changes.
+- **Intent**: services handle secrets, authentication, authorization, dependency scanning, container security, IAM, and vulnerability management according to Entur requirements.
+- **Scope**: application and platform security rules for Entur services. General architecture and Docker implementation details live in [architecture.md](architecture.md) and [docker.md](docker.md).
+
 - **Level 1**: Mandatory for all services
 - **Level 2**: Required for services handling money or personal information
 - **Level 3**: Nice-to-have improvements

@@ -2,6 +2,10 @@
 
 Guidelines for application architecture at Entur. All services run on GKE in `europe-west1`.
 
+- **Target audience**: developers and AI agents making service architecture choices.
+- **Intent**: services are independently deployable, resilient, testable, and compatible with Entur platform operations.
+- **Scope**: service boundaries, data ownership, infrastructure choices, asynchronous messaging, database conventions, and production hardening. Language-specific implementation details live in [java.md](java.md), [kotlin.md](kotlin.md), and [go.md](go.md).
+
 ## Design Principles
 
 - Keep business logic independent of frameworks, databases, and external services

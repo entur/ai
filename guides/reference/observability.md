@@ -2,6 +2,10 @@
 
 All Entur services must expose health checks, Prometheus metrics, and distributed tracing.
 
+- **Target audience**: developers and AI agents adding operational visibility to Entur services.
+- **Intent**: services expose health, readiness, and Prometheus signals that work with Entur Kubernetes and Grafana conventions.
+- **Scope**: liveness/readiness probes, Prometheus metrics, alert-facing metric conventions, and dashboard compatibility. Distributed tracing and profiling live in [tracing.md](tracing.md) and [profiler.md](profiler.md).
+
 ## Health Checks
 
 Every service must expose liveness and readiness probes for Kubernetes pod lifecycle management.

@@ -2,6 +2,10 @@
 
 Go conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS.md) first for cross-language standards.
 
+- **Target audience**: developers and AI agents building Go services for Entur.
+- **Intent**: Go services follow Entur runtime, HTTP, Docker, database, Redis, metrics, and logging conventions.
+- **Scope**: Go project layout, application patterns, testing, Postgres, Redis, Prometheus metrics, and structured logging. Cross-language rules live in [CONVENTIONS.md](../../CONVENTIONS.md).
+
 ## Runtime and Build
 
 - **Go version**: latest stable (currently 1.25+)

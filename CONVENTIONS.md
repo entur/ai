@@ -46,13 +46,8 @@ When a guide conflicts with a platform/security requirement, the platform/securi
 my-application/
   .github/
     workflows/
-      ci.yml                    # Reusable CI build (workflow_call)
-      ci-pr.yml                 # PR verification + CI build
-      ci-feature.yml            # Feature branch CI (if no open PR)
-      deploy.yml                # CD pipeline (dev -> tst -> prd)
-      codeql.yml                # Security code scanning (MUST be named codeql.yml)
-      lint-api.yml              # API spec linting (optional, for contract-first)
-      lint-helm.yml             # Helm chart linting per environment
+      # Generate canonical workflow files with skills/setup-cicd-workflows/SKILL.md.
+      # Workflow files use .yml.
     dependabot.yml              # Automated dependency updates
     pull_request_template.md    # PR description template
   .entur/

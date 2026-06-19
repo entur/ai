@@ -37,17 +37,20 @@ go run . --model sonnet
 | 05-derive-from-manifest | Core test: distinguish metadata.id from metadata.name |
 | 06-critical-rules | Never create GCP projects via Terraform |
 | 07-cicd-file-structure | CI/CD pipeline file naming and architecture (all 8+ workflow files) |
-| 08-cicd-ci-workflow | ci.yaml reusable workflow: lint, test (Java 25/Gradle), Docker build/scan/push |
-| 09-cicd-build-workflow | build.yaml PR trigger and pr.yaml verification workflow |
-| 10-cicd-cd-workflow | cd.yaml image promotion model: resolve-image via git tag, deploy chain |
-| 11-cicd-security-workflows | codeql.yml (CodeQL + Java config) and dependabot-pr.yaml (approval gate) |
-| 12-cicd-terraform-workflows | terraform.yaml (lint/plan/apply) and drift detection (weekly schedule) |
+| 08-cicd-ci-workflow | ci.yml reusable workflow: lint, test (Java 25/Gradle), Docker build/scan/push |
+| 09-cicd-build-workflow | build.yml PR trigger and pr.yml verification workflow |
+| 10-cicd-cd-workflow | cd.yml image promotion model: resolve-image via git tag, deploy chain |
+| 11-cicd-security-workflows | codeql.yml (CodeQL + Java config) and dependabot-pr.yml (approval gate) |
+| 12-cicd-terraform-workflows | terraform.yml (lint/plan/apply) and drift detection (weekly schedule) |
 | 13-cicd-dependabot-config | dependabot.yml: correct ecosystems for Kotlin (github-actions, docker, gradle) |
 | 14-cicd-go-variant | Go CI: setup-go, go test, no artifact upload, no test-reporter, gomod dependabot |
-| 15-cicd-no-helm | No Helm: ci.yaml omits helm-lint, cd.yaml omits deploy jobs |
+| 15-cicd-no-helm | No Helm: ci.yml omits helm-lint, cd.yml omits deploy jobs |
 | 16-cicd-python-variant | Python CI: setup-python, pytest, no artifact upload, pip dependabot |
 | 17-trace-project-routing | Cloud Trace project routing: k8s workload traces land in `ent-<app>-<env>`, not `ent-kub-<env>` |
 | 18-profiler-project-routing | Cloud Profiler project routing: k8s workload profiles land in `ent-<app>-<env>`, not `ent-kub-<env>` |
+| 19-jvm-docker-golden-path | Java/Kotlin Docker runtime defaults to distroless, not Liberica |
+| 20-kotlin-codeql-version | Kotlin version follows Entur CodeQL support, not newest stable blindly |
+| 21-redis-not-default | Redis is not added without a concrete cache/lock/session/dedup use case |
 
 ## CLI Options
 
