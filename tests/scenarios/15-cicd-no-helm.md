@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies that when a project has no Helm chart, ci.yaml omits the helm-lint job, the docker job does not depend on helm-lint, and cd.yaml omits deploy jobs entirely (only builds and pushes images).
+Verifies that when a project has no Helm chart, ci.yml omits the helm-lint job, the docker job does not depend on helm-lint, and cd.yml omits deploy jobs entirely (only builds and pushes images).
 
 ## Prompt
 
@@ -20,10 +20,10 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 
 Generate:
 
-1. The complete `.github/workflows/ci.yaml`
-2. The complete `.github/workflows/cd.yaml`
+1. The complete `.github/workflows/ci.yml`
+2. The complete `.github/workflows/cd.yml`
 
-Output ONLY the YAML content for each file, prefixed with a single line giving the filename (e.g. `# .github/workflows/ci.yaml`). Do NOT include any prose, commentary, or explanation -- just the filename headers and YAML.
+Output ONLY the YAML content for each file, prefixed with a single line giving the filename (e.g. `# .github/workflows/ci.yml`). Do NOT include any prose, commentary, or explanation -- just the filename headers and YAML.
 
 ## Assertions
 

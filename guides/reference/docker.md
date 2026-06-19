@@ -2,6 +2,10 @@
 
 All Entur applications deployed to Kubernetes are packaged as Docker images.
 
+- **Target audience**: developers and AI agents creating or updating Dockerfiles.
+- **Intent**: images use Entur Golden Path base images, run as non-root, contain no secrets, and integrate with Entur reusable Docker workflows.
+- **Scope**: Dockerfile layout, base image selection, multi-stage builds, runtime security, and Docker CI integration. Kubernetes deployment settings live in [common-helm.md](../platform/common-helm.md).
+
 ## Conventions
 
 - Dockerfile lives at the **repository root**
@@ -20,7 +24,7 @@ Prefer **distroless** or **slim-musl** images. Use Alpine only when you need a s
 | Node.js | `gcr.io/distroless/nodejs24-debian12` | `node:24-alpine` |
 | Python | `gcr.io/distroless/python3-debian12` | `python:3.12-slim` |
 
-Use distroless runtime images by default. Use Alpine-based images only when the container needs a shell, package manager, or runtime debugging tools. ALWAYS pin base image versions to specific tags.
+Use distroless runtime images by default. Use Alpine-based images only when the container needs a shell, package manager, or runtime debugging tools. Do **not** use Liberica as the Golden Path Java/Kotlin runtime image. ALWAYS pin base image versions to specific tags.
 
 ## Dockerfile Examples
 

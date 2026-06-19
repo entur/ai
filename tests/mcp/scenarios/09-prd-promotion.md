@@ -2,7 +2,7 @@
 
 ## Description
 
-The cd.yaml image-promotion model: PR-built Docker image is tagged in git,
+The cd.yml image-promotion model: PR-built Docker image is tagged in git,
 promoted to tst and prd via `resolve-image`. Tests that the KB surfaces the
 deploy-to-prd playbook and explains the tag-based promotion (not rebuild).
 

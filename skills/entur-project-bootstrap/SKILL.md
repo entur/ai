@@ -61,7 +61,7 @@ Ask the user to confirm before generating files.
 
 ## Step 3: Generate Self-Service Manifests
 
-### `.entur/cicd.yaml`
+### `.entur/cicd.yml`
 
 ```yaml
 apiVersion: orchestrator.entur.io/github/v1
@@ -274,12 +274,12 @@ Select the Dockerfile template based on language:
 
 ### Kotlin/Java
 
-Use multi-stage with layered JAR and CDS:
+Use multi-stage with a layered JAR and distroless runtime:
 
 - Build stage: `gradle:9.3.1-jdk25-alpine`
-- Layers stage: `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl`
-- Runtime stage: `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl`
-- Non-root user, port 8080, `-XX:MaxRAMPercentage=75.0`
+- Layers stage: `eclipse-temurin:25-jre-alpine`
+- Runtime stage: `gcr.io/distroless/java25-debian13:nonroot`
+- Non-root runtime, port 8080, `-XX:MaxRAMPercentage=75.0`
 
 ### Go
 
@@ -297,19 +297,7 @@ Use multi-stage with layered JAR and CDS:
 
 Delegate to the **setup-cicd-workflows** skill (`skills/setup-cicd-workflows/SKILL.md` in the entur/ai repository) -- it is the canonical source for workflow file names, structure, and reusable-workflow `@vN` pins. Do not generate these files from this skill: keeping two sources of truth has already caused drift.
 
-For reference, the canonical set is:
-
-- `.github/workflows/ci.yaml` -- reusable build (called by `build.yaml` and `cd.yaml`)
-- `.github/workflows/build.yaml` -- PR trigger
-- `.github/workflows/cd.yaml` -- deploy chain (dev → tst → prd via image promotion)
-- `.github/workflows/pr.yaml` -- PR verification
-- `.github/workflows/codeql.yml` -- security scanning
-- `.github/workflows/dependabot-pr.yaml` -- dependabot approval gate
-- `.github/workflows/terraform.yaml` -- terraform lint/plan/apply (if `terraform/` exists)
-- `.github/workflows/terraform-drift-detection.yaml` -- weekly drift check (if `terraform/` exists)
-- `.github/dependabot.yml` -- dependabot ecosystem config (note: `.yml`, this is the only one)
-
-Workflow files use `.yaml`; the dependabot config uses `.yml`.
+Do not restate the workflow file list in this skill. Workflow files use `.yml`; the setup-cicd skill owns the exact set.
 
 For background on each workflow's role, read `guides/platform/gha-workflows.md` in the entur/ai repository.
 
@@ -319,7 +307,7 @@ For background on each workflow's role, read `guides/platform/gha-workflows.md` 
 
 ```toml
 [tools]
-java        = 'liberica-25.0.2+12'    # Kotlin/Java
+java        = 'temurin-25'            # Kotlin/Java
 # go        = '1.25'                   # Go
 terraform   = '1.15.6'
 

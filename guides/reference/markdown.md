@@ -2,18 +2,26 @@
 
 All Entur docs must pass `markdownlint`.
 
+- **Target audience**: developers and AI agents editing Markdown in this repository.
+- **Intent**: Markdown files pass linting and keep a consistent structure that agents can parse reliably.
+- **Scope**: markdownlint configuration, local/CI linting, formatting rules, headings, lists, code blocks, whitespace, links, images, and inline formatting.
+
 ## Linting
 
 ### Configuration
 
-`.markdownlint-cli2.jsonc` at repository root:
+`.markdownlint.jsonc` at repository root:
 
-```json
+```jsonc
 {
-  "config": {
-    "default": true,
-    "MD013": false
-  }
+  "default": true,
+  "MD013": false,
+  "MD024": { "siblings_only": true },
+  "MD025": false,
+  "MD026": false,
+  "MD033": false,
+  "MD034": false,
+  "MD060": false
 }
 ```
 
@@ -27,7 +35,7 @@ From the repo root:
 npm run lint:md
 ```
 
-This runs `markdownlint-cli2 --fix` over all tracked markdown files. Auto-fixable issues (trailing whitespace, blank lines, list markers, heading spacing) are corrected in place -- commit the result before pushing.
+This runs `markdownlint-cli2 --fix` over all markdown files matched by the configured glob. Auto-fixable issues (trailing whitespace, blank lines, list markers, heading spacing) are corrected in place -- commit the result before pushing.
 
 ### Running in CI
 

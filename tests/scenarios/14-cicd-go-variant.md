@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies that ci.yaml for a Go project uses setup-go with go-version-file, runs `go test`, does NOT upload build artifacts or use test-reporter, and the docker build job does NOT reference build_artifact_name or build_artifact_path. Also verifies dependabot uses gomod ecosystem instead of gradle.
+Verifies that ci.yml for a Go project uses setup-go with go-version-file, runs `go test`, does NOT upload build artifacts or use test-reporter, and the docker build job does NOT reference build_artifact_name or build_artifact_path. Also verifies dependabot uses gomod ecosystem instead of gradle.
 
 ## Prompt
 
@@ -21,7 +21,7 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 
 Generate:
 
-1. The complete `.github/workflows/ci.yaml`
+1. The complete `.github/workflows/ci.yml`
 2. The dependabot configuration file
 
 Output the YAML content for each file, clearly labeled.

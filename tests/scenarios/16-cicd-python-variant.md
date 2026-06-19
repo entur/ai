@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies that ci.yaml for a Python project uses setup-python with python-version-file, runs pytest, does NOT use Java/Gradle/Go patterns, and dependabot uses pip ecosystem.
+Verifies that ci.yml for a Python project uses setup-python with python-version-file, runs pytest, does NOT use Java/Gradle/Go patterns, and dependabot uses pip ecosystem.
 
 ## Prompt
 
@@ -21,7 +21,7 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 
 Generate:
 
-1. The complete `.github/workflows/ci.yaml`
+1. The complete `.github/workflows/ci.yml`
 2. The dependabot configuration file
 
 Output the YAML content for each file, clearly labeled.

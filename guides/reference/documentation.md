@@ -2,6 +2,10 @@
 
 Rules for writing documentation in Entur repositories. Follow [markdown.md](markdown.md) for formatting.
 
+- **Target audience**: developers and AI agents writing Entur project documentation.
+- **Intent**: documentation is accurate, close to the code, easy to maintain, and useful for the next developer.
+- **Scope**: documentation purpose, structure, style, examples, external-link policy, and maintenance. Markdown formatting rules live in [markdown.md](markdown.md).
+
 ## Methodology
 
 - Plan outline before writing
