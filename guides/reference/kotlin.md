@@ -4,7 +4,7 @@ Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIO
 
 ## Runtime and Build
 
-- **Kotlin version**: latest stable (currently 2.x)
+- **Kotlin version**: latest patch version in the newest Kotlin release line supported by Entur's CodeQL workflow, Spring Boot, and Gradle baseline
 - **Java target**: 25 (or latest LTS/stable)
 - **Build tool**: Gradle with Kotlin DSL (`build.gradle.kts`)
 - **Framework**: Spring Boot 3.x with Kotlin support
@@ -45,7 +45,7 @@ tasks.withType<Test> {
 
 ### Version Catalog (gradle/libs.versions.toml)
 
-Centralize all dependency versions. Use bundles for related dependencies:
+Centralize all dependency versions. Use bundles for related dependencies. Do not upgrade Kotlin to a newer language release until CodeQL support is confirmed or Team Sikkerhet has approved an exception.
 
 ```toml
 [versions]
@@ -123,7 +123,7 @@ Without OpenAPI Generator, use standard Spring annotations (`@RestController`, `
 
 ### Service Layer
 
-Define service interfaces and implementations separately. Services orchestrate DAOs, perform validation, and throw typed exceptions (e.g., `ElementNotFoundException`).
+Use services to orchestrate business operations, call repositories or other data access components, perform validation, and throw typed exceptions (e.g., `ElementNotFoundException`). Define a service interface when it provides a useful boundary: multiple implementations, external adapters, a public module API, or a test boundary that cannot be handled cleanly otherwise.
 
 ### Key Kotlin Principles
 
@@ -155,9 +155,9 @@ Exposed provides a typesafe SQL DSL without ORM magic.
 
 Define tables as `object` extending `LongIdTable`. Use `varchar`, `timestamp`, `date`, and `.nullable()` for columns. Follow `snake_case` naming for database columns.
 
-#### DAO Pattern
+#### Data Access Layer
 
-Use `@Repository` classes implementing a `BaseDAO` interface. Wrap operations in `transaction {}`. Use `insertAndGetId`, `selectAll().where {}`, and map `ResultRow` to domain models.
+Keep SQL and Exposed table access inside dedicated repository or DAO classes annotated with `@Repository`. Use a shared base interface only when it removes real duplication across several repositories. Wrap operations in `transaction {}`. Use `insertAndGetId`, `selectAll().where {}`, and map `ResultRow` to domain models.
 
 #### Joins and Queries
 
