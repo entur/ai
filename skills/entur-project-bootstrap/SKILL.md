@@ -303,7 +303,7 @@ For reference, the canonical set is:
 - `.github/workflows/build.yaml` -- PR trigger
 - `.github/workflows/cd.yaml` -- deploy chain (dev → tst → prd via image promotion)
 - `.github/workflows/pr.yaml` -- PR verification
-- `.github/workflows/codeql.yaml` -- security scanning
+- `.github/workflows/codeql.yml` -- security scanning
 - `.github/workflows/dependabot-pr.yaml` -- dependabot approval gate
 - `.github/workflows/terraform.yaml` -- terraform lint/plan/apply (if `terraform/` exists)
 - `.github/workflows/terraform-drift-detection.yaml` -- weekly drift check (if `terraform/` exists)

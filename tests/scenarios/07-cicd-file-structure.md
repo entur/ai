@@ -32,7 +32,7 @@ List ALL workflow files and the dependabot config file that should be created un
     ".github/workflows/build.yaml",
     ".github/workflows/cd.yaml",
     ".github/workflows/pr.yaml",
-    ".github/workflows/codeql.yaml",
+    ".github/workflows/codeql.yml",
     ".github/workflows/dependabot-pr.yaml",
     ".github/workflows/terraform.yaml",
     ".github/workflows/terraform-drift-detection.yaml"

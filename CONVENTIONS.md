@@ -2,6 +2,16 @@
 
 Cross-language conventions that apply to all Entur projects. Language-specific additions are in `guides/reference/java.md`, `guides/reference/kotlin.md`, and `guides/reference/go.md`.
 
+## How to Read These Guides
+
+These guides are intentionally opinionated so they can work as a useful default path for teams and AI agents. Read requirement words as follows:
+
+- **MUST**, **ALWAYS**, and **Never** mark platform, security, compliance, or operational requirements. Do not deviate unless the owning platform/security team has approved an exception.
+- **SHOULD**, **preferred**, and **default** mark Golden Path recommendations. Teams may choose another approach when they have a concrete reason, but the decision should be written down in the repository README, an ADR, or another team-owned document.
+- **MAY**, **optional**, and examples show acceptable implementation patterns, not mandatory architecture.
+
+When a guide conflicts with a platform/security requirement, the platform/security requirement wins. If a team intentionally differs from a Golden Path recommendation, prefer a short written rationale over leaving the deviation implicit.
+
 ## Naming Conventions
 
 ### Repository and Application Names
@@ -254,7 +264,7 @@ Use mise (formerly rtx) for consistent tool versions across the team. Define req
 
 ```toml
 [tools]
-java        = 'liberica-25.0.2+12'
+java        = 'temurin-25'
 terraform   = '1.15.6'
 python      = '3.13.10'
 kotlin      = '2.3.0'
