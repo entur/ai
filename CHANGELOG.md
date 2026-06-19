@@ -2,7 +2,6 @@
 
 ## [0.1.2](https://github.com/entur/ai/compare/v0.1.1...v0.1.2) (2026-06-19)
 
-
 ### Documentation
 
 * **guides:** align reference guidance with golden path ([#66](https://github.com/entur/ai/issues/66)) ([f937eee](https://github.com/entur/ai/commit/f937eee5523da8a97dd917975429059841fc7827))
