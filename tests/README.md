@@ -40,7 +40,7 @@ go run . --model sonnet
 | 08-cicd-ci-workflow | ci.yaml reusable workflow: lint, test (Java 25/Gradle), Docker build/scan/push |
 | 09-cicd-build-workflow | build.yaml PR trigger and pr.yaml verification workflow |
 | 10-cicd-cd-workflow | cd.yaml image promotion model: resolve-image via git tag, deploy chain |
-| 11-cicd-security-workflows | codeql.yaml (CodeQL + Java config) and dependabot-pr.yaml (approval gate) |
+| 11-cicd-security-workflows | codeql.yml (CodeQL + Java config) and dependabot-pr.yaml (approval gate) |
 | 12-cicd-terraform-workflows | terraform.yaml (lint/plan/apply) and drift detection (weekly schedule) |
 | 13-cicd-dependabot-config | dependabot.yml: correct ecosystems for Kotlin (github-actions, docker, gradle) |
 | 14-cicd-go-variant | Go CI: setup-go, go test, no artifact upload, no test-reporter, gomod dependabot |

@@ -15,16 +15,16 @@ Prefer **distroless** or **slim-musl** images. Use Alpine only when you need a s
 
 | Language | Recommended | Alternative |
 |----------|------------|-------------|
-| Java/Kotlin | `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl` | `eclipse-temurin:25-jre-alpine` |
+| Java/Kotlin | `gcr.io/distroless/java25-debian13:nonroot` | `eclipse-temurin:25-jre-alpine` |
 | Go | `gcr.io/distroless/static-debian12:nonroot` | `golang:1.25-alpine` (build only) |
 | Node.js | `gcr.io/distroless/nodejs24-debian12` | `node:24-alpine` |
 | Python | `gcr.io/distroless/python3-debian12` | `python:3.12-slim` |
 
-Liberica Runtime Container with CDS is preferred for Java/Kotlin: supports Class Data Sharing for faster startup, optimized for containerized JVM workloads. ALWAYS pin base image versions to specific tags.
+Use distroless runtime images by default. Use Alpine-based images only when the container needs a shell, package manager, or runtime debugging tools. ALWAYS pin base image versions to specific tags.
 
 ## Dockerfile Examples
 
-### Java / Kotlin (Preferred: Multi-Stage with Layered JAR and CDS)
+### Java / Kotlin (Preferred: Multi-Stage with Layered JAR and Distroless Runtime)
 
 Four stages: bundler (OpenAPI spec) → builder (compile) → layers (extract layered JAR) → run (minimal runtime).
 
@@ -54,15 +54,15 @@ RUN --mount=type=secret,id=ARTIFACTORY_AUTH_USER,env=ARTIFACTORY_AUTH_USER  \
     gradle bootJar -x clean -x bundleOpenApiSpecification --no-daemon
 
 # Stage 3: Extract layered JAR
-FROM bellsoft/liberica-runtime-container:jre-25-cds-slim-musl AS layers
+FROM eclipse-temurin:25-jre-alpine AS layers
 WORKDIR /app
 COPY --from=builder /app/build/libs/my-app.jar my-app.jar
 RUN java -Djarmode=tools -jar my-app.jar extract --layers --launcher
 
 # Stage 4: Final runtime image
-FROM bellsoft/liberica-runtime-container:jre-25-cds-slim-musl AS run
+FROM gcr.io/distroless/java25-debian13:nonroot AS run
 LABEL maintainer="Team Name <team@entur.org>"
-EXPOSE 8086
+EXPOSE 8080
 WORKDIR /app
 
 # Copy layers in order of change frequency (least to most)
@@ -79,10 +79,10 @@ Key practices:
 - **Dependency caching**: Copy build files first, download deps, then copy source -- source changes don't invalidate dependency cache
 - **Build secrets**: Use `--mount=type=secret` instead of `ARG`/`ENV` (secrets don't persist in layers)
 - **Layered JAR**: Only changed layers are rebuilt when pushing new images
-- **CDS**: Liberica CDS image pre-computes class metadata for faster startup
+- **Distroless runtime**: Final image contains only the JVM runtime and application files, and runs as non-root
 - **`-XX:MaxRAMPercentage=75.0`**: 75% of container memory for JVM, leaving room for OS and native memory
 
-### Java / Kotlin (Simple)
+### Java / Kotlin (Alternative: Alpine Runtime)
 
 ```dockerfile
 FROM eclipse-temurin:25-jre-alpine
@@ -140,8 +140,8 @@ ENTRYPOINT ["python", "-m", "my_service"]
 
 - **Multi-stage builds**: Separate build from runtime to exclude build tools and source from final image
   > **Note:** Multi-stage builds in GitHub Actions do not support GitHub caching for the build step or GitHub secrets injection. Split into separate workflow steps if needed.
-- **Run as non-root**: All containers must run as non-root. Java/Kotlin: `addgroup`/`adduser` + `USER`. Go: use `nonroot` distroless variant (UID 65532). Python: `groupadd`/`useradd` + `USER`. The common Helm chart enforces `runAsNonRoot: true`.
-- **Minimize image size**: Use Alpine/slim base images, remove caches (`--no-cache`, `--no-cache-dir`), copy only runtime artifacts
+- **Run as non-root**: All containers must run as non-root. Java/Kotlin and Go: use `nonroot` distroless variants where possible. Alpine/slim alternatives must create and switch to a non-root user. The common Helm chart enforces `runAsNonRoot: true`.
+- **Minimize image size**: Use distroless/slim base images, remove caches (`--no-cache`, `--no-cache-dir`), copy only runtime artifacts
 - **No secrets in images**: Use Google Secret Manager + ExternalSecrets for runtime secrets, Helm-injected env vars for non-sensitive config
 - **Pin dependencies**: Pin base image tags, build tool versions, and use lock files (`go.sum`, `gradle.lockfile`, `requirements.txt`)
 - **Port**: All Entur apps default to port `8080`. Ensure `EXPOSE` and application binding match.

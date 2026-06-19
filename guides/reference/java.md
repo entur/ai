@@ -8,7 +8,7 @@ Java conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS
 - **Build tool**: Gradle with Kotlin DSL (`build.gradle.kts`)
 - **Framework**: Spring Boot 3.x
 - **Dependency management**: Gradle version catalogs (`gradle/libs.versions.toml`)
-- **JDK distribution**: Liberica JDK (preferred) or Eclipse Temurin
+- **JDK distribution**: Eclipse Temurin
 
 ## Project Setup
 
@@ -26,7 +26,7 @@ plugins {
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(25)
-        vendor = JvmVendorSpec.BELLSOFT          // Liberica JDK (preferred)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
 }
 
@@ -37,7 +37,7 @@ tasks.withType<Test> {
 
 ### Dockerfile
 
-See [docker.md](docker.md) for Dockerfile conventions, base images, and multi-stage builds. The preferred base image for Java/Kotlin is `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl` (Liberica with Class Data Sharing).
+See [docker.md](docker.md) for Dockerfile conventions, base images, and multi-stage builds. The preferred runtime base image for Java/Kotlin is `gcr.io/distroless/java25-debian13:nonroot`; use `eclipse-temurin:25-jre-alpine` only when the container needs a shell, package manager, or runtime debugging tools.
 
 ## Logging
 
@@ -194,22 +194,26 @@ Use `@RestControllerAdvice` with `@ExceptionHandler` methods for centralized err
 
 ## Redis (Memorystore)
 
-Entur uses **Google Memorystore for Redis** as a managed key-value store. Infrastructure via `terraform-google-memorystore` (see [terraform-modules.md](../platform/terraform-modules.md#memorystore-redis)). Credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) injected via Kubernetes secrets.
+Entur uses **Google Memorystore for Redis** when a service needs a managed cache or key-value store. Do not add Redis by default; add it only when the service has a concrete cache, locking, rate-limiting, session, or idempotency need. Infrastructure is provisioned via `terraform-google-memorystore` (see [terraform-modules.md](../platform/terraform-modules.md#memorystore-redis)). Credentials (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`) are injected via Kubernetes secrets.
 
 ### When to Use Redis
 
-| Use Case | Redis? | Notes |
-|----------|--------|-------|
-| Caching (HTTP responses, DB queries) | Yes | Primary use case |
-| Session storage | Yes | Shared sessions across pods |
-| Rate limiting / counters | Yes | Atomic `INCR` with TTL |
-| Distributed locks | Yes | Use Redisson or Spring Integration |
-| Idempotency keys (Kafka dedup) | Yes | `SET key value NX EX ttl` pattern |
+| Need | Redis fit? | Notes |
+|------|------------|-------|
+| Shared cache for expensive HTTP responses or DB queries | Good fit | Use cache-aside with bounded TTLs |
+| Pod-local, best-effort cache | Usually no | Prefer an in-memory cache such as Caffeine |
+| Session storage across pods | Good fit | Only when the service actually owns server-side sessions |
+| Rate limiting / counters | Good fit | Atomic `INCR` with TTL |
+| Distributed locks | Good fit when needed | Use Redisson or Spring Integration; keep lock TTLs short |
+| Idempotency keys / Kafka dedup | Good fit | `SET key value NX EX ttl` pattern |
 | Primary data store | **No** | Use PostgreSQL |
 | Complex queries / joins | **No** | Use PostgreSQL |
 | Large objects (> 1 MB) | **No** | Use Cloud Storage |
+| Durable messaging / event streaming | **No** | Use Kafka |
 
 ### Dependencies
+
+Add the Redis dependency only in services that use Redis:
 
 ```kotlin
 dependencies {
@@ -238,7 +242,7 @@ spring:
 
 ### Spring Cache Abstraction
 
-Use `@EnableCaching` with `RedisCacheManager` and `@Cacheable`/`@CacheEvict` annotations. Configure per-cache TTLs via `RedisCacheConfiguration`. Serialize with `GenericJackson2JsonRedisSerializer`.
+For Redis-backed caching, use `@EnableCaching` with `RedisCacheManager` and `@Cacheable`/`@CacheEvict` annotations. Configure per-cache TTLs via `RedisCacheConfiguration`. Serialize with `GenericJackson2JsonRedisSerializer`.
 
 ### Direct RedisTemplate Usage
 
@@ -266,7 +270,7 @@ Examples: `products-api:route:ENT:Route:123`, `products-api:rate:partner-xyz`
 - **Use pipelining** for batch operations
 - **Namespace keys** with app name to avoid collisions
 - **Monitor memory** -- alert on `used_memory` vs `maxmemory` (see [observability.md](observability.md))
-- **ALWAYS use Kafka for messaging** -- Redis Pub/Sub lacks persistence and delivery guarantees
+- **Use Kafka for durable messaging** -- do not use Redis Pub/Sub when persistence, replay, consumer groups, or delivery guarantees matter
 
 ### Testing
 

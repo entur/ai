@@ -3,7 +3,7 @@ name: setup-cicd-workflows
 description: >
   Generate Entur-standard CI/CD GitHub Actions workflows for a project.
   Detects language (Kotlin/Java, Go, Python) and generates all required workflow
-  files: ci.yaml, build.yaml, cd.yaml, pr.yaml, codeql.yaml, dependabot-pr.yaml,
+  files: ci.yaml, build.yaml, cd.yaml, pr.yaml, codeql.yml, dependabot-pr.yaml,
   terraform.yaml, terraform-drift-detection.yaml, and dependabot.yml.
   Use this skill when the user says "set up CI/CD", "create pipelines",
   "add GitHub Actions", "configure deployment", or needs CI/CD workflows for a new
@@ -22,7 +22,7 @@ Generate the complete set of GitHub Actions workflows for an Entur project using
   build.yaml                     ← PR: calls ci.yaml
   cd.yaml                        ← Deploy: resolve PR-built image, deploy dev → tst → prd
   pr.yaml                        ← PR verification (title/body validation)
-  codeql.yaml                    ← Security code scanning
+  codeql.yml                     ← Security code scanning
   dependabot-pr.yaml             ← CI for Dependabot PRs after human approval
   terraform.yaml                 ← Terraform lint/plan/apply (if terraform/ exists)
   terraform-drift-detection.yaml ← Weekly Terraform drift check (if terraform/ exists)
@@ -544,7 +544,7 @@ jobs:
     uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
 ```
 
-## Step 6: Generate `.github/workflows/codeql.yaml`
+## Step 6: Generate `.github/workflows/codeql.yml`
 
 Security code scanning with GitHub CodeQL.
 
@@ -992,7 +992,7 @@ Generated CI/CD workflows:
   .github/workflows/build.yaml                     - PR build trigger (calls ci.yaml)
   .github/workflows/cd.yaml                        - Deploy: resolve PR-built image, deploy dev -> tst -> prd
   .github/workflows/pr.yaml                        - PR verification (title/body validation)
-  .github/workflows/codeql.yaml                    - Security code scanning (CodeQL)
+  .github/workflows/codeql.yml                     - Security code scanning (CodeQL)
   .github/workflows/dependabot-pr.yaml             - CI for Dependabot PRs after approval
   .github/workflows/terraform.yaml                 - Terraform lint/plan/apply (if applicable)
   .github/workflows/terraform-drift-detection.yaml - Weekly Terraform drift detection (if applicable)

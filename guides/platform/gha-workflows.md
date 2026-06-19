@@ -2,7 +2,7 @@
 
 Always use Entur reusable workflows instead of custom pipeline steps.
 
-> **Setting up CI/CD for a project?** This file is a reference index of the available reusable workflows and their inputs. For the canonical, copy-pasteable templates and assembly recipe (ci.yaml, build.yaml, cd.yaml with image promotion, codeql.yaml, dependabot-pr.yaml, terraform.yaml, terraform-drift-detection.yaml), load the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill. The skill is the source of truth; the snippets below only illustrate inputs.
+> **Setting up CI/CD for a project?** This file is a reference index of the available reusable workflows and their inputs. For the canonical, copy-pasteable templates and assembly recipe (ci.yaml, build.yaml, cd.yaml with image promotion, codeql.yml, dependabot-pr.yaml, terraform.yaml, terraform-drift-detection.yaml), load the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill. The skill is the source of truth; the snippets below only illustrate inputs.
 
 ## Available Workflows
 
@@ -28,7 +28,7 @@ ci.yaml                        ← Reusable CI (lint, test, Docker build/scan/pu
 build.yaml                     ← PR: calls ci.yaml
 cd.yaml                        ← Deploy: resolve PR-built image, deploy dev → tst → prd
 pr.yaml                        ← PR verification (title/body validation)
-codeql.yaml                    ← Security code scanning
+codeql.yml                     ← Security code scanning
 dependabot-pr.yaml             ← CI for Dependabot PRs after human approval
 terraform.yaml                 ← Terraform lint/plan/apply (if terraform/ exists)
 terraform-drift-detection.yaml ← Weekly Terraform drift check (if terraform/ exists)
@@ -60,7 +60,7 @@ Replace the Java test job in `ci.yaml` with:
 
 All other jobs (docker-lint, docker-build, docker-scan, docker-push) are identical.
 
-## Security Scanning (`.github/workflows/codeql.yaml`)
+## Security Scanning (`.github/workflows/codeql.yml`)
 
 ```yaml
 name: CodeQL Analysis
@@ -323,13 +323,13 @@ Split into focused workflow files instead of a monolithic pipeline:
 | `build.yaml` | `pull_request` to main | PR build trigger (calls ci.yaml) |
 | `cd.yaml` | Push to main, `workflow_dispatch` | Deploy: resolve PR-built image, deploy dev → tst → prd |
 | `pr.yaml` | `pull_request` to main | PR verification (title/body validation) |
-| `codeql.yaml` | PR, push to main, schedule | Security code scanning (CodeQL) |
+| `codeql.yml` | PR, push to main, schedule | Security code scanning (CodeQL) |
 | `dependabot-pr.yaml` | `pull_request_review` submitted | CI for Dependabot PRs after human approval |
 | `terraform.yaml` | PR/push changes to `terraform/` | Terraform lint/plan/apply |
 | `terraform-drift-detection.yaml` | Weekly schedule, `workflow_dispatch` | Terraform drift detection with issue creation |
 | `lint-api.yaml` | PR changes to `specs/` | API spec linting |
 
-> **For the full templates, generate them via the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill.** The skill is the canonical source for ci.yaml, build.yaml, cd.yaml, pr.yaml, codeql.yaml, dependabot-pr.yaml, terraform.yaml (with `tf-plan-{env}`/`tf-apply-{env}` job names and `has_changes` gating), terraform-drift-detection.yaml (with `drift-check` job, weekly cron `0 10 * * 4`, and `gh issue create` on drift), and dependabot.yml -- with the per-language test job variants (Kotlin/Java with `dorny/test-reporter` and `upload-artifact`; Go and Python with neither). The snippets in the remainder of this section are illustrative; if they conflict with the skill, the skill wins.
+> **For the full templates, generate them via the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill.** The skill is the canonical source for ci.yaml, build.yaml, cd.yaml, pr.yaml, codeql.yml, dependabot-pr.yaml, terraform.yaml (with `tf-plan-{env}`/`tf-apply-{env}` job names and `has_changes` gating), terraform-drift-detection.yaml (with `drift-check` job, weekly cron `0 10 * * 4`, and `gh issue create` on drift), and dependabot.yml -- with the per-language test job variants (Kotlin/Java with `dorny/test-reporter` and `upload-artifact`; Go and Python with neither). The snippets in the remainder of this section are illustrative; if they conflict with the skill, the skill wins.
 
 ### ci.yaml (Reusable Build Workflow)
 
@@ -596,7 +596,7 @@ updates:
 1. Use `secrets: inherit` for security scanning and docs workflows
 2. Pin workflow versions to major tags: `@v1`, `@v2`
 3. Use `has_changes` output from terraform-plan to skip unnecessary applies
-4. Name the CodeQL workflow `codeql.yaml`
+4. Name the CodeQL workflow `codeql.yml`
 5. Use GitHub Environments with protection rules for deployment approvals
 6. Split workflows into focused files -- separate CI, deploy, linting, and security
 7. Use matrix strategy for multi-namespace/environment deploys
