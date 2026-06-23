@@ -4,6 +4,14 @@
 
 Entur is a Norwegian public transportation company. All code targets Google Cloud Platform (GKE), follows Entur platform conventions, and uses shared tooling.
 
+## Agent Reading Order
+
+1. Read [CONVENTIONS.md](CONVENTIONS.md) for cross-cutting standards.
+2. Select the task-specific guide, playbook, reference, or skill from [Documentation Map](#documentation-map).
+3. Read the relevant reference for the code or configuration you will change: Java, Kotlin, Go, Docker, SQL, API design, security, observability, or documentation.
+4. When work involves introducing, recommending, configuring, documenting, or automating IT systems or software, read [it-systems-policy.md](it-systems-policy.md) before making recommendations.
+5. Treat [Critical Rules](#critical-rules) as hard constraints. Project-specific `AGENTS.md` files may add stricter rules, but they must not weaken platform, security, or policy requirements from this repo.
+
 ## Platform Context
 
 - **Cloud**: GCP, region `europe-west1`
@@ -20,9 +28,11 @@ Entur is a Norwegian public transportation company. All code targets Google Clou
 
 ## Key Concepts
 
-- **App ID** (`metadata.id` in self-service manifest): 3--10 char alphanumeric identifier, unique across Entur. The Platform Orchestrator creates GCP projects named `ent-{appid}-{env}` (e.g. `metadata.id: products` → `ent-products-dev`, `ent-products-prd`). Data projects use `ent-data-{appid}-{int|ext}-{env}`. Used as Helm `shortname`, Terraform `app_id`, and Terraform state bucket `ent-gcs-tfa-{appid}`. See [self-service.md](guides/platform/self-service.md#gcp-project-naming).
-- **App Name** (`metadata.name` in self-service manifest): Becomes the Kubernetes namespace. Typically matches the repository name. Different from App ID.
-- **Environments**: `dev`, `tst`, `prd` -- each gets its own GCP project (`ent-{appid}-dev`, `ent-{appid}-tst`, `ent-{appid}-prd`).
+| Concept | Source | Use |
+|---------|--------|-----|
+| **App ID** | `metadata.id` in the self-service manifest. 3--10 char alphanumeric identifier, unique across Entur. | Use for GCP project suffixes (`ent-{appid}-{env}`), Helm `shortname`, Terraform `app_id`, and Terraform state bucket `ent-gcs-tfa-{appid}`. Data projects use `ent-data-{appid}-{int\|ext}-{env}`. Do not use App Name for these values. See [self-service.md](guides/platform/self-service.md#gcp-project-naming). |
+| **App Name** | `metadata.name` in the self-service manifest. Typically matches the repository name. | Use for the Kubernetes namespace. Do not use App ID as the Kubernetes namespace unless `metadata.id` and `metadata.name` are intentionally identical. |
+| **Environments** | `dev`, `tst`, `prd` | Standard environments. Each environment gets its own GCP project, for example `ent-{appid}-dev`, `ent-{appid}-tst`, and `ent-{appid}-prd`. |
 
 ## Golden Path
 
@@ -57,9 +67,7 @@ See https://github.com/entur/ai for Entur-wide standards.
 - **[`guides/playbooks/`](guides/playbooks/)** -- end-to-end tasks (bootstrap, add a database, deploy to prd, etc). Prefer these as your entry point for multi-step work.
 - **[`guides/reference/`](guides/reference/)** -- language and topic standards (Java, Kotlin, Go, Docker, observability, logging, tracing, profiler, security, code review, docs).
 
-Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (naming, repo layout, testing, conventional commits).
-
-When work involves introducing, recommending, configuring, documenting, or automating IT systems or software, read [it-systems-policy.md](it-systems-policy.md) before making recommendations.
+Use [Agent Reading Order](#agent-reading-order) first, then use the tables below to find the task-specific document.
 
 ### By goal (start here)
 
@@ -127,3 +135,4 @@ When work involves introducing, recommending, configuring, documenting, or autom
 9. **Conventional commits** -- enables automated semver via release-please.
 10. **Every PR ALWAYS passes**: lint, unit tests, security scan (CodeQL + Docker scan), Helm lint.
 11. **ALWAYS create GCP projects via self-service YAML manifests** in `.entur/` (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`). Never use Terraform `google_project` or `gcloud projects create`. See [self-service.md](guides/platform/self-service.md). For help, ask in `#talk-utviklerplattform`.
+12. **ALWAYS follow [it-systems-policy.md](it-systems-policy.md)** before introducing, recommending, configuring, documenting, or automating IT systems or software. Never claim a system is registered, classified, or approved unless the repository, user, or DAP documentation confirms it.
