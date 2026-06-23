@@ -30,11 +30,11 @@ Output exactly these keys:
     "classified"
   ],
   "must_match": [
-    "preferred_identity_model:.*SaaS.*Microsoft Entra ID|preferred_identity_model:.*Microsoft Entra ID.*SaaS",
-    "system_overview_required:\\s*yes.*System Overview.*DAP portal",
-    "system_owner_required:\\s*yes",
-    "information_classification_required:\\s*yes.*System Overview",
-    "if_not_verified:.*(call out|missing|ask|verify)"
+    "preferred_identity_model\\*{0,2}:\\*{0,2}.*SaaS.*Microsoft Entra ID|preferred_identity_model\\*{0,2}:\\*{0,2}.*Microsoft Entra ID.*SaaS",
+    "system_overview_required\\*{0,2}:\\*{0,2}\\s*yes.*(System Overview.*DAP portal|DAP portal.*System Overview)",
+    "system_owner_required\\*{0,2}:\\*{0,2}\\s*yes",
+    "information_classification_required\\*{0,2}:\\*{0,2}\\s*yes.*System Overview",
+    "if_not_verified\\*{0,2}:\\*{0,2}.*(call out|missing|ask|verify)"
   ],
   "must_not_contain": [
     "approved by default",

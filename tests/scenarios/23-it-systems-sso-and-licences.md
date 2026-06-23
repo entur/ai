@@ -23,17 +23,19 @@ Output exactly these keys:
 ```json
 {
   "must_contain": [
-    "local_user_admin_default: no",
+    "local_user_admin_default",
     "Microsoft Entra ID",
     "System Owner",
     "DAP",
-    "buy_new_licences_first: no",
+    "buy_new_licences_first",
     "inactive licences"
   ],
   "must_match": [
-    "required_identity_provider:.*Microsoft Entra ID",
-    "no_sso_action:.*System Owner.*DAP|no_sso_action:.*DAP.*System Owner",
-    "licence_action:.*(remove|reassign|check).*inactive licences"
+    "local_user_admin_default\\*{0,2}:\\*{0,2}\\s*no",
+    "required_identity_provider\\*{0,2}:\\*{0,2}.*Microsoft Entra ID",
+    "no_sso_action\\*{0,2}:\\*{0,2}.*System Owner.*DAP|no_sso_action\\*{0,2}:\\*{0,2}.*DAP.*System Owner",
+    "buy_new_licences_first\\*{0,2}:\\*{0,2}\\s*no",
+    "licence_action\\*{0,2}:\\*{0,2}.*((remove|reassign|check).*inactive licences|inactive licences.*(remove|reassign|check))"
   ],
   "must_not_contain": [
     "shared accounts are fine",
