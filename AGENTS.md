@@ -59,12 +59,15 @@ See https://github.com/entur/ai for Entur-wide standards.
 
 Always read [CONVENTIONS.md](CONVENTIONS.md) first for cross-cutting standards (naming, repo layout, testing, conventional commits).
 
+When work involves introducing, recommending, configuring, documenting, or automating IT systems or software, read [it-systems-policy.md](it-systems-policy.md) before making recommendations.
+
 ### By goal (start here)
 
 | I want to… | Read |
 |------------|------|
 | Bootstrap a new service | [playbooks/bootstrap-service.md](guides/playbooks/bootstrap-service.md) |
 | Set up CI/CD workflows | Load skill: [`skills/setup-cicd-workflows/SKILL.md`](skills/setup-cicd-workflows/SKILL.md) |
+| Introduce or recommend IT systems and software | [it-systems-policy.md](it-systems-policy.md) |
 | Provision Postgres | [playbooks/add-postgres.md](guides/playbooks/add-postgres.md) |
 | Add Redis (caching, locks, dedup) | [playbooks/add-redis.md](guides/playbooks/add-redis.md) |
 | Produce or consume Kafka events | [playbooks/add-kafka.md](guides/playbooks/add-kafka.md) |

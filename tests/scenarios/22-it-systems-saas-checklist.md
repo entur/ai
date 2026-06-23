@@ -8,7 +8,7 @@ Verifies agents apply the IT systems policy before recommending or documenting a
 
 You are helping an Entur team evaluate a new SaaS product for work use. The user only says that the product looks useful and asks whether they can add it to team onboarding docs.
 
-Read the Entur AI documentation in this repository (start with AGENTS.md, then read it-systems-policy.md) to answer.
+Read the Entur AI documentation in this repository. Start with AGENTS.md and follow the relevant links for IT systems and software policy before answering.
 
 Output exactly these keys:
 

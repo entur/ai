@@ -8,7 +8,7 @@ Verifies agents do not recommend local user administration, shared accounts, or 
 
 An Entur team is adopting an internal tool. The tool can run with local username/password accounts, and the team says it is faster to buy five new licences than to check whether existing licences are unused.
 
-Read the Entur AI documentation in this repository (start with AGENTS.md, then read it-systems-policy.md) to answer.
+Read the Entur AI documentation in this repository. Start with AGENTS.md and follow the relevant links for IT systems and software policy before answering.
 
 Output exactly these keys:
 
