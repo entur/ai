@@ -1,35 +1,59 @@
-# Guidelines for IT systems and software
+# Guidelines for IT Systems and Software
 
-To ensure a safe and efficient digital workplace, IT systems and software must be managed well. We have now established Guidelines for IT systems and software to help us remember what is especially important.
+- **Target audience**: AI agents and Entur contributors working with IT systems or software.
+- **Intent**: keep system ownership, access control, information classification, licensing, and software lifecycle decisions compliant with Entur policy.
+- **Scope**: SaaS products, internal tools, desktop and mobile apps, browser extensions, and developer tools introduced, recommended, configured, documented, or automated for Entur.
 
-At Entur we prefer "Software as a Service" (SaaS) tied to an Entur user account (Entra ID).
+Entur's preferred model is Software as a Service (SaaS) connected to Entur user accounts through Microsoft Entra ID.
 
-## Key points from the guidelines
+## Agent Checklist
 
-### The System Overview
+When a task involves IT systems or software, AI agents must apply these checks before making or recommending a change:
 
-All IT systems and software must be registered in the System Overview, which is available on the DAP portal. The System Overview holds basic information about IT systems and software used internally, including who holds which roles for each system. For management purposes, the most important role is "System Owner". The tasks linked to the different roles are described on the DAP portal.
+- Prefer SaaS that supports Microsoft Entra ID and named Entur user accounts.
+- Check whether the system or software is registered in the System Overview on the DAP portal.
+- Identify the System Owner. Do not assume ownership when it is not documented.
+- Require Single Sign-On (SSO) with Microsoft Entra ID for internal systems.
+- Prefer automatic user provisioning when the product supports it.
+- Ensure the data used by the system is classified in the System Overview.
+- Avoid adding software, apps, or browser extensions without a clear work-related need.
+- Avoid unused licences. Remove or reassign inactive licences instead of buying more.
+- Do not claim that a system has been registered, classified, or approved unless the repository, user, or DAP documentation confirms it.
 
-### User administration
+If you cannot verify these points from the repository or available documentation, call out the missing information and ask the user or relevant Entur team to verify it.
 
-Internal IT systems must use Single Sign-On (SSO) with Microsoft Entra ID as the identity provider, and automatic user provisioning where this is possible. Contact DAP if you are the System Owner of a system that does not use SSO.
+## System Overview
 
-### Information classification
+All IT systems and software used internally at Entur must be registered in the System Overview on the DAP portal.
 
-Data used in an IT system must be classified to decide which security measures are needed. The information classification is filled in within the System Overview.
+The System Overview records basic information about each system, including who holds each role. The most important management role is System Owner. Role responsibilities are described on the DAP portal.
 
-### Licence management
+Contact Digital Workplace in the `#open-internsupport` Slack channel if you notice missing or incorrect information in the System Overview. Everyone must help keep the overview accurate and useful.
 
-We do not want to spend more money than necessary, so licences that are not in active use must be removed and instead reassigned when needed.
+## User Administration
 
-### Use of IT systems and software
+Internal IT systems must use SSO with Microsoft Entra ID as the identity provider. Enable automatic user provisioning where the product supports it.
 
-Entur's IT systems and software must only be used for work-related activity. Avoid installing or using software and apps carelessly on Entur's computers, mobile phones, and tablets.
+If a system does not use SSO, the System Owner must contact DAP. AI agents must not propose bypasses, shared accounts, or local user administration as a default solution.
 
-Contact Digital Workplace in the `#open-internsupport` channel on Slack if you notice anything missing or incorrect in the System Overview. We need everyone to be `#pålag` (on the team) to build a good and useful overview.
+## Information Classification
 
-## Keeping software up to date is everyone's responsibility
+Data used in an IT system must be classified so Entur can choose the correct security measures.
 
-It is also important that everyone at Entur updates their computer (and mobile phone, if they have one) with security updates, and keeps installed software up to date as well. It does not hurt to do a proper restart at regular intervals either, in fact it is necessary to install some of the updates. Guides for keeping Windows and macOS up to date are available on the DAP portal.
+The classification must be registered in the System Overview. If the classification is unknown, treat it as missing required information and ask for clarification before recommending security controls.
 
-Browsers such as Chrome, Firefox, and Edge are software that are used a lot and regularly require security updates. To show how to keep your browser up to date, we have prepared a guide that is available on the DAP portal.
+## Licence Management
+
+Licences that are not actively used must be removed and reassigned when needed. Do not recommend buying additional licences until inactive licences have been checked.
+
+## Work-Related Use
+
+Entur's IT systems and software must only be used for work-related activity.
+
+Do not install, recommend, or automate arbitrary software on Entur computers, mobile phones, or tablets. Software should have a clear business need, a System Owner where relevant, and a path for support and lifecycle management.
+
+## Software Updates
+
+Everyone at Entur is responsible for keeping their computer, mobile phone, browsers, and installed software up to date with security updates.
+
+Regular restarts are necessary because some updates are only installed after a restart. Guides for keeping Windows, macOS, and browsers such as Chrome, Firefox, and Edge up to date are available on the DAP portal.
