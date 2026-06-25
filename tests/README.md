@@ -51,6 +51,8 @@ go run . --model sonnet
 | 19-jvm-docker-golden-path | Java/Kotlin Docker runtime defaults to distroless, not Liberica |
 | 20-kotlin-codeql-version | Kotlin version follows Entur CodeQL support, not newest stable blindly |
 | 21-redis-not-default | Redis is not added without a concrete cache/lock/session/dedup use case |
+| 22-it-systems-saas-checklist | IT systems policy checks for SaaS: Entra ID, System Overview, System Owner, classification |
+| 23-it-systems-sso-and-licences | IT systems policy rejects local-user defaults and licence purchases before reuse checks |
 
 ## CLI Options
 

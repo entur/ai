@@ -7,21 +7,22 @@ A few ways to contribute:
 - **Found something wrong or unclear?** Open an issue or just submit a PR directly
 - **Have a pattern or skill that works great for your team?** Share it -- others will benefit
 - **Not sure if something belongs here?** Open an issue and let's figure it out together
-- **Want to improve the AI output for your stack?** Tweak the relevant `guides/` file and see how your agent responds -- that's the fastest feedback loop
+- **Want to improve the AI output for your stack?** Tweak the relevant guide, skill, or root policy file and see how your agent responds -- that's the fastest feedback loop
 
 When submitting changes:
 
 1. Use Conventional Commits (`<type>(<scope>): <description>`) for commit messages
 2. Do **not** introduce links to non-Entur external URLs -- see [External Links](guides/reference/documentation.md#external-links) for the allow-list and how to handle the cases where you would have linked out
 3. Keep in mind the audience is AI agents, not humans -- follow [Writing AI Documentation](#writing-ai-documentation) below
-4. Run the comprehension tests (see [Comprehension Tests](#comprehension-tests))
-5. Get a review from another colleague - you know your own solutions best!
+4. Run `npm run lint:md` for Markdown changes
+5. Run the comprehension tests when changing `guides/`, skills, or root policy files that affect agent behaviour (see [Comprehension Tests](#comprehension-tests))
+6. Get a review from another colleague - you know your own solutions best!
 
 For questions, ideas, or just to say hi, find us in `#talk-utviklerplattform` on Slack.
 
 ## Writing AI Documentation
 
-The docs in `guides/` are read by AI coding agents that generate platform-compliant code. Humans skim; agents execute. Optimise every guide for the agent.
+The docs in `guides/`, `skills/`, and root policy files such as `CONVENTIONS.md`, `AGENTS.md`, and `it-systems-policy.md` are read by AI coding agents that generate platform-compliant code and recommendations. Humans skim; agents execute. Optimise every agent-facing document for the agent.
 
 ### Be direct -- "here's how you do it"
 
@@ -61,7 +62,7 @@ The docs in `guides/` are read by AI coding agents that generate platform-compli
 ### Test continuously
 
 - The `tests/` directory contains comprehension tests that send real prompts to an agent, let it read the docs, and check the answer. A doc change that humans understand but agents misread is a regression.
-- Run the suite before opening a PR (see [Comprehension Tests](#comprehension-tests)).
+- Run the suite before opening a PR when changing a guide, skill, or root policy file that affects agent behaviour (see [Comprehension Tests](#comprehension-tests)).
 - When you add or change a rule that agents are likely to get wrong, add a scenario for it. See `tests/README.md` for how.
 - If a test fails after your change, fix the guide or update the scenario -- do not ignore it.
 
@@ -120,7 +121,7 @@ What's right: imperative opening, wrong paths named and forbidden, runnable exam
 
 The `tests/` directory contains automated tests that verify AI agents correctly understand the documentation. The tests send real prompts to Claude, let it read the docs, and validate that the answers are correct.
 
-Run these tests before submitting changes to any existing guides.
+Run these tests before submitting changes to any existing guide, skill, or root policy file that affects agent behaviour.
 A documentation change that humans can read but AI agents misinterpret is a regression.
 
 *NB* For new documentation this is *optional*!

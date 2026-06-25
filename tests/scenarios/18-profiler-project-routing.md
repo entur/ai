@@ -22,7 +22,7 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 
 - profiler_project_id: <the GCP project ID to query Cloud Profiler in>
 - logs_project_id: <the GCP project ID to query Cloud Logging in for the workload's stdout>
-- service_version_source: <what value to set as the Profiler agent's ServiceVersion on Cloud Run>
+- service_version_source: <what value to set as the Profiler agent's ServiceVersion on Kubernetes>
 - one_line_reason: <one sentence explaining why profiles and k8s logs live in different projects>
 
 ## Assertions
@@ -31,14 +31,14 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 {
   "must_contain": [
     "profiler_project_id: ent-someapp-prd",
-    "logs_project_id: ent-kub-prd",
-    "K_REVISION"
+    "logs_project_id: ent-kub-prd"
   ],
   "must_not_contain": [
     "profiler_project_id: ent-kub-prd",
     "logs_project_id: ent-someapp-prd"
   ],
   "must_match": [
+    "service_version_source:.*(Helm release revision|Helm-injected label|image tag|helm-release-revision)",
     "(workload|application|app|agent).*(report|stamp|write|emit|upload|own).*project|kubelet.*cluster"
   ]
 }
