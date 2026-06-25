@@ -26,7 +26,7 @@ spec:
     serviceAccount: application
 ```
 
-Read the Entur AI documentation in this repository (start with AGENTS.md, then helm.md and terraform/modules.md) to answer.
+Read the Entur AI documentation in this repository (start with AGENTS.md, then platform/common-helm.md and platform/terraform-modules.md) to answer.
 Output each answer in `key: value` format on its own line:
 
 - gcp_project_dev: <GCP project ID for dev>

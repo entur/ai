@@ -1,5 +1,4 @@
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "entur",
   "description": "Entur platform AI toolbox: reusable skills, agents, and hooks for Entur developers",
   "owner": {

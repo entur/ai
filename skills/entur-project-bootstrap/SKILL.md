@@ -61,7 +61,7 @@ Ask the user to confirm before generating files.
 
 ## Step 3: Generate Self-Service Manifests
 
-### `.entur/cicd.yaml`
+### `.entur/cicd.yml`
 
 ```yaml
 apiVersion: orchestrator.entur.io/github/v1
@@ -104,7 +104,7 @@ If `auth0 M2M` is needed, add under `spec`:
 
 ## Step 4: Generate Helm Chart
 
-Read `guides/helm.md` in the entur/ai repository for the full common chart reference.
+Read `guides/platform/common-helm.md` in the entur/ai repository for the full common chart reference.
 
 ### `helm/{repoName}/Chart.yaml`
 
@@ -166,7 +166,7 @@ If database is needed, add:
     connectionConfig: {repoName}
 ```
 
-If secrets are needed (do NOT add `PG_USER`/`PG_PASSWORD` here — those are already provided by `postgres.enabled`), add:
+If secrets are needed (do NOT add `PGUSER`/`PGPASSWORD` here — those are already provided by `postgres.enabled`), add:
 
 ```yaml
   secrets:
@@ -198,7 +198,7 @@ For prd, also set:
 
 ## Step 5: Generate Terraform Scaffolding
 
-Read `guides/terraform/modules.md` in the entur/ai repository for the full module reference.
+Read `guides/platform/terraform-modules.md` in the entur/ai repository for the full module reference.
 
 ### `terraform/main.tf`
 
@@ -268,18 +268,18 @@ environment = "{env}"
 
 ## Step 6: Generate Dockerfile
 
-Read `guides/docker.md` in the entur/ai repository for the full Docker reference.
+Read `guides/reference/docker.md` in the entur/ai repository for the full Docker reference.
 
 Select the Dockerfile template based on language:
 
 ### Kotlin/Java
 
-Use multi-stage with layered JAR and CDS:
+Use multi-stage with a layered JAR and distroless runtime:
 
 - Build stage: `gradle:9.3.1-jdk25-alpine`
-- Layers stage: `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl`
-- Runtime stage: `bellsoft/liberica-runtime-container:jre-25-cds-slim-musl`
-- Non-root user, port 8080, `-XX:MaxRAMPercentage=75.0`
+- Layers stage: `eclipse-temurin:25-jre-alpine`
+- Runtime stage: `gcr.io/distroless/java25-debian13:nonroot`
+- Non-root runtime, port 8080, `-XX:MaxRAMPercentage=75.0`
 
 ### Go
 
@@ -295,15 +295,11 @@ Use multi-stage with layered JAR and CDS:
 
 ## Step 7: Generate CI/CD Workflows
 
-Delegate to the **setup-cicd-workflows** skill if available, or generate:
+Delegate to the **setup-cicd-workflows** skill (`skills/setup-cicd-workflows/SKILL.md` in the entur/ai repository) -- it is the canonical source for workflow file names, structure, and reusable-workflow `@vN` pins. Do not generate these files from this skill: keeping two sources of truth has already caused drift.
 
-- `.github/workflows/ci.yml` (reusable build)
-- `.github/workflows/ci-pr.yml` (PR verification)
-- `.github/workflows/deploy.yml` (dev → tst → prd)
-- `.github/workflows/codeql.yml` (security scanning)
-- `.github/dependabot.yml`
+Do not restate the workflow file list in this skill. Workflow files use `.yml`; the setup-cicd skill owns the exact set.
 
-Read `guides/cicd/workflows.md` in the entur/ai repository for the full workflow reference.
+For background on each workflow's role, read `guides/platform/gha-workflows.md` in the entur/ai repository.
 
 ## Step 8: Generate Supporting Files
 
@@ -311,9 +307,9 @@ Read `guides/cicd/workflows.md` in the entur/ai repository for the full workflow
 
 ```toml
 [tools]
-java        = 'liberica-25.0.2+12'    # Kotlin/Java
+java        = 'temurin-25'            # Kotlin/Java
 # go        = '1.25'                   # Go
-terraform   = '1.9.8'
+terraform   = '1.15.6'
 
 [settings]
 experimental = true

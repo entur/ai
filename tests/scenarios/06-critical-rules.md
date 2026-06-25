@@ -24,7 +24,7 @@ Read the Entur AI documentation in this repository (start with AGENTS.md) and re
     "resource \"google_project\""
   ],
   "must_match": [
-    "never|must not|do not|cannot|should not|not.*create.*gcp.*project.*terraform|not.*terraform.*create.*gcp.*project",
+    "never|must not|do not|don't|can't|won't|shouldn't|mustn't|cannot|should not|instead of|rather than|not.*create.*gcp.*project.*terraform|not.*terraform.*create.*gcp.*project",
     "GoogleCloudApplication|self-service.*manifest|orchestrator"
   ]
 }

@@ -29,8 +29,6 @@ description: [...]
 Clear explanation of what happens.
 ```
 
-**Learn more:** [The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf)
-
 ## 📁 Repository Structure
 
 Skills are organized under the skills folder, naming the folder as the skill.
@@ -56,8 +54,6 @@ skills/
 - Use **snake_case** for Python files and functions
 - Include meaningful names that describe the skill's purpose
 
-**Reference:** [The Complete Guide to Building Skills for Claude](https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf) - Section on Best Practices
-
 ## 🚀 Installation Guide
 
 There are several ways to install skills from this repository, depending on which agent or tooling you use. All skills below live in `skills/` at the repo root and are also exposed as Claude Code / Codex plugins (one plugin per skill).
@@ -76,23 +72,15 @@ codex plugin marketplace add entur/ai
 codex # then run /plugins to browse
 ```
 
-### Option 3 — `npx skills` (any agent)
+### Option 3 — `gh skill install` (any agent)
 
-[`skills`](https://github.com/vercel-labs/skills) is a Vercel Labs CLI that pulls skills from a GitHub repo into your local agent skill folder. Walks `skills/` only, lets you select which to install.
-
-```shell
-npx skills add entur/ai
-```
-
-### Option 4 — `gh skill install` (any agent)
-
-[`gh skill`](https://cli.github.com/manual/gh_skill_install) is a part of the `gh` CLI that walks the repo for `SKILL.md` files (recursively) and allows you to select which to install.
+`gh skill` is a third-party `gh` CLI extension. Install the extension once via `gh extension install <owner>/gh-skill` (see `gh extension --help`), then the command below walks the repo for `SKILL.md` files recursively and lets you pick which to install.
 
 ```shell
 gh skill install entur/ai
 ```
 
-### Option 5 — Manual upload (Claude Code UI)
+### Option 4 — Manual upload (Claude Code UI)
 
 1. Clone or download this repo.
 2. In Claude Code, open Customize → Skills → + Upload a skill.
