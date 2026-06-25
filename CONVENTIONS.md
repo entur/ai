@@ -1,6 +1,16 @@
 # General Coding Conventions
 
-Cross-language conventions that apply to all Entur projects. Language-specific additions are in `guides/java.md`, `guides/kotlin.md`, and `guides/go.md`.
+Cross-language conventions that apply to all Entur projects. Language-specific additions are in `guides/reference/java.md`, `guides/reference/kotlin.md`, and `guides/reference/go.md`.
+
+## How to Read These Guides
+
+These guides are intentionally opinionated so they can work as a useful default path for teams and AI agents. Read requirement words as follows:
+
+- **MUST**, **ALWAYS**, and **Never** mark platform, security, compliance, or operational requirements. Do not deviate unless the owning platform/security team has approved an exception.
+- **SHOULD**, **preferred**, and **default** mark Golden Path recommendations. Teams may choose another approach when they have a concrete reason, but the decision should be written down in the repository README, an ADR, or another team-owned document.
+- **MAY**, **optional**, and examples show acceptable implementation patterns, not mandatory architecture.
+
+When a guide conflicts with a platform/security requirement, the platform/security requirement wins. If a team intentionally differs from a Golden Path recommendation, prefer a short written rationale over leaving the deviation implicit.
 
 ## Naming Conventions
 
@@ -36,13 +46,8 @@ Cross-language conventions that apply to all Entur projects. Language-specific a
 my-application/
   .github/
     workflows/
-      ci.yml                    # Reusable CI build (workflow_call)
-      ci-pr.yml                 # PR verification + CI build
-      ci-feature.yml            # Feature branch CI (if no open PR)
-      deploy.yml                # CD pipeline (dev -> tst -> prd)
-      codeql.yml                # Security code scanning (MUST be named codeql.yml)
-      lint-api.yml              # API spec linting (optional, for contract-first)
-      lint-helm.yml             # Helm chart linting per environment
+      # Generate canonical workflow files with skills/setup-cicd-workflows/SKILL.md.
+      # Workflow files use .yml.
     dependabot.yml              # Automated dependency updates
     pull_request_template.md    # PR description template
   .entur/
@@ -184,7 +189,7 @@ raise Exception("not found")
 - Use `cleanup.sql` scripts to ensure clean state between tests
 - Upload test results in CI using `dorny/test-reporter` for visibility in GitHub
 
-For test libraries and test structure conventions, see [kotlin.md](guides/kotlin.md#testing-in-kotlin) and [java.md](guides/java.md#testing).
+For test libraries and test structure conventions, see [kotlin.md](guides/reference/kotlin.md#testing-in-kotlin) and [java.md](guides/reference/java.md#testing).
 
 ## Dependency Management
 
@@ -208,7 +213,7 @@ For test libraries and test structure conventions, see [kotlin.md](guides/kotlin
 
 ### Commit Messages
 
-Follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/):
+Follow Conventional Commits -- a structured commit message format where each message starts with a type, optional scope, and short description. The type prefix drives automated semver bumps via release-please.
 
 ```text
 <type>(<scope>): <description>
@@ -219,6 +224,8 @@ Follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/):
 ```
 
 **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+
+Append `!` after the type/scope (e.g. `feat!:` or `feat(api)!:`) **or** add a `BREAKING CHANGE: <description>` footer to mark a breaking change.
 
 Examples:
 
@@ -248,12 +255,12 @@ This enables automated semantic versioning via release-please:
 
 ### Tool Version Management (mise)
 
-Use [mise](https://mise.jdx.dev/) (formerly rtx) for consistent tool versions across the team. Define required tools in `.mise.toml`:
+Use mise (formerly rtx) for consistent tool versions across the team. Define required tools in `.mise.toml`:
 
 ```toml
 [tools]
-java        = 'liberica-25.0.2+12'
-terraform   = '1.9.8'
+java        = 'temurin-25'
+terraform   = '1.15.6'
 python      = '3.13.10'
 kotlin      = '2.3.0'
 
@@ -270,7 +277,7 @@ enter = 'mise install'
 
 ### Docker Compose and Local Spring Profile
 
-Use `compose.yaml` at the repository root for running the full application locally. Use `application-local.yml` for local development overrides (human-readable logging, local database URL, Swagger UI enabled). See [docker.md](guides/docker.md) for Dockerfile conventions and [java.md](guides/java.md) for Spring Boot configuration.
+Use `compose.yaml` at the repository root for running the full application locally. Use `application-local.yml` for local development overrides (human-readable logging, local database URL, Swagger UI enabled). See [docker.md](guides/reference/docker.md) for Dockerfile conventions and [java.md](guides/reference/java.md) for Spring Boot configuration.
 
 ## Architecture Decision Records (ADRs)
 

@@ -46,7 +46,7 @@ linked from that file (e.g. java.md, helm.md, docker.md).
 - Custom health indicator for external route provider connectivity
 ```
 
-That's it. `AGENTS.md` is read automatically by GitHub Copilot and [many other agents](https://agents.md). Claude Code reads `CLAUDE.md` instead -- see [Agent Compatibility](#agent-compatibility) for details. The agent will fetch the linked URL to get the full platform standards.
+That's it. `AGENTS.md` is read automatically by GitHub Copilot and many other agents. Claude Code reads `CLAUDE.md` instead -- see [Agent Compatibility](#agent-compatibility) for details. The agent will fetch the linked URL to get the full platform standards.
 
 ### Tips for a good `AGENTS.md`
 
@@ -94,17 +94,14 @@ codex # then run /plugins to browse
 
 ## Install individual skills (any agent)
 
-For agents without a plugin marketplace, two CLIs can pull skills directly from this repo:
+For agents without a plugin marketplace, the `gh skill` extension for the `gh` CLI can pull skills directly from this repo:
 
 ```shell
-# Vercel Labs CLI (https://github.com/vercel-labs/skills)
-npx skills add entur/ai
-
-# gh CLI (https://cli.github.com/manual/gh_skill_install)
+# Install the extension once via `gh extension install`, then:
 gh skill install entur/ai
 ```
 
-Both walk the repo for `SKILL.md` files and let you pick which to install into your local agent skill folder. See [`skills/README.md`](skills/README.md) for the full install matrix.
+It walks the repo for `SKILL.md` files and lets you pick which to install into your local agent skill folder. See [`skills/README.md`](skills/README.md) for the full install matrix.
 
 ## Agent Compatibility
 
@@ -114,7 +111,7 @@ Both walk the repo for `SKILL.md` files and let you pick which to install into y
 | GitHub Copilot | Yes                     | Limited        | Reads `AGENTS.md`; may not fetch URLs in all modes                           |
 | opencode       | Yes                     | Unknown        | Reads `AGENTS.md` natively                                                   |
 
-`AGENTS.md` is supported by a [large ecosystem of AI coding agents](https://agents.md) including Codex, Gemini CLI, Jules, Windsurf, Aider, and many more.
+`AGENTS.md` is supported by a large ecosystem of AI coding agents including Codex, Gemini CLI, Jules, Windsurf, Aider, and many more.
 
 Claude Code reads `CLAUDE.md`, not `AGENTS.md`. To support Claude Code alongside other agents, create a symlink: `ln -s AGENTS.md CLAUDE.md`.
 
@@ -122,42 +119,61 @@ For agents that cannot fetch URLs, the most important rules are already inline i
 
 ## Documentation Structure
 
+The `guides/` folder is split into three layers along the internal developer platform value chain:
+
+- **`platform/`** -- what the platform provides (self-service, common Helm chart, reusable workflows, Terraform modules, Permission Store, Kafka starter).
+- **`playbooks/`** -- end-to-end tasks (bootstrap, add a database, deploy to prd, etc). These are the agent's recommended entry point for multi-step work.
+- **`reference/`** -- language and topic standards (Java, Kotlin, Go, Docker, observability, tracing, profiler, security, code review, docs).
+
 ```text
-AGENTS.md                       # Top-level agent routing and critical rules
-CONVENTIONS.md                  # Cross-language coding conventions
+AGENTS.md                              # Top-level agent routing and critical rules
+CONVENTIONS.md                         # Cross-language coding conventions
 guides/
-  java.md                       # Java standards (Spring Boot, Gradle)
-  kotlin.md                     # Kotlin standards
-  go.md                         # Go standards
-  docker.md                     # Containerization with Docker
-  api-design.md                 # REST and gRPC API design
-  architecture.md               # Service and infrastructure architecture
-  logging.md                    # Structured logging
-  observability.md              # Health checks, metrics, tracing
-  security.md                   # Secrets, scanning, IAM
-  code-review.md                # Review checklist
-  helm.md                       # Entur common Helm chart reference
-  self-service.md               # Self-service provisioning, manifests, onboarding
-  markdown.md                   # Markdown standards and linting
-  terraform/
-    modules.md                  # Terraform modules (init, SQL, Redis, GCS)
-    iam-roles.md                # Approved IAM roles
-  cicd/
-    workflows.md                # CI/CD pipeline reference
-    actions.md                  # Composite actions reference
+  platform/
+    self-service.md                    # GitOps provisioning, manifests, onboarding
+    common-helm.md                     # Entur common Helm chart reference
+    gha-workflows.md                   # Reusable GitHub Actions workflows
+    gha-actions.md                     # Composite GitHub Actions
+    terraform-modules.md               # Terraform modules (init, SQL, Redis, GCS)
+    iam-roles.md                       # Approved IAM roles
+    permission-store.md                # Permission Store + Permission Client
+    entur-kafka-starter.md             # Entur Kafka Spring starter (Aiven)
+  playbooks/
+    bootstrap-service.md               # New service on the platform
+    add-postgres.md                    # Managed PostgreSQL
+    add-redis.md                       # Memorystore Redis
+    add-kafka.md                       # Aiven Kafka producer/consumer
+    set-up-auth.md                     # OIDC + Permission Store authorization
+    add-custom-domain.md               # *.entur.{no,io,org} hostname + managed TLS
+    deploy-to-prd.md                   # Promote to production
+    deprecate-service.md               # Retire an application
+    local-dev.md                       # Run the service locally
+  reference/
+    java.md                            # Java standards (Spring Boot, Gradle)
+    kotlin.md                          # Kotlin standards
+    go.md                              # Go standards
+    docker.md                          # Containerization
+    api-design.md                      # REST and gRPC API design
+    architecture.md                    # Architecture principles, lifecycle
+    logging.md                         # Structured logging
+    observability.md                   # Health checks, metrics
+    tracing.md                         # OpenTelemetry + Cloud Trace
+    profiler.md                        # Cloud Profiler (CPU, heap)
+    security.md                        # Secrets, scanning, IAM
+    code-review.md                     # Review checklist
+    markdown.md                        # Markdown standards and linting
+    documentation.md                   # Writing user-facing docs
 skills/
-  README.md                     # Skill catalogue, usage guide, and how to contribute
-  entur-project-bootstrap/      # Bootstrap a new app (self-service, Helm, TF, Docker, CI/CD)
-  setup-cicd-workflows/         # Generate CI/CD workflows by language
+  README.md                            # Skill catalogue, usage guide, how to contribute
+  entur-project-bootstrap/             # Bootstrap a new app (self-service, Helm, TF, Docker, CI/CD)
+  setup-cicd-workflows/                # Generate CI/CD workflows by language
 tests/
-  README.md                     # Test usage guide and how to add scenarios
-  main.go                       # Test runner (Go, stdlib only)
-  scenario.go                   # Scenario parser and assertion evaluator
-  scenario_test.go              # Unit tests for the parser
-  scenarios/                    # Test scenarios (one .md file per test)
+  README.md                            # Test usage guide and how to add scenarios
+  main.go                              # Test runner (Go, stdlib only)
+  scenarios/                           # Test scenarios (one .md file per test)
 ```
 
-AI agents read `AGENTS.md` first, which routes them to the relevant sub-documents based on the task.
+AI agents read `AGENTS.md` first, which routes them by goal: a playbook for a multi-step task, a platform doc for a specific capability, or a reference doc for language and topic standards.
 
 ## Shared Tooling Referenced
 
@@ -169,53 +185,7 @@ AI agents read `AGENTS.md` first, which routes them to the relevant sub-document
 
 ## Contributing
 
-This is a shared resource for all of Entur, and we'd love your help making it better! Every contribution matters -- whether it's fixing a typo, clarifying a confusing section, adding a new skill, or sharing a pattern that works well for your team.
-
-A few ways to contribute:
-
-- **Found something wrong or unclear?** Open an issue or just submit a PR directly
-- **Have a pattern or skill that works great for your team?** Share it! Others will benefit
-- **Not sure if something belongs here?** Open an issue and let's figure it out together
-- **Want to improve the AI output for your stack?** Try tweaking the relevant `guides/` file and see how your agent responds -- that's the fastest feedback loop
-
-When submitting changes:
-
-1. Use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for commit messages
-2. Keep in mind the audience is AI agents, not humans -- be precise and structured
-3. **Run the comprehension tests** before opening a PR (see below)
-4. Get a review from the platform team
-
-### Comprehension Tests (required)
-
-The `tests/` directory contains automated tests that verify AI agents correctly understand the documentation. These tests send real prompts to Claude, let it read the docs, and validate that the answers are correct.
-
-**You must run these tests before submitting changes to any guide.** A documentation change that humans can read but AI agents misinterpret is a regression.
-
-```bash
-# Prerequisite: Go 1.25+ and claude CLI installed
-
-# Dry run -- validate scenario syntax, no API calls
-go run ./tests --dry-run
-
-# Full suite -- ~$0.18, ~90 seconds
-go run ./tests --verbose
-
-# Run a single scenario for faster iteration
-go run ./tests --scenario "05-*" --verbose
-```
-
-The tests cover:
-
-| Scenario | What it verifies |
-|----------|-----------------|
-| 01-kotlin-api | Identity chain: metadata.id → GCP projects, Helm shortname, Terraform app_id |
-| 02-go-service | Go-specific: health paths, distroless image, metrics path |
-| 03-data-project | Data project naming: `ent-data-{id}-{int\|ext}-{env}` |
-| 04-firebase-app | Firebase uses standard `ent-{id}-{env}`, not a special prefix |
-| 05-derive-from-manifest | Distinguishes metadata.id from metadata.name (the #1 confusion) |
-| 06-critical-rules | Refuses to create GCP projects via Terraform |
-
-If you change a guide and a test starts failing, either fix the guide or update the test scenario. See [`tests/README.md`](tests/README.md) for how to add new scenarios.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute, how to write good AI-facing documentation, and how to run the comprehension tests that every doc change must pass.
 
 For questions, ideas, or just to say hi, find us in `#talk-utviklerplattform` on Slack.
 

@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies the skill generates the correct set of workflow files with proper naming (.yaml not .yml for workflows) and the right pipeline architecture for a Kotlin project with Helm and Terraform.
+Verifies the skill generates the correct set of workflow files with proper naming (`.yml` for workflows) and the right pipeline architecture for a Kotlin project with Helm and Terraform.
 
 ## Prompt
 
@@ -28,6 +28,16 @@ List ALL workflow files and the dependabot config file that should be created un
 ```json
 {
   "must_contain": [
+    ".github/workflows/ci.yml",
+    ".github/workflows/build.yml",
+    ".github/workflows/cd.yml",
+    ".github/workflows/pr.yml",
+    ".github/workflows/codeql.yml",
+    ".github/workflows/dependabot-pr.yml",
+    ".github/workflows/terraform.yml",
+    ".github/workflows/terraform-drift-detection.yml"
+  ],
+  "must_not_contain": [
     ".github/workflows/ci.yaml",
     ".github/workflows/build.yaml",
     ".github/workflows/cd.yaml",
@@ -35,13 +45,7 @@ List ALL workflow files and the dependabot config file that should be created un
     ".github/workflows/codeql.yaml",
     ".github/workflows/dependabot-pr.yaml",
     ".github/workflows/terraform.yaml",
-    ".github/workflows/terraform-drift-detection.yaml"
-  ],
-  "must_not_contain": [
-    "ci.yml",
-    "build.yml",
-    "cd.yml",
-    "pr.yml",
+    ".github/workflows/terraform-drift-detection.yaml",
     "ci-pr.yaml",
     "ci-pr.yml",
     "deploy.yaml",
@@ -50,7 +54,7 @@ List ALL workflow files and the dependabot config file that should be created un
     "lint-helm.yml"
   ],
   "must_match": [
-    "dependabot\\.ya?ml"
+    "dependabot\\.yml"
   ]
 }
 ```

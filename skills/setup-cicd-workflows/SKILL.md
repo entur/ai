@@ -3,8 +3,8 @@ name: setup-cicd-workflows
 description: >
   Generate Entur-standard CI/CD GitHub Actions workflows for a project.
   Detects language (Kotlin/Java, Go, Python) and generates all required workflow
-  files: ci.yaml, build.yaml, cd.yaml, pr.yaml, codeql.yaml, dependabot-pr.yaml,
-  terraform.yaml, terraform-drift-detection.yaml, and dependabot.yml.
+  files: ci.yml, build.yml, cd.yml, pr.yml, codeql.yml, dependabot-pr.yml,
+  terraform.yml, terraform-drift-detection.yml, and dependabot.yml.
   Use this skill when the user says "set up CI/CD", "create pipelines",
   "add GitHub Actions", "configure deployment", or needs CI/CD workflows for a new
   or existing Entur project. Always uses Entur reusable workflows -- never custom steps.
@@ -18,14 +18,14 @@ Generate the complete set of GitHub Actions workflows for an Entur project using
 
 ```text
 .github/workflows/
-  ci.yaml                        ← Reusable CI (lint, test, Docker build/scan/push)
-  build.yaml                     ← PR: calls ci.yaml
-  cd.yaml                        ← Deploy: resolve PR-built image, deploy dev → tst → prd
-  pr.yaml                        ← PR verification (title/body validation)
-  codeql.yaml                    ← Security code scanning
-  dependabot-pr.yaml             ← CI for Dependabot PRs after human approval
-  terraform.yaml                 ← Terraform lint/plan/apply (if terraform/ exists)
-  terraform-drift-detection.yaml ← Weekly Terraform drift check (if terraform/ exists)
+  ci.yml                        ← Reusable CI (lint, test, Docker build/scan/push)
+  build.yml                     ← PR: calls ci.yml
+  cd.yml                        ← Deploy: resolve PR-built image, deploy dev → tst → prd
+  pr.yml                        ← PR verification (title/body validation)
+  codeql.yml                     ← Security code scanning
+  dependabot-pr.yml             ← CI for Dependabot PRs after human approval
+  terraform.yml                 ← Terraform lint/plan/apply (if terraform/ exists)
+  terraform-drift-detection.yml ← Weekly Terraform drift check (if terraform/ exists)
 .github/
   dependabot.yml                 ← Dependabot dependency update config
 ```
@@ -46,15 +46,15 @@ Determine from the project files or ask the user:
 | **Repo name** | from git remote or directory name | ask |
 | **Slack channel ID** | ask user (optional) | omit |
 
-## Step 2: Generate `.github/workflows/ci.yaml`
+## Step 2: Generate `.github/workflows/ci.yml`
 
-Reusable build workflow called by both `build.yaml` (PRs) and `cd.yaml` (workflow_dispatch without pre-built image).
+Reusable build workflow called by both `build.yml` (PRs) and `cd.yml` (workflow_dispatch without pre-built image).
 
 ```yaml
 # Continuous Integration Workflow
 #
 # This is a reusable workflow (workflow_call) -- it is NOT triggered directly by events.
-# It is called by build.yaml (on PRs) and cd.yaml (on workflow_dispatch without a pre-built image).
+# It is called by build.yml (on PRs) and cd.yml (on workflow_dispatch without a pre-built image).
 #
 # Pipeline:
 #   1. Lint (parallel)    -- Validate Dockerfile {and Helm charts for all environments}
@@ -62,7 +62,7 @@ Reusable build workflow called by both `build.yaml` (PRs) and `cd.yaml` (workflo
 #   3. Docker build      -- Build Docker image (runs after all lints + tests pass)
 #   4. Docker scan/push  -- Scan image for vulnerabilities and push to the container registry (parallel)
 #
-# The output `image_and_tag` is passed back to the caller (cd.yaml) so it knows
+# The output `image_and_tag` is passed back to the caller (cd.yml) so it knows
 # which image to deploy. The docker push also creates a git tag used later to
 # promote the same image to higher environments after merge.
 
@@ -84,7 +84,7 @@ jobs:
 
 ### Add Helm lint job (if Helm chart exists):
 
-Helm linting runs inside `ci.yaml` (not as a separate workflow) so charts are validated on every PR and dispatch build, not only when `helm/**` files change.
+Helm linting runs inside `ci.yml` (not as a separate workflow) so charts are validated on every PR and dispatch build, not only when `helm/**` files change.
 
 ```yaml
   # Helm charts are linted per environment to catch env-specific value errors
@@ -118,7 +118,7 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with:
-          distribution: liberica
+          distribution: temurin
           java-version: "25"
       - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
         with:
@@ -163,6 +163,8 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
 ```
 
 **Python:**
+
+> Use this block verbatim. Do NOT add `dorny/test-reporter`, `upload-artifact`, `--junit-xml`, or any Java/Kotlin steps. Those belong only in the Kotlin/Java variant above. Python is intentionally a simple `pip install && pytest`.
 
 ```yaml
   # --- Build and Test ---
@@ -234,16 +236,16 @@ If Artifactory deps detected, add build secrets:
     secrets: inherit
 ```
 
-## Step 3: Generate `.github/workflows/build.yaml`
+## Step 3: Generate `.github/workflows/build.yml`
 
-PR build trigger. Calls the reusable `ci.yaml` on every pull request.
+PR build trigger. Calls the reusable `ci.yml` on every pull request.
 
 ```yaml
 # Build Workflow
 #
 # Runs CI (lint, test, Docker build/scan/push) on every pull request.
 # The built image is tagged and pushed to the registry so it can be
-# resolved and deployed by cd.yaml after merge.
+# resolved and deployed by cd.yml after merge.
 
 name: Build
 
@@ -260,11 +262,11 @@ concurrency:
 
 jobs:
   build:
-    uses: ./.github/workflows/ci.yaml
+    uses: ./.github/workflows/ci.yml
     secrets: inherit
 ```
 
-## Step 4: Generate `.github/workflows/cd.yaml`
+## Step 4: Generate `.github/workflows/cd.yml`
 
 Continuous deployment using image promotion. On merge to main, resolves the image built during the PR (via git tag) and deploys through dev -> tst -> prd. Also supports manual deployment via workflow_dispatch.
 
@@ -331,7 +333,7 @@ jobs:
 
   build:
     if: github.event_name == 'workflow_dispatch' && inputs.image == ''
-    uses: ./.github/workflows/ci.yaml
+    uses: ./.github/workflows/ci.yml
     secrets: inherit
 
   # ============================================================================
@@ -403,6 +405,14 @@ jobs:
 ```
 
 ### Deploy jobs (for each environment):
+
+> **No Helm chart? Skip this entire section.** If the project has no `helm/` directory,
+> `cd.yml` ALWAYS omits all `deploy-*` jobs **and** `ci.yml` ALWAYS omits the
+> `helm-lint` job. The Docker job's `needs:` must then be `[test, docker-lint]` only,
+> with no `helm-lint` entry. The cd workflow still keeps `resolve-image:` (so the
+> built image is tagged for downstream consumers) but has no deploy jobs at all.
+> Do NOT generate `deploy-dev`, `deploy-tst`, `deploy-prd`, `helm-lint`,
+> `gha-helm` references, or `values-kub-ent-*` paths in that case.
 
 Generate deploy jobs for all environments. This example shows the standard three-environment setup:
 
@@ -500,9 +510,9 @@ Replace simple deploy jobs with matrix strategy:
 
 ### Skip Helm (if no `helm/` directory):
 
-Omit all deploy jobs from `cd.yaml`. The workflow only builds and pushes the Docker image.
+Omit all deploy jobs from `cd.yml`. The workflow only builds and pushes the Docker image.
 
-## Step 5: Generate `.github/workflows/pr.yaml`
+## Step 5: Generate `.github/workflows/pr.yml`
 
 PR verification using the Entur reusable PR verification workflow.
 
@@ -534,7 +544,7 @@ jobs:
     uses: entur/gha-meta/.github/workflows/verify-pr.yml@v1
 ```
 
-## Step 6: Generate `.github/workflows/codeql.yaml`
+## Step 6: Generate `.github/workflows/codeql.yml`
 
 Security code scanning with GitHub CodeQL.
 
@@ -572,12 +582,12 @@ For Java/Kotlin projects, add configuration:
 ```yaml
     with:
       java_version: '25'
-      java_distribution: 'liberica'
+      java_distribution: 'temurin'
       use_setup_java: true
       codeql_queries: 'security-extended'
 ```
 
-## Step 7: Generate `.github/workflows/dependabot-pr.yaml`
+## Step 7: Generate `.github/workflows/dependabot-pr.yml`
 
 Dependabot PRs do not receive repository secrets by default. This workflow adds an approval gate so secrets are only exposed after a human has reviewed and approved the PR.
 
@@ -600,13 +610,41 @@ permissions:
 jobs:
   ci:
     if: github.event.review.state == 'approved' && github.event.pull_request.user.login == 'dependabot[bot]'
-    uses: ./.github/workflows/ci.yaml
+    uses: ./.github/workflows/ci.yml
     secrets: inherit
 ```
 
-## Step 8: Generate `.github/workflows/terraform.yaml` (if `terraform/` exists)
+## Step 8: Generate `.github/workflows/terraform.yml` (if `terraform/` exists)
 
 Manages Terraform infrastructure changes across all environments. On PR: lint, plan all environments, apply dev. On merge: lint, plan tst+prd, apply tst, apply prd.
+
+> **Required job names** (use these exact identifiers):
+> `terraform-lint`, `tf-plan-dev`, `tf-plan-tst`, `tf-plan-prd`,
+> `tf-apply-dev`, `tf-apply-tst`, `tf-apply-prd`.
+>
+> **Required conditional**: `tf-plan-dev` MUST be gated with `if: github.event_name != 'push'`
+> (it is PR/dispatch only). `tf-apply-dev` runs on PR/dispatch; `tf-apply-tst` and
+> `tf-apply-prd` run on push/dispatch.
+>
+> **Required per-job `permissions:` (do NOT omit, do NOT declare at workflow level).**
+> `entur/gha-terraform/.github/workflows/{plan,apply}.yml@v2` declare
+> `contents: read`, `id-token: write`, `pull-requests: write` on their inner job.
+> A reusable workflow cannot grant itself more than the caller provides, so the
+> caller MUST also declare these at the job level. `lint.yml@v2` only needs
+> `contents: read`.
+>
+> Two failure modes to avoid:
+>
+> 1. Declaring `permissions:` at the **workflow** level (or on the caller's job)
+>    that omits any required scope -- GitHub clamps the unlisted scopes to
+>    `none` and the called workflow fails with `startup_failure`
+>    ("Refusing to allow a GitHub App to create or update workflow ... without
+>    `pull-requests` permission").
+> 2. Omitting `permissions:` entirely -- works while the repo's default
+>    `GITHUB_TOKEN` is `write-all`, breaks the moment that default is tightened.
+>
+> Always keep `permissions:` on the **calling job** (as shown below) and never
+> add a workflow-level `permissions:` block to `terraform.yml`.
 
 ```yaml
 # Terraform Infrastructure Workflow -- apply on PR, promote on merge
@@ -645,6 +683,8 @@ jobs:
   # --- Lint ---
   terraform-lint:
     uses: entur/gha-terraform/.github/workflows/lint.yml@v2
+    permissions:
+      contents: read
     concurrency:
       group: terraform-lint-${{ github.ref }}
       cancel-in-progress: true
@@ -657,6 +697,10 @@ jobs:
     needs: [terraform-lint]
     if: github.event_name != 'push'
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-plan-dev-${{ github.ref }}
       cancel-in-progress: true
@@ -666,6 +710,10 @@ jobs:
   tf-plan-tst:
     needs: [terraform-lint]
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-plan-tst-${{ github.ref }}
       cancel-in-progress: true
@@ -675,6 +723,10 @@ jobs:
   tf-plan-prd:
     needs: [terraform-lint]
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-plan-prd-${{ github.ref }}
       cancel-in-progress: true
@@ -689,6 +741,10 @@ jobs:
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-dev]
     uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-apply-dev
       cancel-in-progress: false
@@ -704,6 +760,10 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-tst]
     uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-apply-tst
       cancel-in-progress: false
@@ -715,6 +775,10 @@ jobs:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-prd, tf-apply-tst]
     uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     concurrency:
       group: terraform-apply-prd
       cancel-in-progress: false
@@ -723,7 +787,18 @@ jobs:
       has_changes: ${{ needs.tf-plan-prd.outputs.has_changes }}
 ```
 
-## Step 9: Generate `.github/workflows/terraform-drift-detection.yaml` (if `terraform/` exists)
+## Step 9: Generate `.github/workflows/terraform-drift-detection.yml` (if `terraform/` exists)
+
+> **This is a separate file from `terraform.yml`.** When the user asks for Terraform
+> workflows, ALWAYS generate BOTH `terraform.yml` (Step 8) AND
+> `terraform-drift-detection.yml` (Step 9).
+>
+> **Required job names**: `tf-plan-dev`, `tf-plan-tst`, `tf-plan-prd`, `drift-check`.
+>
+> **Required schedule**: `cron: '0 10 * * 4'` (Thursdays at 10:00 UTC).
+>
+> **Required outputs** on `drift-check`: `has_drift`, `drifted_envs`, plus a step that
+> calls `gh issue create` when drift is detected.
 
 Weekly scheduled Terraform plan to detect infrastructure drift. Creates a GitHub issue and sends a Slack notification if drift is found.
 
@@ -743,18 +818,32 @@ on:
 
 jobs:
   # --- Plan all environments ---
+  # Per-job permissions are required: plan.yml@v2 needs contents:read,
+  # id-token:write, pull-requests:write. See Step 8 for the full rationale.
   tf-plan-dev:
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     with:
       environment: dev
 
   tf-plan-tst:
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     with:
       environment: tst
 
   tf-plan-prd:
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
     with:
       environment: prd
 
@@ -877,7 +966,7 @@ Add language-specific ecosystems:
 
 ## Step 11: Generate Optional Lint Workflows
 
-### `lint-api.yaml` (if OpenAPI specs exist):
+### `lint-api.yml` (if OpenAPI specs exist):
 
 ```yaml
 name: lint-api
@@ -899,15 +988,15 @@ List all generated files and their purpose:
 
 ```text
 Generated CI/CD workflows:
-  .github/workflows/ci.yaml                        - Reusable CI (lint, test, Docker build/scan/push)
-  .github/workflows/build.yaml                     - PR build trigger (calls ci.yaml)
-  .github/workflows/cd.yaml                        - Deploy: resolve PR-built image, deploy dev -> tst -> prd
-  .github/workflows/pr.yaml                        - PR verification (title/body validation)
-  .github/workflows/codeql.yaml                    - Security code scanning (CodeQL)
-  .github/workflows/dependabot-pr.yaml             - CI for Dependabot PRs after approval
-  .github/workflows/terraform.yaml                 - Terraform lint/plan/apply (if applicable)
-  .github/workflows/terraform-drift-detection.yaml - Weekly Terraform drift detection (if applicable)
-  .github/workflows/lint-api.yaml                  - API spec linting (if applicable)
+  .github/workflows/ci.yml                        - Reusable CI (lint, test, Docker build/scan/push)
+  .github/workflows/build.yml                     - PR build trigger (calls ci.yml)
+  .github/workflows/cd.yml                        - Deploy: resolve PR-built image, deploy dev -> tst -> prd
+  .github/workflows/pr.yml                        - PR verification (title/body validation)
+  .github/workflows/codeql.yml                     - Security code scanning (CodeQL)
+  .github/workflows/dependabot-pr.yml             - CI for Dependabot PRs after approval
+  .github/workflows/terraform.yml                 - Terraform lint/plan/apply (if applicable)
+  .github/workflows/terraform-drift-detection.yml - Weekly Terraform drift detection (if applicable)
+  .github/workflows/lint-api.yml                  - API spec linting (if applicable)
   .github/dependabot.yml                           - Automated dependency updates
 ```
 
@@ -917,7 +1006,7 @@ Generated CI/CD workflows:
 - **Pin workflow versions** to major tags: `@v1`, `@v2`
 - **Use `secrets: inherit`** for security scanning and deploy workflows
 - **Image promotion model**: PRs build and push images; merges ALWAYS resolve the PR-built image via git tag
-- **Terraform ALWAYS runs in a separate workflow** from `cd.yaml`
+- **Terraform ALWAYS runs in a separate workflow** from `cd.yml`
 - **Deploy concurrency ALWAYS uses `cancel-in-progress: false`** to protect running deployments
 - **Plan concurrency uses `cancel-in-progress: true`** -- only the latest plan matters
 - **Use `has_changes` output** from terraform-plan to skip unnecessary applies
@@ -928,7 +1017,7 @@ Generated CI/CD workflows:
     always() && !cancelled() && !contains(needs.*.result, 'failure')
   ```
 
-- **Dependabot PRs need approval** before CI runs with secrets (`dependabot-pr.yaml`)
+- **Dependabot PRs need approval** before CI runs with secrets (`dependabot-pr.yml`)
 - **Use `paths-ignore`** on build and cd workflows to skip Terraform-only and docs-only changes
 - **Use `paths` triggers** on Terraform workflows to only run on infrastructure changes
 - **Upload test reports** using `dorny/test-reporter` for PR check visibility (Java/Kotlin)

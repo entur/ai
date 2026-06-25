@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies cd.yaml implements the image promotion model: resolve-image job looks up the PR's git tag instead of rebuilding, deploy jobs chain through dev -> tst -> prd with correct concurrency (cancel-in-progress: false), and workflow_dispatch supports manual deployment with optional pre-built image.
+Verifies cd.yml implements the image promotion model: resolve-image job looks up the PR's git tag instead of rebuilding, deploy jobs chain through dev -> tst -> prd with correct concurrency (cancel-in-progress: false), and workflow_dispatch supports manual deployment with optional pre-built image.
 
 ## Prompt
 
@@ -15,7 +15,7 @@ Details:
 
 Read the Entur AI documentation in this repository (start with AGENTS.md, then read the setup-cicd-workflows skill) to answer.
 
-Generate the complete `.github/workflows/cd.yaml` file. Output ONLY the YAML content.
+Generate the complete `.github/workflows/cd.yml` file. Output ONLY the YAML content.
 
 ## Assertions
 

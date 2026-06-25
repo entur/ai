@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies that ci.yaml is a reusable workflow (workflow_call only) with the correct job structure for a Kotlin project: docker-lint, helm-lint, test (Java 25, liberica, Gradle with SHA-pinned action, test-reporter, upload-artifact), docker build with artifact, docker-scan, docker-push.
+Verifies that ci.yml is a reusable workflow (workflow_call only) with the correct job structure for a Kotlin project: docker-lint, helm-lint, test (Java 25, Temurin, Gradle with SHA-pinned action, test-reporter, upload-artifact), docker build with artifact, docker-scan, docker-push.
 
 ## Prompt
 
@@ -18,7 +18,7 @@ Details:
 
 Read the Entur AI documentation in this repository (start with AGENTS.md, then read the setup-cicd-workflows skill) to answer.
 
-Generate the complete `.github/workflows/ci.yaml` file for this project. Output ONLY the YAML content.
+Generate the complete `.github/workflows/ci.yml` file for this project. Output ONLY the YAML content.
 
 ## Assertions
 
@@ -44,13 +44,13 @@ Generate the complete `.github/workflows/ci.yaml` file for this project. Output 
   ],
   "must_not_contain": [
     "pull_request:",
-    "push:",
-    "temurin",
+    "  push:",
+    "liberica",
     "setup-gradle@v4",
     "setup-gradle@v5"
   ],
   "must_match": [
-    "distribution.*liberica",
+    "distribution.*temurin",
     "java-version.*25",
     "setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e",
     "build_artifact_path.*app/build/distributions",

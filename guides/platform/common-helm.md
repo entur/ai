@@ -1,0 +1,474 @@
+# Entur Common Helm Chart
+
+Reference: [entur/helm-charts](https://github.com/entur/helm-charts)
+
+The Entur `common` Helm chart is the standard base chart for deploying applications to Kubernetes. **ALWAYS use the `common` chart for all Kubernetes deployments** -- do not create custom charts from scratch. It provides sensible defaults for Spring Boot and can be configured for Go, Python, or any containerized service.
+
+> **Scope:** this page is a reference for chart values. For provisioning workflows see the playbooks: [add-postgres.md](../playbooks/add-postgres.md), [add-redis.md](../playbooks/add-redis.md), [add-kafka.md](../playbooks/add-kafka.md), [add-custom-domain.md](../playbooks/add-custom-domain.md).
+
+## Naming Convention
+
+Application name = Git repository name = backend URL (`yourapp.entur.io`). Must be unique across Entur, max 63 characters, only `[a-z0-9-]`.
+
+## Setup
+
+### Chart.yaml
+
+```yaml
+apiVersion: v2
+name: my-application
+version: 0.1.0
+dependencies:
+  - name: common
+    version: "1.21.1"
+    repository: "https://entur.github.io/helm-charts"
+    alias: common
+```
+
+Run `helm dependency update` after creating or modifying `Chart.yaml`.
+
+### Directory Structure
+
+```text
+helm/
+  my-application/
+    Chart.yaml
+    Chart.lock
+    values.yaml           # Default values
+    env/
+      dev.yaml            # Dev overrides
+      tst.yaml            # Test overrides
+      prd.yaml            # Production overrides
+    tests/                # Helm unit tests (optional)
+      deployment_test.yaml
+```
+
+## Required Values
+
+Every deployment must set these:
+
+```yaml
+# values.yaml
+common:
+  app: my-application
+  shortname: myapp          # Must match self-service metadata.id (max 10 chars)
+  team: my-team             # Team name without "team-" prefix
+  container:
+    image: my-application   # Docker image name (without registry/tag)
+```
+
+> **`shortname` must match your self-service `metadata.id`**. The platform creates GCP projects as `ent-{shortname}-{env}`. This is used for Secret Manager project references and other GCP resource lookups. See [self-service.md](self-service.md#gcp-project-naming).
+
+```yaml
+# env/dev.yaml
+common:
+  env: dev
+```
+
+```yaml
+# env/prd.yaml
+common:
+  env: prd
+```
+
+## Container Configuration
+
+### Resources
+
+```yaml
+common:
+  container:
+    cpu: 0.2          # CPU request in cores (200m)
+    memory: 256        # Memory request in Mi
+    memoryLimit: 256   # Set equal to memory request
+```
+
+- **CPU limit**: ALWAYS leave unset. CPU is compressible -- pods are throttled, not killed. Allow bursting.
+- **Memory limit**: Set equal to request. Memory is incompressible -- exceeding limit causes OOM kills.
+- Start small, let VPA recommend optimal settings.
+
+### Replicas and Scaling
+
+```yaml
+common:
+  container:
+    replicas: 2              # Desired replicas (set to 1 for Recreate strategy)
+
+  deployment:
+    maxReplicas: 10          # HPA maximum (default: 10)
+    minAvailable: "50%"      # PDB minimum available (default: 50%)
+```
+
+- In `prd`, HPA and PDB are enabled automatically when replicas > 1
+- `replicas: 1` uses Recreate strategy (no PDB, no HPA)
+- HPA scales on CPU utilization (80% threshold by default)
+- **PDB percentage gotcha**: Kubernetes rounds `minAvailable` up. With 3 replicas and 80%, ceil(2.4) = 3, preventing all disruption. Use `50%` or ensure enough replicas.
+- In dev/tst with a single pod, set `minAvailable: 0`
+
+### Health Probes
+
+Default paths (Spring Boot):
+
+```yaml
+common:
+  container:
+    probes:
+      enabled: true
+      liveness:
+        path: /actuator/health/liveness
+      readiness:
+        path: /actuator/health/readiness
+```
+
+**Probe rules:**
+
+- **Liveness**: ALWAYS verify only the app process itself -- checking external deps causes unnecessary restarts.
+- **Readiness**: ALWAYS check only **private resources** (own DB, internal cache) -- shared service failures would remove all pods simultaneously.
+
+For non-Spring-Boot (Go, Python):
+
+```yaml
+common:
+  container:
+    probes:
+      liveness:
+        path: /health/liveness
+      readiness:
+        path: /health/readiness
+```
+
+Custom probe spec:
+
+```yaml
+common:
+  container:
+    probes:
+      spec:
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+```
+
+### Prometheus Metrics
+
+```yaml
+common:
+  container:
+    prometheus:
+      enabled: true
+      path: /actuator/prometheus    # Spring Boot
+      # path: /metrics              # Go / Python
+```
+
+### Ports
+
+```yaml
+common:
+  service:
+    internalPort: 8080    # Container port (default)
+    externalPort: 80      # Service port (default)
+```
+
+## Networking
+
+### Ingress
+
+```yaml
+common:
+  ingress:
+    enabled: true                    # Default: true
+    trafficType: api                 # Required: "api", "public", or "http2"
+    host: products-api.dev.entur.io  # Per-env override; see hostname pattern below
+```
+
+| Traffic Type | Description |
+|-------------|-------------|
+| `api` | Internal API traffic (default for backend services) |
+| `public` | Public-facing traffic (internet-accessible) |
+| `http2` | gRPC / HTTP/2 traffic |
+
+The platform serves hostnames only under `entur.no`, `entur.io`, and `entur.org`. The `host` value is environment-specific and typically lives in `env/values-kub-ent-<env>.yaml`:
+
+| Environment | Hostname |
+|-------------|----------|
+| `dev`       | `<app>.dev.entur.{no,io,org}` |
+| `tst`       | `<app>.staging.entur.{no,io,org}` -- note `staging`, not `tst` |
+| `prd`       | `<app>.entur.{no,io,org}` -- no env token |
+
+TLS is Google-managed and auto-renewed; no certificate work is required. For the full end-to-end flow (request, verify, off-golden-path Firebase / Cloud Run setups), see [playbooks/add-custom-domain.md](../playbooks/add-custom-domain.md).
+
+### gRPC
+
+```yaml
+common:
+  grpc: true
+  ingress:
+    trafficType: http2
+```
+
+When `grpc: true`, the chart automatically sets gRPC annotations and configures gRPC health checking probes.
+
+## Database (Cloud SQL Proxy)
+
+```yaml
+common:
+  postgres:
+    enabled: true
+```
+
+Injects a Cloud SQL proxy sidecar. Application connects to `localhost:5432`. Credentials provided as env vars from K8s secrets (created by `terraform-google-sql-db` module): `PGUSER`, `PGPASSWORD`. Database name configured via application config. Do NOT add `PGUSER`/`PGPASSWORD` to ExternalSecrets — they are already injected automatically.
+
+## Secrets (ExternalSecrets)
+
+Sync secrets from Google Secret Manager to Kubernetes:
+
+```yaml
+common:
+  secrets:
+    my-app-secrets:           # K8s Secret name
+      - MY_APP_API_KEY        # Secret Manager secret -> env var name
+      - EXTERNAL_SERVICE_KEY
+    some-service:             # Another K8s Secret
+      - X_API_KEY
+```
+
+Each entry creates an ExternalSecret syncing named secrets from Secret Manager into a K8s Secret mounted as env vars.
+
+## CronJobs
+
+```yaml
+common:
+  cron:
+    enabled: true
+    schedule: "0 2 * * *"    # Daily at 02:00 UTC
+```
+
+## Environment Variables
+
+```yaml
+common:
+  container:
+    envFrom:
+      - configMapRef:
+          name: my-config
+    env:
+      - name: SPRING_PROFILES_ACTIVE
+        value: "cloud"
+      - name: JAVA_TOOL_OPTIONS
+        value: "-Xmx512m"
+```
+
+## Custom HPA Spec
+
+```yaml
+common:
+  hpa:
+    spec:
+      minReplicas: 2
+      maxReplicas: 20
+      metrics:
+        - type: Resource
+          resource:
+            name: cpu
+            target:
+              type: Utilization
+              averageUtilization: 70
+```
+
+## Resource Sizing Best Practices
+
+| Resource | Recommendation |
+|----------|---------------|
+| CPU request | Set for normal load with overhead. Compressible -- pods throttled, not killed. |
+| CPU limit | **Do not set.** Allow bursting. |
+| Memory request | Set close to real usage including burst. |
+| Memory limit | **Set equal to request.** Incompressible -- exceeding causes OOM kills. |
+
+Use VPA recommendations (enabled on all clusters) to tune over time. See [observability](../reference/observability.md) for Grafana dashboards.
+
+## Local Debugging
+
+```bash
+# Lint (check for errors):
+helm lint helm/my-application/ -f helm/my-application/env/dev.yaml
+
+# Template (render K8s YAML locally):
+helm template my-application helm/my-application/ -f helm/my-application/env/dev.yaml
+```
+
+```yaml
+# values.yaml
+common:
+  configmap:
+    enabled: true
+
+# env/dev.yaml -- "ent-myapp-dev" = ent-{metadata.id}-{env}
+common:
+  configmap:
+    data:
+      SPRING_PROFILES_ACTIVE: "dev"
+      ENTUR_PERMISSION_PERMISSIONCACHE_URL: "http://permission-store.dev.entur.internal"
+```
+
+## Multi-Namespace Deployments
+
+For deploying to multiple namespaces (e.g., different data partitions), use separate values files per namespace:
+
+```text
+helm/my-app/
+  values.yaml                     # Shared defaults
+  env/
+    values-kub-ent-dev.yaml       # Primary dev namespace
+    values-kub-ent-dev-ep.yaml    # Secondary dev namespace
+    values-kub-ent-tst.yaml
+    values-kub-ent-tst-ep.yaml
+    values-kub-ent-prd.yaml
+```
+
+Override `app` and `shortname` in secondary namespace values:
+
+```yaml
+# env/values-kub-ent-dev-ep.yaml
+common:
+  app: my-app-ep
+  shortname: myappep
+  ingress:
+    host: my-app-ep.dev.entur.io
+  postgres:
+    connectionConfig: my-app-ep
+```
+
+Deploy using matrix strategy in GitHub Actions (see [CI/CD workflows](gha-workflows.md)).
+
+## Helm Values Naming Convention
+
+Pattern: `values-kub-ent-{environment}.yaml` or `values-kub-ent-{environment}-{variant}.yaml`
+
+Examples: `values-kub-ent-dev.yaml`, `values-kub-ent-tst-ep.yaml`, `values-kub-ent-prd.yaml`
+
+## Complete Example (Spring Boot with Kotlin)
+
+```yaml
+# values.yaml
+common:
+  app: products-api
+  shortname: products
+  team: produkt
+  ingress:
+    trafficType: api
+  service:
+    internalPort: 8086
+  configmap:
+    enabled: true
+  container:
+    image: <+artifacts.primary.image>
+    cpu: 0.5
+    memory: 1000
+    memoryLimit: 1000
+    prometheus:
+      enabled: true
+  secrets:
+    products-api-secrets:
+      - PRODUCTS_API_KEY
+      - EXTERNAL_SERVICE_KEY
+```
+
+> Adding a database, cache, message broker, or custom domain? Those values are documented in their respective playbooks rather than here -- see the **Scope** note at the top of this page.
+
+```yaml
+# env/values-kub-ent-dev.yaml
+common:
+  ingress:
+    host: products-api.dev.entur.io
+  hpa:
+    spec:
+      maxReplicas: 2
+  pdb:
+    minAvailable: 40%
+  env: dev
+  configmap:
+    data:
+      SPRING_PROFILES_ACTIVE: "dev"
+```
+
+```yaml
+# env/values-kub-ent-prd.yaml
+common:
+  ingress:
+    host: products-api.entur.io
+  hpa:
+    spec:
+      maxReplicas: 5
+  pdb:
+    minAvailable: 50%
+  env: prd
+  configmap:
+    data:
+      SPRING_PROFILES_ACTIVE: "prd"
+      LOG_LEVEL: "INFO"
+```
+
+## Complete Example (Go Service)
+
+```yaml
+# values.yaml
+common:
+  app: stop-lookup
+  shortname: stoplkup
+  team: data-platform
+  container:
+    image: stop-lookup
+    cpu: 0.1
+    memory: 64
+    replicas: 2
+    probes:
+      liveness:
+        path: /health/liveness
+      readiness:
+        path: /health/readiness
+    prometheus:
+      enabled: true
+      path: /metrics
+  service:
+    internalPort: 8080
+  ingress:
+    enabled: true
+    trafficType: api
+```
+
+## Helm Unit Testing
+
+Use `helm-unittest`:
+
+```yaml
+# tests/deployment_test.yaml
+suite: deployment tests
+templates:
+  - templates/deployment.yaml
+tests:
+  - it: should set the correct image
+    set:
+      common.container.image: my-app
+    asserts:
+      - contains:
+          path: spec.template.spec.containers
+          content:
+            image: my-app
+```
+
+Run in CI:
+
+```yaml
+jobs:
+  helm-unittest:
+    uses: entur/gha-helm/.github/workflows/unittest.yml@v1
+```

@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies codeql.yaml has correct schedule, Java configuration, and uses the Entur security reusable workflow. Verifies dependabot-pr.yaml triggers on pull_request_review (not pull_request), requires approval, and only runs for dependabot[bot].
+Verifies codeql.yml has correct schedule, Java configuration, and uses the Entur security reusable workflow. Verifies dependabot-pr.yml triggers on pull_request_review (not pull_request), requires approval, and only runs for dependabot[bot].
 
 ## Prompt
 
@@ -17,8 +17,8 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 
 Generate two files:
 
-1. The complete `.github/workflows/codeql.yaml`
-2. The complete `.github/workflows/dependabot-pr.yaml`
+1. The complete `.github/workflows/codeql.yml`
+2. The complete `.github/workflows/dependabot-pr.yml`
 
 Output the YAML content for each file, clearly labeled.
 
@@ -39,15 +39,15 @@ Output the YAML content for each file, clearly labeled.
     "types: [submitted]",
     "dependabot[bot]",
     "approved",
-    "./.github/workflows/ci.yaml"
+    "./.github/workflows/ci.yml"
   ],
   "must_not_contain": [
-    "temurin",
+    "liberica",
     "pull_request_target"
   ],
   "must_match": [
     "java_version.*25",
-    "java_distribution.*liberica",
+    "java_distribution.*temurin",
     "review\\.state.*approved.*dependabot|dependabot.*review\\.state.*approved"
   ]
 }

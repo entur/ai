@@ -1,0 +1,24 @@
+{
+  "name": "entur-ai",
+  "version": "0.1.2",
+  "description": "Entur AI agent instructions, conventions, guides, skills, and plugins.",
+  "private": true,
+  "license": "EUPL-1.2",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/entur/ai.git"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "bugs": "https://github.com/entur/ai/issues",
+  "scripts": {
+    "lint:md": "npx --yes markdownlint-cli2@0.17.2 --fix \"**/*.md\" \"!tmp/**\" \"!CHANGELOG.md\""
+  },
+  "files": [
+    "AGENTS.md",
+    "CONVENTIONS.md",
+    "README.md",
+    "guides",
+    "skills",
+    "plugins"
+  ]
+}

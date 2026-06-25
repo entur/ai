@@ -1,4 +1,3 @@
-// https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
 {
   "default": true,
   // Allow long lines -- documentation has tables, URLs, and code blocks

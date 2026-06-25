@@ -1,0 +1,5 @@
+.DS_Store
+
+# Compiled test runner binary -- `go run .` and `go build` produce artifacts
+# that should not be checked in.
+tests/tests

@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -48,7 +49,12 @@ func main() {
 	scenarioDir := flag.String("dir", "", "scenario directory (default: ./scenarios relative to binary)")
 	sysPromptOverride := flag.String("system-prompt", "", "override default system prompt ('none' to omit)")
 	allowedToolsFlag := flag.String("allowed-tools", "", "override allowed tools ('none' to omit, default: Read,Grep,Glob)")
+	parallel := flag.Int("parallel", 4, "max scenarios to run concurrently (1 = sequential)")
 	flag.Parse()
+
+	if *parallel < 1 {
+		*parallel = 1
+	}
 
 	// Apply system prompt and tools configuration
 	activeSysPrompt = systemPrompt
@@ -129,70 +135,65 @@ func main() {
 		return
 	}
 
-	var results []ScenarioResult
+	results := make([]ScenarioResult, len(scenarios))
 	var totalCost float64
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	sem := make(chan struct{}, *parallel)
+	budgetReached := false
 
 	for i, s := range scenarios {
-		if totalCost >= *totalBudget {
-			fmt.Printf("\n[!] Budget cap reached ($%.2f). Skipping remaining scenarios.\n", *totalBudget)
+		mu.Lock()
+		over := totalCost >= *totalBudget
+		mu.Unlock()
+		if over {
+			if !budgetReached {
+				fmt.Printf("\n[!] Budget cap reached ($%.2f). Skipping remaining scenarios.\n", *totalBudget)
+				budgetReached = true
+			}
 			break
 		}
 
-		fmt.Printf("[%d/%d] %s ", i+1, len(scenarios), s.Name)
+		sem <- struct{}{}
+		wg.Add(1)
+		go func(i int, s Scenario) {
+			defer wg.Done()
+			defer func() { <-sem }()
 
-		result := runScenario(s, *model, *strict, repoRoot)
-		totalCost += result.CostUSD
+			result := runScenario(s, *model, *strict, repoRoot)
+			mu.Lock()
+			totalCost += result.CostUSD
+			mu.Unlock()
 
-		// Retry once if failed and retries enabled
-		if !result.Passed && !*noRetry && result.Error == "" {
-			fmt.Print("-> retrying ")
-			retry := runScenario(s, *model, *strict, repoRoot)
-			totalCost += retry.CostUSD
-			if retry.Passed {
-				retry.Flaky = true
-				result = retry
-			}
-		}
-
-		results = append(results, result)
-
-		// Print result
-		totalAssertions := len(result.AssertionResults)
-		passedAssertions := 0
-		for _, a := range result.AssertionResults {
-			if a.Passed {
-				passedAssertions++
-			}
-		}
-
-		status := "PASS"
-		if result.Error != "" {
-			status = "ERROR"
-		} else if !result.Passed {
-			status = "FAIL"
-		} else if result.Flaky {
-			status = "FLAKY"
-		}
-
-		fmt.Printf("... %s (%d/%d assertions, $%.3f, %.1fs)\n",
-			status, passedAssertions, totalAssertions, result.CostUSD,
-			float64(result.DurationMS)/1000)
-
-		// Print failures
-		if !result.Passed || *verbose {
-			for _, a := range result.AssertionResults {
-				if !a.Passed {
-					fmt.Printf("      FAIL %s: %s\n", a.Kind, a.Detail)
+			retried := false
+			if !result.Passed && !*noRetry && result.Error == "" {
+				retried = true
+				retry := runScenario(s, *model, *strict, repoRoot)
+				mu.Lock()
+				totalCost += retry.CostUSD
+				mu.Unlock()
+				if retry.Passed {
+					retry.Flaky = true
+					result = retry
 				}
 			}
-			if result.Error != "" {
-				fmt.Printf("      ERROR: %s\n", result.Error)
-			}
-		}
-		if !result.Passed && *verbose && result.RawOutput != "" {
-			fmt.Printf("      --- Raw output ---\n%s\n      --- End ---\n", truncate(result.RawOutput, 2000))
+
+			mu.Lock()
+			defer mu.Unlock()
+			results[i] = result
+			printResult(i+1, len(scenarios), result, retried, *verbose)
+		}(i, s)
+	}
+	wg.Wait()
+
+	// Drop unfilled slots (only happens when budget cap stopped dispatch mid-list).
+	compacted := results[:0]
+	for _, r := range results {
+		if r.Scenario.Name != "" {
+			compacted = append(compacted, r)
 		}
 	}
+	results = compacted
 
 	// Summary
 	passed, flaky, failed, errored := 0, 0, 0, 0
@@ -331,6 +332,51 @@ func runScenario(s Scenario, model string, strict bool, repoRoot string) Scenari
 	result.Passed = ScenarioPassed(result.AssertionResults, strict)
 
 	return result
+}
+
+// printResult writes a single scenario's outcome to stdout. Caller must hold
+// the stdout mutex when running scenarios in parallel.
+func printResult(idx, total int, result ScenarioResult, retried, verbose bool) {
+	totalAssertions := len(result.AssertionResults)
+	passedAssertions := 0
+	for _, a := range result.AssertionResults {
+		if a.Passed {
+			passedAssertions++
+		}
+	}
+
+	status := "PASS"
+	if result.Error != "" {
+		status = "ERROR"
+	} else if !result.Passed {
+		status = "FAIL"
+	} else if result.Flaky {
+		status = "FLAKY"
+	}
+
+	suffix := ""
+	if retried {
+		suffix = " (retried)"
+	}
+
+	fmt.Printf("[%d/%d] %s ... %s%s (%d/%d assertions, $%.3f, %.1fs)\n",
+		idx, total, result.Scenario.Name, status, suffix,
+		passedAssertions, totalAssertions, result.CostUSD,
+		float64(result.DurationMS)/1000)
+
+	if !result.Passed || verbose {
+		for _, a := range result.AssertionResults {
+			if !a.Passed {
+				fmt.Printf("      FAIL %s: %s\n", a.Kind, a.Detail)
+			}
+		}
+		if result.Error != "" {
+			fmt.Printf("      ERROR: %s\n", result.Error)
+		}
+	}
+	if !result.Passed && verbose && result.RawOutput != "" {
+		fmt.Printf("      --- Raw output ---\n%s\n      --- End ---\n", truncate(result.RawOutput, 2000))
+	}
 }
 
 func findRepoRoot() string {
