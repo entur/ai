@@ -1,15 +1,10 @@
 ---
 name: setup-tracing
 description: >
-  Instrument an Entur application with OpenTelemetry and ship traces to Google
-  Cloud Trace, following the Entur tracing golden path. Covers Terraform
-  (Cloud Trace API + IAM), the OpenTelemetry Java Agent for Spring Boot
-  (Kotlin/Java), manual OpenTelemetry SDK wiring for Go, runtime env vars, and
-  log-trace correlation. Use this skill when the user says "add tracing",
-  "set up OpenTelemetry", "instrument for Cloud Trace", or asks to wire
-  distributed tracing into a Kotlin/Java or Go service. Confirms the repo
-  language and that Cloud Trace storage has already been enabled in the
-  console before making any changes.
+    Wire distributed tracing into an Entur service following the golden path.
+    Use when the user says "add tracing", "set up OpenTelemetry", "instrument
+    for Cloud Trace", or asks to add distributed tracing to a Kotlin/Java or
+    Go service.
 ---
 
 # Set Up Tracing (Golden Path)
@@ -25,7 +20,7 @@ Ask the user directly; do not infer silently and do not proceed until all four a
 2. **Step 1 -- Cloud Trace storage.** Ask: *"Have you already enabled Cloud Trace storage in the GCP Console (Monitoring → Trace Explorer → Enable trace storage) for every environment you're setting up, in the application project `ent-<app>-<env>` -- not the cluster host project `ent-kub-<env>`?"*
    - If no, or unsure, **stop** and tell them to do this first, once per environment (dev, tst, prd). This is a console-only action -- there is no Terraform resource for it yet. Do not attempt to script it.
    - Only proceed with the environments the user confirms are done. If they've only enabled it for `dev`, scope the rest of this skill to `dev`.
-3. **App ID.** Needed to build `ent-<appId>-<env>`. Read `metadata.id` from the self-service manifest under `.entur/*.yaml` if present; otherwise ask.
+3. **App ID.** Needed to build `ent-<appId>-<env>`. Read `metadata.id` from the self-service manifest under `.entur/*.yaml` if present. If the manifest exists but `metadata.id` is missing or empty, ask the user for it instead of guessing -- do not derive it from the repo name or any other field. If no manifest exists at all, ask the user directly.
 4. **Runtime.** Kubernetes (`helm/<app>/env/values-kub-ent-<env>.yaml`) or Cloud Run (`cloudrun.yaml`)? Determines where env vars in Step 4 are set.
 
 ## Step 1: Enable the Cloud Trace API in Terraform
@@ -141,6 +136,8 @@ func Init(ctx context.Context, projectID, serviceName, serviceVersion string) (f
 }
 ```
 
+Run `go mod tidy` after pasting.
+
 - `googlegrpc.NewDefaultCredentials()` bundles TLS + Application Default Credentials -- no API keys or credential files in the container; auth resolves through the Workload Identity binding from Step 2.
 - Wrap the outermost handler so every inbound request gets a span, and filter probe/metrics paths so they don't drown the trace stream:
 
@@ -194,12 +191,7 @@ Set on Helm values (`values-kub-ent-<env>.yaml`, under `common.container.env`) f
 
 Do not set `OTEL_TRACES_SAMPLER` on Cloud Run: the Cloud Run load balancer injects its own (thin) sampling decision upstream, and `parentbased_always_on` would defer to it, sampling far less than intended. Omitting the variable lets the agent default to `always_on`.
 
-**Go (sampler/exporter already hardcoded in `tracing.Init`; only these two are needed):**
-
-| Variable | Kubernetes | Cloud Run |
-|---|---|---|
-| `TRACING_ENABLED` | `true` | `true` |
-| `GCP_PROJECT_ID` | `ent-<app>-<env>` | `ent-<app>-<env>` |
+**Go (sampler/exporter already hardcoded in `tracing.Init`; only these two are needed):** set `TRACING_ENABLED` to `true` and `GCP_PROJECT_ID` to `ent-<app>-<env>`, the same on both Kubernetes and Cloud Run.
 
 Set the Go sampler in code to match the runtime, mirroring the Java table above: `ParentBased(AlwaysSample())` on Kubernetes, bare `AlwaysSample()` on Cloud Run.
 
@@ -222,10 +214,14 @@ Every log line inside a traced request needs `logging.googleapis.com/trace` (`pr
 
   Health-probe endpoints filtered out of tracing in Step 3 don't need these fields.
 
-## Step 6: Verify
+## Step 6: Tell the user what's left
 
-- GCP Console: **Trace → Trace Explorer** under `ent-<app>-<env>` (not `ent-kub-<env>`, even for Kubernetes workloads -- traces always land in the application project).
-- Programmatically: if the entur-kompass MCP server is available, use `list_cloud_traces` / `get_cloud_trace` against the app's per-env project.
+Steps 0-5 are everything this skill can do by editing the repo. Verifying traces actually arrive requires a live deploy and real traffic, which happens outside this skill -- tell the user to:
+
+1. Commit and merge the changes, and let the normal CD pipeline deploy to the confirmed environment(s) from Step 0.
+2. Send a few requests to the deployed service to generate spans.
+3. Check **Trace → Trace Explorer** in the GCP Console under `ent-<app>-<env>` (not `ent-kub-<env>`, even for Kubernetes workloads -- traces always land in the application project).
+4. If no spans show up: re-check that Step 0's trace storage was enabled for the *deployed* environment, and that `TRACING_ENABLED`/`GCP_PROJECT_ID` reached the running container (a common miss is setting them in the wrong Helm values file for the target environment).
 
 ## Critical Rules
 
@@ -233,6 +229,5 @@ Every log line inside a traced request needs `logging.googleapis.com/trace` (`pr
 - **Grant exactly `roles/cloudtrace.agent`** to the workload -- never a broader trace role.
 - **`GCP_PROJECT_ID` is always the application project (`ent-<app>-<env>`)**, never the cluster host project, even on Kubernetes.
 - **Java/Kotlin defaults to the Java Agent.** Only hand-roll manual OpenTelemetry instrumentation if the user gives a specific reason.
-- **One `CMD` per Dockerfile.** Merge Cloud Profiler flags into the same `CMD` as the tracing agent flags.
+- **One `CMD` per Dockerfile.** Merge Cloud Profiler flags into the same `CMD` as the tracing agent flags if present.
 - **Kubernetes vs Cloud Run sampler differs** -- see Step 4. Getting this backwards silently under-samples on Cloud Run or double-samples on Kubernetes.
-- **Do not improvise instrumentation for languages outside Kotlin/Java and Go** -- this golden path doesn't cover them; say so and stop.
