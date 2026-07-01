@@ -17,10 +17,10 @@ Ask the user directly; do not infer silently and do not proceed until all four a
 
 1. **Language.** Detect from the repo: `build.gradle.kts` → Kotlin/Java, `go.mod` → Go. State the detected language and ask the user to confirm it.
    - If the repo is neither (Python, Node, etc.), **stop**. Tell the user this golden path only documents Java Agent instrumentation (Java/Kotlin) and manual SDK wiring (Go) -- do not improvise OpenTelemetry setup for another language.
-2. **Step 1 -- Cloud Trace storage.** Ask: *"Have you already enabled Cloud Trace storage in the GCP Console (Monitoring → Trace Explorer → Enable trace storage) for every environment you're setting up, in the application project `ent-<app>-<env>` -- not the cluster host project `ent-kub-<env>`?"*
+2. **Cloud Trace storage (manual, console-only).** Ask: *"Have you already enabled Cloud Trace storage in the GCP Console (Monitoring → Trace Explorer → Enable trace storage) for every environment you're setting up, in the application project `ent-<app>-<env>` -- not the cluster host project `ent-kub-<env>`?"*
    - If no, or unsure, **stop** and tell them to do this first, once per environment (dev, tst, prd). This is a console-only action -- there is no Terraform resource for it yet. Do not attempt to script it.
    - Only proceed with the environments the user confirms are done. If they've only enabled it for `dev`, scope the rest of this skill to `dev`.
-3. **App ID.** Needed to build `ent-<appId>-<env>`. Read `metadata.id` from the self-service manifest under `.entur/*.yaml` if present. If the manifest exists but `metadata.id` is missing or empty, ask the user for it instead of guessing -- do not derive it from the repo name or any other field. If no manifest exists at all, ask the user directly.
+3. **App ID.** Needed to build `ent-<app>-<env>`. Read `metadata.id` from the self-service manifest under `.entur/*.yaml` if present. If the manifest exists but `metadata.id` is missing or empty, ask the user for it instead of guessing -- do not derive it from the repo name or any other field. If no manifest exists at all, ask the user directly.
 4. **Runtime.** Kubernetes (`helm/<app>/env/values-kub-ent-<env>.yaml`) or Cloud Run (`cloudrun.yaml`)? Determines where env vars in Step 4 are set.
 
 ## Step 1: Enable the Cloud Trace API in Terraform
@@ -225,7 +225,7 @@ Steps 0-5 are everything this skill can do by editing the repo. Verifying traces
 
 ## Critical Rules
 
-- **Step 1 (trace storage) is a manual console action, once per environment.** Never attempt to Terraform it; never proceed with Steps 1-5 for an environment the user hasn't confirmed is enabled.
+- **The Step 0 trace-storage check is a manual console action, once per environment.** Never attempt to Terraform it; never proceed with Steps 1-5 for an environment the user hasn't confirmed is enabled.
 - **Grant exactly `roles/cloudtrace.agent`** to the workload -- never a broader trace role.
 - **`GCP_PROJECT_ID` is always the application project (`ent-<app>-<env>`)**, never the cluster host project, even on Kubernetes.
 - **Java/Kotlin defaults to the Java Agent.** Only hand-roll manual OpenTelemetry instrumentation if the user gives a specific reason.
