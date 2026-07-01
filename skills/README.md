@@ -93,6 +93,7 @@ gh skill install entur/ai
 | [entur-project-bootstrap](entur-project-bootstrap/) | Bootstrap a new Entur app: self-service manifests, Helm, Terraform, Docker, CI/CD |
 | [setup-cicd-workflows](setup-cicd-workflows/) | Generate CI/CD GitHub Actions workflows using Entur reusable workflows |
 | [scr-situation-complication-resolution](scr-situation-complication-resolution/) | Structure problems and decisions in SCR format for leadership |
+| [setup-tracing](setup-tracing/) | Instrument a Kotlin/Java or Go service with OpenTelemetry and ship traces to Google Cloud Trace |
 
 ## 🤝 Contributing
 
