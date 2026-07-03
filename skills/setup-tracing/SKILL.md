@@ -34,7 +34,7 @@ resource "google_project_service" "services" {
     "cloudtrace.googleapis.com",
     # ... other APIs your service needs
   ])
-  project            = module.init.app.project_id
+  project            = module.init.app.project_id # "init" assumes that's this repo's terraform-google-init alias
   service            = each.value
   disable_on_destroy = false
 }
@@ -47,7 +47,7 @@ If the repo has no `terraform/` directory yet, do not create one ad hoc -- tell 
 ```hcl
 # terraform/main.tf
 resource "google_project_iam_member" "runtime_cloudtrace_agent" {
-  project    = module.init.app.project_id
+  project    = module.init.app.project_id # adapt "init" to this repo's module alias
   role       = "roles/cloudtrace.agent"
   member     = "serviceAccount:${module.init.service_accounts.runtime.email}"
   depends_on = [google_project_service.services]
@@ -82,7 +82,8 @@ CMD ["-javaagent:/otel/opentelemetry-javaagent.jar", \
 ```
 
 - Both JARs are required: `opentelemetry-javaagent.jar` does the bytecode instrumentation; `gcp-auth-extension` attaches a Workload Identity token to outbound OTLP calls -- without it, `telemetry.googleapis.com` rejects the export as unauthenticated.
-- Check the OpenTelemetry Java agent's own release notes for a newer version before pinning; `v2.29.0` (agent) / `1.58.0-alpha` (gcp-auth-extension) are current as of this guide.
+- Use the pinned versions above as-is -- `v2.29.0` (agent) / `1.58.0-alpha` (gcp-auth-extension). Do not spend time checking upstream for a newer release. In Step 6's summary, tell the user which versions were used and point to the `otel` build stage in the Dockerfile as where to bump them later.
+- `java25-debian13` is an example tag, not a guarantee -- match the distroless image version to the project's own Java toolchain (`build.gradle.kts`/`.tool-versions`), and confirm the resulting tag actually exists before using it. Flag the tag used in the Step 6 summary as something the user may need to change.
 - If the project also uses Cloud Profiler, merge its `-javaagent`/flags into this **same** `CMD` -- a Dockerfile only honors its last `CMD`, a second one silently disables the first.
 
 ### Go -- manual OpenTelemetry SDK wiring
@@ -178,6 +179,36 @@ Run `go mod tidy` after pasting.
 
 Set on Helm values (`values-kub-ent-<env>.yaml`, under `common.container.env`) for Kubernetes, or on the container spec (`cloudrun.yaml`) for Cloud Run. `GCP_PROJECT_ID` is always the application's per-env project (`ent-<app>-<env>`) -- never the cluster host project.
 
+**If `helm/<app>/env/values-kub-ent-<env>.yaml` doesn't exist yet for a confirmed environment**, ask the user: *"No Helm values file exists yet for `<env>` -- do you want me to create `helm/<app>/env/values-kub-ent-<env>.yaml` with the tracing env vars?"* Only create it if they say yes, and only for the environment(s) confirmed in Step 0. Use this shape:
+
+```yaml
+# helm/<app>/env/values-kub-ent-<env>.yaml
+common:
+  env: <env>
+  container:
+    env:
+      - name: OTEL_TRACES_EXPORTER
+        value: otlp
+      - name: OTEL_EXPORTER_OTLP_ENDPOINT
+        value: https://telemetry.googleapis.com
+      - name: OTEL_SERVICE_NAME
+        value: <service-name>
+      - name: TRACING_ENABLED
+        value: "true"
+      - name: GCP_PROJECT_ID
+        value: ent-<app>-<env>
+      - name: OTEL_TRACES_SAMPLER
+        value: parentbased_always_on
+      - name: OTEL_METRICS_EXPORTER
+        value: none
+      - name: OTEL_LOGS_EXPORTER
+        value: none
+```
+
+If the file already exists with its own `common.container.env` entries, append these to the existing list instead of overwriting the file -- check for entries with the same `name` first and update their `value` in place rather than duplicating. Omit `OTEL_TRACES_SAMPLER` on Cloud Run, per the table below.
+
+Only create the single env file this way -- do not scaffold `helm/<app>/Chart.yaml` or `helm/<app>/values.yaml` ad hoc. If those don't exist either, Helm hasn't been bootstrapped for this service at all, which is out of scope for this skill (same rule as Step 1's Terraform bootstrap).
+
 **Kotlin/Java (Java Agent auto-configures from env vars):**
 
 | Variable | Kubernetes | Cloud Run |
@@ -188,6 +219,10 @@ Set on Helm values (`values-kub-ent-<env>.yaml`, under `common.container.env`) f
 | `TRACING_ENABLED` | `true` | `true` |
 | `GCP_PROJECT_ID` | `ent-<app>-<env>` | `ent-<app>-<env>` |
 | `OTEL_TRACES_SAMPLER` | `parentbased_always_on` | **omit** |
+| `OTEL_METRICS_EXPORTER` | `none` | `none` |
+| `OTEL_LOGS_EXPORTER` | `none` | `none` |
+
+Always set `OTEL_METRICS_EXPORTER=none` and `OTEL_LOGS_EXPORTER=none` on both runtimes -- the agent defaults both to `otlp` like traces, but Step 2's IAM grant doesn't authorize either.
 
 Do not set `OTEL_TRACES_SAMPLER` on Cloud Run: the Cloud Run load balancer injects its own (thin) sampling decision upstream, and `parentbased_always_on` would defer to it, sampling far less than intended. Omitting the variable lets the agent default to `always_on`.
 
@@ -223,6 +258,8 @@ Steps 0-5 are everything this skill can do by editing the repo. Verifying traces
 3. Check **Trace → Trace Explorer** in the GCP Console under `ent-<app>-<env>` (not `ent-kub-<env>`, even for Kubernetes workloads -- traces always land in the application project).
 4. If no spans show up: re-check that Step 0's trace storage was enabled for the *deployed* environment, and that `TRACING_ENABLED`/`GCP_PROJECT_ID` reached the running container (a common miss is setting them in the wrong Helm values file for the target environment).
 
+For Kotlin/Java, also state in the summary: the OpenTelemetry Java agent (`v2.29.0`) and gcp-auth-extension (`1.58.0-alpha`) versions were pinned as-is, not checked against upstream for something newer, and are set in the Dockerfile's `otel` build stage if the user wants to bump them later. Also state the distroless base image tag used and that it may need to change to match the project's Java toolchain.
+
 ## Critical Rules
 
 - **The Step 0 trace-storage check is a manual console action, once per environment.** Never attempt to Terraform it; never proceed with Steps 1-5 for an environment the user hasn't confirmed is enabled.
@@ -231,3 +268,4 @@ Steps 0-5 are everything this skill can do by editing the repo. Verifying traces
 - **Java/Kotlin defaults to the Java Agent.** Only hand-roll manual OpenTelemetry instrumentation if the user gives a specific reason.
 - **One `CMD` per Dockerfile.** Merge Cloud Profiler flags into the same `CMD` as the tracing agent flags if present.
 - **Kubernetes vs Cloud Run sampler differs** -- see Step 4. Getting this backwards silently under-samples on Cloud Run or double-samples on Kubernetes.
+- **Kotlin/Java also disables metrics/logs export** -- see Step 4. They default to `otlp` too if left unset, but Step 2 doesn't authorize either.
