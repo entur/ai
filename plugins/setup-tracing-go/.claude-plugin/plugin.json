@@ -1,7 +1,7 @@
 {
-  "name": "setup-tracing",
+  "name": "setup-tracing-go",
   "version": "0.1.0",
-  "description": "Instrument a service with OpenTelemetry and ship traces to Google Cloud Trace, following the Entur tracing golden path (Kotlin/Java Agent, Go SDK).",
+  "description": "Instrument a Go service with manual OpenTelemetry SDK wiring and ship traces to Google Cloud Trace, following the Entur tracing golden path.",
   "author": {
     "name": "Team Kvalitet",
     "email": "support@entur.org"
@@ -15,8 +15,6 @@
     "opentelemetry",
     "cloud-trace",
     "observability",
-    "kotlin",
-    "java",
     "go"
   ]
 }

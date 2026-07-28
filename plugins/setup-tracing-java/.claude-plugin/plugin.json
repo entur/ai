@@ -1,0 +1,22 @@
+{
+  "name": "setup-tracing-java",
+  "version": "0.1.0",
+  "description": "Instrument a Kotlin/Java (Spring Boot) service with the OpenTelemetry Java Agent and ship traces to Google Cloud Trace, following the Entur tracing golden path.",
+  "author": {
+    "name": "Team Kvalitet",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "tracing",
+    "opentelemetry",
+    "cloud-trace",
+    "observability",
+    "kotlin",
+    "java",
+    "spring-boot"
+  ]
+}

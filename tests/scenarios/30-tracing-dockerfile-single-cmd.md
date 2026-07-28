@@ -15,7 +15,7 @@ CMD ["-javaagent:/profiler/profiler_java_agent.so", "-jar", "/app/app.jar"]
 
 Now add OpenTelemetry Java Agent tracing per Entur's golden path.
 
-Read `skills/setup-tracing/SKILL.md` in this repository and answer in `key: value`
+Read `skills/setup-tracing-java/SKILL.md` in this repository and answer in `key: value`
 format on its own line:
 
 - number_of_cmd_instructions: <number>

@@ -10,7 +10,7 @@ account, not a broader trace role.
 What IAM role should be bound to the workload service account so it can export
 traces to Cloud Trace, per Entur's tracing golden path?
 
-Read `skills/setup-tracing/SKILL.md` in this repository and answer in `key: value`
+Read `skills/setup-tracing-java/SKILL.md` in this repository and answer in `key: value`
 format on its own line:
 
 - role: <role>
