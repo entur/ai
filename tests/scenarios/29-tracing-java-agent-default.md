@@ -3,10 +3,11 @@
 ## Description
 
 Verifies the agent defaults a Kotlin/Java service to the OpenTelemetry Java Agent
-without a specific reason to hand-instrument, AND correctly does NOT recommend the
-Java Agent for a Go service in the same prompt -- confirming it understands the
-language scope of the rule rather than pattern-matching "just get tracing working"
-to one fixed answer.
+(per `setup-tracing-java`) without a specific reason to hand-instrument, AND
+correctly does NOT recommend the Java Agent for a Go service (per
+`setup-tracing-go`) in the same prompt -- confirming it pulls the answer from the
+language-scoped skill rather than pattern-matching "just get tracing working" to
+one fixed answer.
 
 ## Prompt
 
@@ -16,8 +17,8 @@ by either:
 1. "We need tracing on our Spring Boot service, nothing fancy, just get it working."
 2. "We need tracing on our Go service, nothing fancy, just get it working."
 
-Read `skills/setup-tracing/SKILL.md` in this repository and answer in `key: value`
-format on its own line:
+Read `skills/setup-tracing-java/SKILL.md` and `skills/setup-tracing-go/SKILL.md` in
+this repository and answer in `key: value` format on its own line:
 
 - spring_boot_approach: <java agent/manual sdk>
 - go_approach: <java agent/manual sdk>
