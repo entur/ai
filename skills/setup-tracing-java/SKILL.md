@@ -26,15 +26,16 @@ Ask the user directly; do not infer silently and do not proceed until all four a
 3. **App ID.** Needed to build `ent-<app>-<env>`. Read `metadata.id` from the self-service manifest under `.entur/*.yaml` if present. If the manifest exists but `metadata.id` is missing or empty, ask the user for it instead of guessing -- do not derive it from the repo name or any other field. If no manifest exists at all, ask the user directly.
 4. **Runtime.** Kubernetes (`helm/<app>/env/values-kub-ent-<env>.yaml`) or Cloud Run (`cloudrun.yaml`)? Determines where env vars in Step 4 are set.
 
-## Step 1: Enable the Cloud Trace API in Terraform
+## Step 1: Enable the Cloud Trace and Telemetry APIs in Terraform
 
-Add `cloudtrace.googleapis.com` to the per-environment service-activation block:
+Add both `cloudtrace.googleapis.com` and `telemetry.googleapis.com` to the per-environment service-activation block -- `cloudtrace.googleapis.com` covers the Cloud Trace backend, while `telemetry.googleapis.com` enables the OTLP ingestion endpoint the service exports to:
 
 ```hcl
 # terraform/main.tf
 resource "google_project_service" "services" {
   for_each = toset([
     "cloudtrace.googleapis.com",
+    "telemetry.googleapis.com",
     # ... other APIs your service needs
   ])
   project            = module.init.app.project_id # "init" assumes that's this repo's terraform-google-init alias
@@ -111,6 +112,8 @@ common:
         value: "true"
       - name: GCP_PROJECT_ID
         value: ent-<app>-<env>
+      - name: GOOGLE_CLOUD_PROJECT
+        value: ent-<app>-<env>
       - name: OTEL_TRACES_SAMPLER
         value: parentbased_always_on
       - name: OTEL_METRICS_EXPORTER
@@ -120,6 +123,8 @@ common:
 ```
 
 If the file already exists with its own `common.container.env` entries, append these to the existing list instead of overwriting the file -- check for entries with the same `name` first and update their `value` in place rather than duplicating. Omit `OTEL_TRACES_SAMPLER` on Cloud Run, per the note below.
+
+`GCP_PROJECT_ID` and `GOOGLE_CLOUD_PROJECT` carry the same value but serve different consumers: `GCP_PROJECT_ID` is read by application code that needs the project ID directly; `GOOGLE_CLOUD_PROJECT` is the variable Google's client libraries auto-detect to determine the target project. Set both.
 
 Only create the single env file this way -- do not scaffold `helm/<app>/Chart.yaml` or `helm/<app>/values.yaml` ad hoc. If those don't exist either, Helm hasn't been bootstrapped for this service at all, which is out of scope for this skill (same rule as Step 1's Terraform bootstrap).
 
