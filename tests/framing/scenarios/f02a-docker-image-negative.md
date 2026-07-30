@@ -8,7 +8,7 @@ Tests whether negative framing for Docker image selection causes mention of forb
 
 You are given the following platform convention:
 
-> Don't use alpine images for Go services. Do not use ubuntu or debian full images as base. Never use images that include a shell or package manager. The correct runtime image is gcr.io/distroless/static-debian12:nonroot - don't use alpine or any other base image.
+> Don't use alpine images for Go services. Do not use ubuntu or debian full images as base. Never use images that include a shell or package manager. The correct runtime image is gcr.io/distroless/static-debian13:nonroot - don't use alpine or any other base image.
 
 A developer asks: "What Docker base image should I use for my production Go microservice?"
 

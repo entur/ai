@@ -43,7 +43,7 @@ This runs `markdownlint-cli2 --fix` over all markdown files matched by the confi
 
 ## Rules Summary
 
-Full reference: [markdownlint rules v0.40.0](https://github.com/DavidAnson/markdownlint/tree/v0.40.0/doc).
+Full reference: [markdownlint rules v0.41.1](https://github.com/DavidAnson/markdownlint/tree/v0.41.1/doc).
 
 ### Headings
 
