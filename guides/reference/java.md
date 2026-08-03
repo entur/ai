@@ -10,7 +10,7 @@ Java conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS
 
 - **Java version**: 25 or newer
 - **Build tool**: Gradle with Kotlin DSL (`build.gradle.kts`)
-- **Framework**: Spring Boot 3.x
+- **Framework**: Spring Boot 4.x
 - **Dependency management**: Gradle version catalogs (`gradle/libs.versions.toml`)
 - **JDK distribution**: Eclipse Temurin
 
