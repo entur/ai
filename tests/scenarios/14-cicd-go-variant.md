@@ -32,7 +32,7 @@ Output the YAML content for each file, clearly labeled.
 {
   "must_contain": [
     "workflow_call:",
-    "setup-go@v5",
+    "setup-go@v7",
     "go-version-file: go.mod",
     "go test ./...",
     "docker-lint:",

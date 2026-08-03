@@ -114,7 +114,7 @@ name: {repoName}
 version: 0.1.0
 dependencies:
   - name: common
-    version: "1.21.1"
+    version: "1.22.0"
     repository: "https://entur.github.io/helm-charts"
     alias: common
 ```
@@ -276,21 +276,21 @@ Select the Dockerfile template based on language:
 
 Use multi-stage with a layered JAR and distroless runtime:
 
-- Build stage: `gradle:9.3.1-jdk25-alpine`
+- Build stage: `gradle:9.6.1-jdk25-alpine`
 - Layers stage: `eclipse-temurin:25-jre-alpine`
 - Runtime stage: `gcr.io/distroless/java25-debian13:nonroot`
 - Non-root runtime, port 8080, `-XX:MaxRAMPercentage=75.0`
 
 ### Go
 
-- Build stage: `golang:1.25-alpine` with `CGO_ENABLED=0`
-- Runtime stage: `gcr.io/distroless/static-debian12:nonroot`
+- Build stage: `golang:1.26-alpine` with `CGO_ENABLED=0`
+- Runtime stage: `gcr.io/distroless/static-debian13:nonroot`
 - Port 8080
 
 ### Python
 
-- Build stage: `python:3.12-slim` with pip install
-- Runtime stage: `python:3.12-slim`
+- Build stage: `python:3.13-slim` with pip install
+- Runtime stage: `python:3.13-slim`
 - Non-root user, port 8080
 
 ## Step 7: Generate CI/CD Workflows
@@ -308,8 +308,8 @@ For background on each workflow's role, read `guides/platform/gha-workflows.md` 
 ```toml
 [tools]
 java        = 'temurin-25'            # Kotlin/Java
-# go        = '1.25'                   # Go
-terraform   = '1.15.6'
+# go        = '1.26'                   # Go
+terraform   = '1.15.8'
 
 [settings]
 experimental = true
