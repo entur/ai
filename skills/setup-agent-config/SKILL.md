@@ -142,6 +142,8 @@ Keep hooks non-blocking (`|| true`): a formatting failure must not abort the age
 
 Tell the user to install the Entur plugin marketplace instead of generating custom commit, review, or test skills -- agents ship with those capabilities, and Entur conventions come from the shared skills.
 
+Do **not** generate `.claude/agents/` files (for example a security-reviewer or refactor-helper agent) -- built-in review and security-review commands and the entur/ai skills cover those, and generated agent files restate Entur standards that live in one place. Hand-author a custom subagent only when a task needs a restricted toolset or a separate context window.
+
 ```shell
 claude plugin marketplace add entur/ai
 ```
