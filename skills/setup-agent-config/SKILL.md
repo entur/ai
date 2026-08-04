@@ -60,6 +60,8 @@ https://github.com/entur/ai/blob/main/AGENTS.md
 | Lint | {lint command} |
 ```
 
+When the existing `AGENTS.md` already references the entur/ai standards in any wording (for example "See https://github.com/entur/ai for Entur-wide standards"), do **not** add a second reference section -- add only the sections that are genuinely missing, such as the identity facts.
+
 Fill the identity facts from the `.entur/` manifest found in Step 1. List one GCP project per environment in the manifest's `spec.environments` -- do not assume all three; a prd-only service gets only `ent-{appId}-prd`. Keep the Kubernetes namespace line only when the service deploys to GKE (`helm/` directory present); for Cloud Run services (`cloudrun.yaml`) replace it with `App name: {metadata.name}`. When the repository has no `.entur/` manifest, omit the identity lines and tell the user to run the **entur-project-bootstrap** skill if the service still needs GCP projects.
 
 Fill Commands from the detected build system:
@@ -106,7 +108,7 @@ Example for a Kotlin/Gradle service with Helm and Terraform:
 }
 ```
 
-Replace the Gradle entries with the matching commands from the table in Step 2 for Go (`go build`, `go test`, `go vet`), Python (`pytest`, `ruff check`, `ruff format`), or TypeScript/Node (`yarn build`, `yarn test`, plus `yarn lint` when the script exists). Omit the Helm entries when the repository has no `helm/` directory. Keep the deny list in every variant: agents must never apply Terraform, mutate Kubernetes resources, or create GCP projects from a local session -- those run through CI/CD and self-service manifests.
+Replace the Gradle entries with the matching commands from the table in Step 2 for Go (`go build`, `go test`, `go vet`), Python (`pytest`, `ruff check`, `ruff format`), or TypeScript/Node (`yarn build`, `yarn test`, plus `yarn lint` when the script exists). Omit the Helm entries when the repository has no `helm/` directory. For Cloud Run services (`cloudrun.yaml`), also deny `Bash(gcloud run deploy:*)` -- rollout runs through CD, not a local session. Keep the deny list in every variant: agents must never apply Terraform, mutate Kubernetes resources, deploy Cloud Run revisions, or create GCP projects from a local session -- those run through CI/CD and self-service manifests.
 
 ## Step 4: Add a Formatting Hook (Conditional)
 
