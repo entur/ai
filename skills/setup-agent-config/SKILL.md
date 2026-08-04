@@ -152,7 +152,15 @@ Recommend by project state:
 
 ## Step 6: MCP Servers
 
-Follow `it-systems-policy.md` in the entur/ai repository before recommending any MCP server. Do **not** recommend third-party MCP servers (database, issue-tracker, error-tracking, or chat integrations) -- software used at Entur must be registered in the System Overview, and you must not claim a server is approved unless documentation confirms it. When the user asks for an MCP server, point them to `#talk-utviklerplattform`.
+Recommend **Entur Kompass** (`https://ki.entur.io/mcp`) -- Entur's approved MCP server on the org-wide MCP allowlist. It gives agents Entur's docs, source code, APIs, GCP runtime state, and GitHub context, authenticated with the user's own Entur Google account.
+
+```shell
+claude mcp add --scope user --transport http entur-kompass https://ki.entur.io/mcp
+```
+
+Codex CLI: `codex mcp add entur-kompass --url https://ki.entur.io/mcp`. Tools and the access model are documented at github.com/entur/kompass.
+
+Do **not** recommend any other MCP server (database, issue-tracker, error-tracking, or chat integrations). Entur admins enforce an org-wide allowlist of approved MCP servers; additions go through the MCP registry process in the entur/kompass repository (`docs/mcp-registry.md`) and must follow `it-systems-policy.md` in the entur/ai repository.
 
 ## Step 7: Update .gitignore
 

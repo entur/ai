@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Set up AI agent configuration for an existing Entur repository: AGENTS.md, tool permissions, formatting hooks, and Entur skill recommendations.",
   "author": {
-    "name": "Team Plattform",
+    "name": "Team KI Effekt",
     "email": "support@entur.org"
   },
   "homepage": "https://github.com/entur/ai",
