@@ -19,11 +19,13 @@ Detect the following from files. Do not ask the user for information you can rea
 
 | What | How to detect |
 |------|---------------|
-| Language and build | `build.gradle.kts` or `build.gradle` = Kotlin/Java (Gradle); `go.mod` = Go; `pyproject.toml` or `requirements.txt` = Python |
+| Language and build | `build.gradle.kts` or `build.gradle` = Kotlin/Java (Gradle); `go.mod` = Go; `pyproject.toml` or `requirements.txt` = Python; `package.json` = TypeScript/Node (yarn when `yarn.lock` exists, npm otherwise) |
 | App identity | `.entur/*.yaml` manifests: read `metadata.id` (App ID), `metadata.name` (Kubernetes namespace), `metadata.owner` (team) |
 | Platform surface | `helm/` (common chart), `terraform/`, `.github/workflows/`, `Dockerfile` |
-| Formatter | Spotless or ktlint in Gradle config; `gofmt` (always present for Go); `ruff` in `pyproject.toml` |
+| Formatter | Spotless or ktlint in Gradle config; `gofmt` (always present for Go); `ruff` in `pyproject.toml`; `prettier` or `biome` in `package.json` devDependencies |
 | Existing agent config | `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json` |
+
+Build files are usually at the repository root, but check one directory level down too (for example `website/package.json`) -- some repositories keep the application in a subdirectory.
 
 Never overwrite existing agent configuration. When `AGENTS.md`, `CLAUDE.md`, or `.claude/settings.json` already exist, add missing sections or entries and preserve everything else.
 
@@ -58,15 +60,17 @@ https://github.com/entur/ai/blob/main/AGENTS.md
 | Lint | {lint command} |
 ```
 
-Fill the identity facts from the `.entur/` manifest found in Step 1. When the repository has no `.entur/` manifest, omit the identity lines and tell the user to run the **entur-project-bootstrap** skill if the service still needs GCP projects.
+Fill the identity facts from the `.entur/` manifest found in Step 1. List one GCP project per environment in the manifest's `spec.environments` -- do not assume all three; a prd-only service gets only `ent-{appId}-prd`. Keep the Kubernetes namespace line only when the service deploys to GKE (`helm/` directory present); for Cloud Run services (`cloudrun.yaml`) replace it with `App name: {metadata.name}`. When the repository has no `.entur/` manifest, omit the identity lines and tell the user to run the **entur-project-bootstrap** skill if the service still needs GCP projects.
 
 Fill Commands from the detected build system:
 
-| Task | Kotlin/Java | Go | Python |
-|------|-------------|-----|--------|
-| Build | `./gradlew build` | `go build ./...` | -- |
-| Test | `./gradlew test` | `go test ./...` | `pytest` |
-| Lint | `./gradlew check` | `go vet ./...` | `ruff check .` |
+| Task | Kotlin/Java | Go | Python | TypeScript/Node |
+|------|-------------|-----|--------|-----------------|
+| Build | `./gradlew build` | `go build ./...` | -- | `yarn build` |
+| Test | `./gradlew test` | `go test ./...` | `pytest` | `yarn test` |
+| Lint | `./gradlew check` | `go vet ./...` | `ruff check .` | `yarn lint` |
+
+For TypeScript/Node, use only the scripts that exist in the `scripts` block of `package.json` (`npm run <script>` when the repository uses npm), and note the directory to run them from when the application lives in a subdirectory.
 
 Add a `## Gotchas` section only when the analysis found non-obvious constraints (for example a required local emulator or a generated-code step). Do not pad it.
 
@@ -102,7 +106,7 @@ Example for a Kotlin/Gradle service with Helm and Terraform:
 }
 ```
 
-Replace the Gradle entries with the matching commands from the table in Step 2 for Go (`go build`, `go test`, `go vet`) or Python (`pytest`, `ruff check`, `ruff format`). Keep the deny list in every variant: agents must never apply Terraform, mutate Kubernetes resources, or create GCP projects from a local session -- those run through CI/CD and self-service manifests.
+Replace the Gradle entries with the matching commands from the table in Step 2 for Go (`go build`, `go test`, `go vet`), Python (`pytest`, `ruff check`, `ruff format`), or TypeScript/Node (`yarn build`, `yarn test`, plus `yarn lint` when the script exists). Omit the Helm entries when the repository has no `helm/` directory. Keep the deny list in every variant: agents must never apply Terraform, mutate Kubernetes resources, or create GCP projects from a local session -- those run through CI/CD and self-service manifests.
 
 ## Step 4: Add a Formatting Hook (Conditional)
 
@@ -128,7 +132,7 @@ Example for a Go repository, merged into `.claude/settings.json`:
 }
 ```
 
-For Python with ruff, replace the command with `jq -r '.tool_input.file_path // empty' | grep '\.py$' | xargs -r ruff format || true`. For Gradle projects, do not add a hook -- running Gradle on every edit is too slow; formatting runs in `./gradlew check` instead.
+For Python with ruff, replace the command with `jq -r '.tool_input.file_path // empty' | grep '\.py$' | xargs -r ruff format || true`. For TypeScript/Node with prettier, replace the `grep`/format part with `grep -E '\.(ts|tsx|js|jsx)$' | xargs -r npx prettier --write || true`. For Gradle projects, do not add a hook -- running Gradle on every edit is too slow; formatting runs in `./gradlew check` instead.
 
 Keep hooks non-blocking (`|| true`): a formatting failure must not abort the agent's edit.
 
