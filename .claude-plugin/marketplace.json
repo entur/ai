@@ -52,6 +52,20 @@
       "license": "EUPL-1.2"
     },
     {
+      "name": "agent-config",
+      "source": "./plugins/agent-config",
+      "description": "Set up AI agent configuration for an existing Entur repository: AGENTS.md, tool permissions, formatting hooks, and Entur skill recommendations.",
+      "category": "configuration",
+      "keywords": ["entur", "agents", "claude-code", "codex", "agents-md", "permissions", "onboarding"],
+      "author": {
+        "name": "Team Plattform",
+        "email": "support@entur.org"
+      },
+      "homepage": "https://github.com/entur/ai",
+      "repository": "https://github.com/entur/ai",
+      "license": "EUPL-1.2"
+    },
+    {
       "name": "guides",
       "source": "./plugins/guides",
       "description": "Routes Entur platform conventions to AI agents on demand. The skill fetches the matching guide from the entur/ai repo so contributors only need to add a markdown file under guides/.",

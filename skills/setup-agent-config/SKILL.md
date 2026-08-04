@@ -1,0 +1,181 @@
+---
+name: setup-agent-config
+description: >
+  Set up AI agent configuration for an existing Entur repository. Analyzes the
+  project, generates an AGENTS.md that references Entur-wide standards, configures
+  agent tool permissions and an optional formatting hook, recommends Entur skills,
+  and updates .gitignore. Use this skill when the user says "set up Claude Code",
+  "set up agent config", "create AGENTS.md", "auto-setup", "onboard this repo for
+  AI agents", or wants agent instructions added to an existing repository.
+---
+
+# Entur Agent Config Setup
+
+Configure an existing Entur repository so AI agents (Claude Code, Codex) work with it safely and follow Entur platform standards. Generate the minimum configuration that points agents at the Entur-wide standards -- do **not** copy standards into the repository.
+
+## Step 1: Analyze the Repository
+
+Detect the following from files. Do not ask the user for information you can read from the repository.
+
+| What | How to detect |
+|------|---------------|
+| Language and build | `build.gradle.kts` or `build.gradle` = Kotlin/Java (Gradle); `go.mod` = Go; `pyproject.toml` or `requirements.txt` = Python |
+| App identity | `.entur/*.yaml` manifests: read `metadata.id` (App ID), `metadata.name` (Kubernetes namespace), `metadata.owner` (team) |
+| Platform surface | `helm/` (common chart), `terraform/`, `.github/workflows/`, `Dockerfile` |
+| Formatter | Spotless or ktlint in Gradle config; `gofmt` (always present for Go); `ruff` in `pyproject.toml` |
+| Existing agent config | `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json` |
+
+Never overwrite existing agent configuration. When `AGENTS.md`, `CLAUDE.md`, or `.claude/settings.json` already exist, add missing sections or entries and preserve everything else.
+
+## Step 2: Generate AGENTS.md
+
+`AGENTS.md` is the single agent instruction file for the repository. It references the Entur-wide standards and adds only project-specific facts an agent cannot derive from the code.
+
+Do **not** copy rules from the entur/ai repository into `AGENTS.md`, and do **not** generate per-language rule files (for example `.claude/rules/kotlin.md`) -- standards live in one place at github.com/entur/ai, and copies drift.
+
+```markdown
+# {Display Name}
+
+{Language} application that {one-line description}.
+
+## Entur Standards
+
+Read and follow the Entur platform standards at:
+https://github.com/entur/ai/blob/main/AGENTS.md
+
+## Project-Specific
+
+- App ID: {appId}
+- Kubernetes namespace: {metadata.name}
+- GCP projects: ent-{appId}-dev, ent-{appId}-tst, ent-{appId}-prd
+
+## Commands
+
+| Task | Command |
+|------|---------|
+| Build | {build command} |
+| Test | {test command} |
+| Lint | {lint command} |
+```
+
+Fill the identity facts from the `.entur/` manifest found in Step 1. When the repository has no `.entur/` manifest, omit the identity lines and tell the user to run the **entur-project-bootstrap** skill if the service still needs GCP projects.
+
+Fill Commands from the detected build system:
+
+| Task | Kotlin/Java | Go | Python |
+|------|-------------|-----|--------|
+| Build | `./gradlew build` | `go build ./...` | -- |
+| Test | `./gradlew test` | `go test ./...` | `pytest` |
+| Lint | `./gradlew check` | `go vet ./...` | `ruff check .` |
+
+Add a `## Gotchas` section only when the analysis found non-obvious constraints (for example a required local emulator or a generated-code step). Do not pad it.
+
+When tooling in the team only reads `CLAUDE.md`, create it as a symlink to `AGENTS.md` (`ln -s AGENTS.md CLAUDE.md`). Never create `CLAUDE.md` as a separate file with duplicated content. When a `CLAUDE.md` with its own content already exists, merge that content into `AGENTS.md` first and ask the user before replacing the file with a symlink.
+
+## Step 3: Configure Agent Permissions
+
+Write tool permissions to `.claude/settings.json`. Merge with existing content -- never replace the file. Allow the build, test, and lint commands detected in Step 1; deny mutations of cloud infrastructure and reads of secret material.
+
+Example for a Kotlin/Gradle service with Helm and Terraform:
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew build:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(./gradlew check:*)",
+      "Bash(helm lint:*)",
+      "Bash(helm template:*)",
+      "Bash(terraform fmt:*)",
+      "Bash(terraform validate:*)"
+    ],
+    "deny": [
+      "Bash(terraform apply:*)",
+      "Bash(kubectl apply:*)",
+      "Bash(kubectl delete:*)",
+      "Bash(gcloud projects create:*)",
+      "Read(./.env)",
+      "Read(./.env.*)"
+    ]
+  }
+}
+```
+
+Replace the Gradle entries with the matching commands from the table in Step 2 for Go (`go build`, `go test`, `go vet`) or Python (`pytest`, `ruff check`, `ruff format`). Keep the deny list in every variant: agents must never apply Terraform, mutate Kubernetes resources, or create GCP projects from a local session -- those run through CI/CD and self-service manifests.
+
+## Step 4: Add a Formatting Hook (Conditional)
+
+Add a `PostToolUse` hook only when Step 1 detected a formatter. Skip this step otherwise -- a hook that calls a missing tool fails on every edit.
+
+Example for a Go repository, merged into `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | grep '\\.go$' | xargs -r gofmt -w || true"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+For Python with ruff, replace the command with `jq -r '.tool_input.file_path // empty' | grep '\.py$' | xargs -r ruff format || true`. For Gradle projects, do not add a hook -- running Gradle on every edit is too slow; formatting runs in `./gradlew check` instead.
+
+Keep hooks non-blocking (`|| true`): a formatting failure must not abort the agent's edit.
+
+## Step 5: Recommend Entur Skills
+
+Tell the user to install the Entur plugin marketplace instead of generating custom commit, review, or test skills -- agents ship with those capabilities, and Entur conventions come from the shared skills.
+
+```shell
+claude plugin marketplace add entur/ai
+```
+
+Codex CLI: `codex plugin marketplace add entur/ai`.
+
+Recommend by project state:
+
+| Situation | Skill |
+|-----------|-------|
+| Any Entur repository | `guides` (routes Entur conventions on demand) |
+| Missing or outdated CI/CD workflows | `cicd-workflows` |
+| New service without infrastructure | `bootstrap` |
+
+## Step 6: MCP Servers
+
+Follow `it-systems-policy.md` in the entur/ai repository before recommending any MCP server. Do **not** recommend third-party MCP servers (database, issue-tracker, error-tracking, or chat integrations) -- software used at Entur must be registered in the System Overview, and you must not claim a server is approved unless documentation confirms it. When the user asks for an MCP server, point them to `#talk-utviklerplattform`.
+
+## Step 7: Update .gitignore
+
+Append the following entries when missing. Do not remove or reorder existing entries.
+
+```gitignore
+CLAUDE.local.md
+.claude/settings.local.json
+```
+
+## Step 8: Print Summary
+
+After all steps, print:
+
+1. Files created and files modified (with paths)
+2. Permissions allowed and denied
+3. Skills recommended and the marketplace install command
+4. Next steps: review the diff, commit with a Conventional Commit (`chore: add AI agent configuration`), open a PR
+
+## Critical Rules
+
+- **Never** overwrite existing `AGENTS.md`, `CLAUDE.md`, or `.claude/settings.json` -- merge and extend
+- **Never** copy Entur standards into the repository -- `AGENTS.md` references github.com/entur/ai
+- **Never** allow agents to apply Terraform, mutate Kubernetes, or create GCP projects locally
+- **Never** recommend software or MCP servers outside `it-systems-policy.md`
+- `CLAUDE.md` is only ever a symlink to `AGENTS.md`, never a second instruction file
