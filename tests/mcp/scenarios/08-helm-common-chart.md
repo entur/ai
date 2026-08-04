@@ -11,7 +11,7 @@ Search the Entur knowledge base to answer:
 
 Q: How should I package my Kubernetes deployment for an Entur service? Should I write a custom Helm chart, use a shared chart, or use Kustomize?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 

@@ -12,7 +12,7 @@ Search the Entur knowledge base to answer:
 
 Q: For a new Kotlin Spring Boot service that has a Helm chart and Terraform, list the GitHub Actions workflow files that must be created under `.github/workflows/`. Give the exact file names.
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 
