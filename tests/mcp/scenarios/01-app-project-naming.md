@@ -12,7 +12,7 @@ Search the Entur knowledge base to answer:
 
 Q: A team sets `metadata.id: products` in a `GoogleCloudApplication` self-service manifest. What GCP project IDs will the Platform Orchestrator create for the `dev`, `tst`, and `prd` environments?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 

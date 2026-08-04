@@ -11,7 +11,7 @@ Search the Entur knowledge base to answer:
 
 Q: Where should I store database passwords and API keys for an Entur service? How are they made available to the running pod?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 
