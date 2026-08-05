@@ -121,7 +121,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | Code review | [reference/code-review.md](guides/reference/code-review.md) |
 | Markdown format | [reference/markdown.md](guides/reference/markdown.md) |
 | Writing documentation | [reference/documentation.md](guides/reference/documentation.md) |
-| UI / Design system / Branding | Load skill: `https://raw.githubusercontent.com/entur/design-system/main/skills/entur-linje/SKILL.md` |
+| UI / Design system / Branding | Use the `entur-linje` skill if the `entur-linje` plugin is installed. Otherwise load `https://raw.githubusercontent.com/entur/design-system/main/skills/entur-linje/SKILL.md` |
 
 ## Critical Rules
 
