@@ -94,6 +94,7 @@ gh skill install entur/ai
 | [setup-agent-config](setup-agent-config/) | Set up AI agent config for an existing repo: AGENTS.md, permissions, hooks, skill recommendations |
 | [setup-cicd-workflows](setup-cicd-workflows/) | Generate CI/CD GitHub Actions workflows using Entur reusable workflows |
 | [scr-situation-complication-resolution](scr-situation-complication-resolution/) | Structure problems and decisions in SCR format for leadership |
+| [entur-linje](https://github.com/entur/design-system/tree/main/skills) | Entur Linje design system: `@entur/*` components, design tokens, brand identity, universell utforming, package upgrades. Lives in `entur/design-system`; install via the `entur-linje` plugin |
 
 ## 🤝 Contributing
 

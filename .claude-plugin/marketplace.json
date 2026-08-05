@@ -78,6 +78,33 @@
       "homepage": "https://github.com/entur/ai",
       "repository": "https://github.com/entur/ai",
       "license": "EUPL-1.2"
+    },
+    {
+      "name": "entur-linje",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/entur/design-system.git",
+        "path": "skills",
+        "ref": "main"
+      },
+      "strict": false,
+      "skills": [
+        "./entur-linje",
+        "./entur-web-development",
+        "./entur-accessibility",
+        "./entur-brand-design",
+        "./migrate-react-18"
+      ],
+      "description": "Entur Linje design system: @entur/* React components, design tokens, brand identity, WCAG/universell utforming compliance, and package upgrade migrations. Sourced directly from entur/design-system so there is no vendored copy to drift.",
+      "category": "design",
+      "keywords": ["entur", "design-system", "linje", "react", "accessibility", "universell-utforming", "branding", "design-tokens"],
+      "author": {
+        "name": "Team Designsystem",
+        "email": "support@entur.org"
+      },
+      "homepage": "https://linje.entur.no",
+      "repository": "https://github.com/entur/design-system",
+      "license": "EUPL-1.2"
     }
   ]
 }
