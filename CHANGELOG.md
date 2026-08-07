@@ -2,13 +2,11 @@
 
 ## [0.2.0](https://github.com/entur/ai/compare/v0.1.2...v0.2.0) (2026-08-07)
 
-
 ### Features
 
 * **plugins:** add entur-linje design system plugin ([#74](https://github.com/entur/ai/issues/74)) ([58d5a79](https://github.com/entur/ai/commit/58d5a79a7cc512fb6e293f128599d53b50bf0c0f))
 * **skills:** add Scala support to setup-agent-config ([#77](https://github.com/entur/ai/issues/77)) ([fd036d8](https://github.com/entur/ai/commit/fd036d8432cca6977e115e2d268f87bf343e075d))
 * **skills:** add setup-agent-config skill for onboarding existing repos ([#75](https://github.com/entur/ai/issues/75)) ([f01dbac](https://github.com/entur/ai/commit/f01dbacb6fcb8e53c5746735c71d310e104d77b0))
-
 
 ### Documentation
 
