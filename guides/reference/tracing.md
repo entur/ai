@@ -151,7 +151,7 @@ Our recommendation for Kubernetes:
 ```
 
 These are our recommended defaults, not hard requirements - adjust OTEL_TRACES_SAMPLER_ARG if a service needs a different ratio.
-If you want to filter traces beyond the sampler ratio, see the [Java Agent Sampler Extension](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/sampler-extension).
+If you want to filter traces beyond the sampler ratio, see the [Java Agent Sampler Extension](https://opentelemetry.io/docs/zero-code/java/agent/extensions/).
 
 ### Manual OpenTelemetry SDK instrumentation (Go and other non-Java services)
 
