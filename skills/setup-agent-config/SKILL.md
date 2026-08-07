@@ -19,10 +19,10 @@ Detect the following from files. Do not ask the user for information you can rea
 
 | What | How to detect |
 |------|---------------|
-| Language and build | `build.gradle.kts` or `build.gradle` = Kotlin/Java (Gradle); `build.sbt` = Scala (sbt); `go.mod` = Go; `pyproject.toml` or `requirements.txt` = Python; `package.json` = TypeScript/Node (yarn when `yarn.lock` exists, npm otherwise) |
+| Language and build | `build.gradle.kts` or `build.gradle`: Scala plugin or `src/main/scala` = Scala (Gradle), otherwise Kotlin/Java (Gradle); `pom.xml` with `scala-maven-plugin` or `src/main/scala` = Scala (Maven); `go.mod` = Go; `pyproject.toml` or `requirements.txt` = Python; `package.json` = TypeScript/Node (yarn when `yarn.lock` exists, npm otherwise) |
 | App identity | `.entur/*.yaml` manifests: read `metadata.id` (App ID), `metadata.name` (Kubernetes namespace), `metadata.owner` (team) |
 | Platform surface | `helm/` (common chart), `terraform/`, `.github/workflows/`, `Dockerfile` |
-| Formatter | Spotless or ktlint in Gradle config; `.scalafmt.conf` with sbt-scalafmt for Scala; `gofmt` (always present for Go); `ruff` in `pyproject.toml`; `prettier` or `biome` in `package.json` devDependencies |
+| Formatter | Spotless or ktlint in Gradle config, including Spotless with scalafmt for Scala; Spotless Maven plugin in `pom.xml`; `gofmt` (always present for Go); `ruff` in `pyproject.toml`; `prettier` or `biome` in `package.json` devDependencies |
 | Existing agent config | `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json` |
 
 Build files are usually at the repository root, but check one directory level down too (for example `website/package.json`) -- some repositories keep the application in a subdirectory.
@@ -66,13 +66,13 @@ Fill the identity facts from the `.entur/` manifest found in Step 1. List one GC
 
 Fill Commands from the detected build system:
 
-| Task | Kotlin/Java | Scala | Go | Python | TypeScript/Node |
-|------|-------------|-------|-----|--------|-----------------|
-| Build | `./gradlew build` | `sbt compile` | `go build ./...` | -- | `yarn build` |
-| Test | `./gradlew test` | `sbt test` | `go test ./...` | `pytest` | `yarn test` |
-| Lint | `./gradlew check` | `sbt scalafmtCheckAll` | `go vet ./...` | `ruff check .` | `yarn lint` |
+| Task | Kotlin/Java/Scala (Gradle) | Scala (Maven) | Go | Python | TypeScript/Node |
+|------|----------------------------|---------------|-----|--------|-----------------|
+| Build | `./gradlew build` | `mvn clean install` | `go build ./...` | -- | `yarn build` |
+| Test | `./gradlew test` | `mvn test` | `go test ./...` | `pytest` | `yarn test` |
+| Lint | `./gradlew check` | `mvn spotless:check` | `go vet ./...` | `ruff check .` | `yarn lint` |
 
-For Scala, include the lint command only when the repository configures sbt-scalafmt; otherwise omit it. Use a different sbt task when the build defines one for the same purpose.
+Treat these as defaults. Prefer a repository-specific aggregate task when its README or CI workflows document one. For Maven, use `./mvnw` instead of `mvn` when the Maven wrapper exists, and include the Spotless command only when the repository configures the plugin.
 
 For TypeScript/Node, use only the scripts that exist in the `scripts` block of `package.json` (`npm run <script>` when the repository uses npm), and note the directory to run them from when the application lives in a subdirectory.
 
@@ -110,7 +110,7 @@ Example for a Kotlin/Gradle service with Helm and Terraform:
 }
 ```
 
-Replace the Gradle entries with the matching commands from the table in Step 2 for Scala (`sbt compile`, `sbt test`, plus `sbt scalafmtCheckAll` when configured), Go (`go build`, `go test`, `go vet`), Python (`pytest`, `ruff check`, `ruff format`), or TypeScript/Node (`yarn build`, `yarn test`, plus `yarn lint` when the script exists). Omit the Helm entries when the repository has no `helm/` directory. For Cloud Run services (`cloudrun.yaml`), also deny `Bash(gcloud run deploy:*)` -- rollout runs through CD, not a local session. Keep the deny list in every variant: agents must never apply Terraform, mutate Kubernetes resources, deploy Cloud Run revisions, or create GCP projects from a local session -- those run through CI/CD and self-service manifests.
+Use the Gradle entries unchanged for Kotlin, Java, or Scala Gradle repositories. Replace them with the matching commands from the table in Step 2 for Scala with Maven (`mvn clean install`, `mvn test`, plus `mvn spotless:check` when configured), Go (`go build`, `go test`, `go vet`), Python (`pytest`, `ruff check`, `ruff format`), or TypeScript/Node (`yarn build`, `yarn test`, plus `yarn lint` when the script exists). Use the Maven wrapper form when present. Omit the Helm entries when the repository has no `helm/` directory. For Cloud Run services (`cloudrun.yaml`), also deny `Bash(gcloud run deploy:*)` -- rollout runs through CD, not a local session. Keep the deny list in every variant: agents must never apply Terraform, mutate Kubernetes resources, deploy Cloud Run revisions, or create GCP projects from a local session -- those run through CI/CD and self-service manifests.
 
 ## Step 4: Add a Formatting Hook (Conditional)
 
@@ -136,7 +136,7 @@ Example for a Go repository, merged into `.claude/settings.json`:
 }
 ```
 
-For Python with ruff, replace the command with `jq -r '.tool_input.file_path // empty' | grep '\.py$' | xargs -r ruff format || true`. For TypeScript/Node with prettier, replace the `grep`/format part with `grep -E '\.(ts|tsx|js|jsx)$' | xargs -r npx prettier --write || true`. For Gradle and sbt projects, do not add a hook -- running the build tool on every edit is too slow; formatting runs in the lint command instead.
+For Python with ruff, replace the command with `jq -r '.tool_input.file_path // empty' | grep '\.py$' | xargs -r ruff format || true`. For TypeScript/Node with prettier, replace the `grep`/format part with `grep -E '\.(ts|tsx|js|jsx)$' | xargs -r npx prettier --write || true`. For Gradle and Maven projects, do not add a hook -- running the build tool on every edit is too slow; formatting runs in the lint command instead.
 
 Keep hooks non-blocking (`|| true`): a formatting failure must not abort the agent's edit.
 
