@@ -6,6 +6,8 @@ How to instrument an Entur service with OpenTelemetry and ship spans to Google C
 - **Intent**: every inbound request produces a trace visible in Cloud Trace Explorer, with `traceId` and `spanId` correlated to structured logs.
 - **Scope**: per-project trace storage initialization, Terraform wiring (APIs + IAM), instrumentation strategy per language (Java Agent vs. manual OpenTelemetry SDK), runtime configuration, propagation, sampling, and project routing. Health probes, Prometheus metrics, and Cloud Profiler live in [observability.md](observability.md). Structured log fields live in [logging.md](logging.md).
 
+This guide follows the instructions from [How-To Initialise Distributed Tracing](https://entur.atlassian.net/wiki/spaces/ESP/pages/6607110165/How-To+Initialise+Distributed+Tracing) in Confluence.
+
 ## Initialize Cloud Trace storage for the project
 
 Cloud Trace Explorer requires per-project trace storage initialization before it retains spans. Until this is done the OpenTelemetry exporter ships spans successfully, Cloud Trace discards them, and the UI shows: *"Trace storage is not initialized for this project. Enable trace storage to begin collecting trace data."*
