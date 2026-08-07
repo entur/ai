@@ -135,11 +135,13 @@ common:
 
 Sampling must be set explicitly per environment, do not rely on the default everywhere.
 Our recommendation for Kubernetes:
+
 ```yaml
 # values-kub-ent-dev.yaml
 - name: OTEL_TRACES_SAMPLER
   value: "parentbased_always_on" # sample everything, easiest for debugging.
  ```
+
 ```yaml
 # values-kub-ent-prd.yaml/values-kub-ent-tst.yaml
 - name: OTEL_TRACES_SAMPLER
@@ -147,6 +149,7 @@ Our recommendation for Kubernetes:
 - name: OTEL_TRACES_SAMPLER_ARG
   value: "0.1" # 10% of requests
 ```
+
 These are our recommended defaults, not hard requirements - adjust OTEL_TRACES_SAMPLER_ARG if a service needs a different ratio.
 If you want to filter traces beyond the sampler ratio, see the [Java Agent Sampler Extension](https://github.com/open-telemetry/opentelemetry-java-contrib/tree/main/sampler-extension).
 
@@ -315,7 +318,6 @@ logging.Info().
 Apply the same pattern to error and warning log lines within the same handler. Health probe endpoints filtered from tracing do not need these fields.
 
 Set `GCP_PROJECT_ID` per environment (`ent-<app>-<env>`). Never use the cluster host project (`ent-kub-<env>`), because traces are stored in the application project.
-
 
 ## Trace project routing
 
