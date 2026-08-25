@@ -19,7 +19,7 @@ each sub-topic. Assertions are split into:
 
 ## Prompt
 
-Search the Entur knowledge base to answer the following compound question. You may call mcp__entur-kb__search_entur_kb up to FIVE times with different queries to cover all sub-topics. Do not call any other tool. Do not use prior knowledge of Entur.
+Search the Entur knowledge base to answer the following compound question. You may call mcp__entur-kompass__search_entur_kb up to FIVE times with different queries to cover all sub-topics. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Q: I am setting up a brand-new Java Spring Boot service at Entur that will run on Google Kubernetes Engine. It needs a managed PostgreSQL database, a Memorystore Redis instance, and Kafka topics for event streaming. It also needs to be reachable on a custom hostname under `entur.io`. Walk me through:
 

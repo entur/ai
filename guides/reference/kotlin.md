@@ -8,10 +8,10 @@ Kotlin conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIO
 
 ## Runtime and Build
 
-- **Kotlin version**: latest patch version in the newest Kotlin release line supported by Entur's CodeQL workflow, Spring Boot, and Gradle baseline. Current baseline example: Kotlin 2.3.x.
+- **Kotlin version**: latest patch version in the newest Kotlin release line supported by Entur's CodeQL workflow, Spring Boot, and Gradle baseline. Current baseline example: Kotlin 2.4.x.
 - **Java target**: 25 (or latest LTS/stable)
 - **Build tool**: Gradle with Kotlin DSL (`build.gradle.kts`)
-- **Framework**: Spring Boot 3.x with Kotlin support
+- **Framework**: Spring Boot 4.x with Kotlin support
 - **Linting**: Ktlint
 - **Dependency management**: Gradle version catalogs (`gradle/libs.versions.toml`)
 - **API approach**: Contract-first with OpenAPI Generator (preferred)
@@ -53,15 +53,15 @@ Centralize all dependency versions. Use bundles for related dependencies. Do not
 
 ```toml
 [versions]
-kotlin = "2.3.0"
-spring-boot = "3.5.10"
-exposed = "1.0.0"
-flyway = "11.19.0"
-entur-cloud-logging = "2.0.18"
-entur-auth-server = "2.0.0"
-kotest = "6.1.3"
-testcontainers = "1.21.4"
-openapi-generator = "7.19.0"
+kotlin = "2.4.10"
+spring-boot = "4.1.0"
+exposed = "1.3.1"
+flyway = "13.0.0"
+entur-cloud-logging = "7.0.0"
+entur-auth-server = "3.0.2"
+kotest = "6.2.3"
+testcontainers = "2.0.5"
+openapi-generator = "7.24.0"
 
 [libraries]
 exposed-java-time     = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }

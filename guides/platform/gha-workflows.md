@@ -15,9 +15,9 @@ Always use Entur reusable workflows instead of custom pipeline steps.
 | [gha-meta](https://github.com/entur/gha-meta) | Releases, PR verification, auth actions | `@v1` |
 | [gha-firebase](https://github.com/entur/gha-firebase) | Firebase Hosting preview and deploy | `@v1` |
 | [gha-docs](https://github.com/entur/gha-docs) | Documentation publishing | `@v1` |
-| [gha-slack](https://github.com/entur/gha-slack) | Slack notifications | `@v2` |
+| [gha-slack](https://github.com/entur/gha-slack) | Slack notifications | `@v3` |
 | [gha-artifactory](https://github.com/entur/gha-artifactory) | Artifactory publishing (Maven/Gradle) | `@v1` |
-| [gha-api](https://github.com/entur/gha-api) | API spec linting (Redocly) | `@v5` |
+| [gha-api](https://github.com/entur/gha-api) | API spec lint, validate, publish (Redocly) | `@v6` |
 
 ## Pipeline Architecture
 
@@ -39,8 +39,8 @@ Replace the Java test job in `ci.yml` with:
   test:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - run: go test ./...
@@ -189,7 +189,7 @@ Prerequisite: In your Slack channel, run `/invite @GitHub Actions Slack send`
 ```yaml
 jobs:
   notify:
-    uses: entur/gha-slack/.github/workflows/post.yml@v2
+    uses: entur/gha-slack/.github/workflows/post.yml@v3
     with:
       channel_id: "C01ABCDEFGH"
       message: "Deployment to prd completed successfully"
@@ -339,12 +339,12 @@ jobs:
       contents: read
       checks: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
-      - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
+      - uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
         with:
           cache-provider: basic
       - name: Build and test
@@ -352,13 +352,13 @@ jobs:
         env:
           ARTIFACTORY_AUTH_USER: ${{ secrets.ARTIFACTORY_AUTH_USER }}
           ARTIFACTORY_AUTH_TOKEN: ${{ secrets.ARTIFACTORY_AUTH_TOKEN }}
-      - uses: dorny/test-reporter@v2
+      - uses: dorny/test-reporter@v3
         if: always()
         with:
           name: test-results
           path: app/build/test-results/test/*.xml
           reporter: java-junit
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: build
           path: app/build/distributions/app.tar
@@ -488,7 +488,7 @@ jobs:
     outputs:
       image: ${{ steps.resolve.outputs.image }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -531,12 +531,16 @@ on:
     paths: ['specs/**']
 jobs:
   api-lint:
-    uses: entur/gha-api/.github/workflows/lint.yml@v5
+    uses: entur/gha-api/.github/workflows/lint.yml@v6
     if: github.actor != 'dependabot[bot]'
     secrets: inherit
     with:
-      spec: specs/*.yaml
+      path: specs/openapi.yaml
 ```
+
+`path` does not accept globs. Use a matrix strategy when the repository has
+several specs. See
+[api-design.md](../reference/api-design.md#linting-validating-and-publishing-openapi-specs-in-cicd).
 
 ### Dependabot Configuration
 

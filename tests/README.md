@@ -5,7 +5,7 @@ Automated tests that verify AI agents correctly understand Entur's platform docu
 Two suites live here:
 
 - `scenarios/` -- this suite. Claude reads the markdown files in this repo directly via `Read`/`Grep`/`Glob`. Measures whether the docs are precise enough for an agent with full file access.
-- [`mcp/`](mcp/README.md) -- companion suite. Claude can only call the `entur-kb` MCP server. Measures retrieval quality + whether the surfaced doc actually contains the answer. Run with `./mcp/run.sh`.
+- [`mcp/`](mcp/README.md) -- companion suite. Claude can only call the `entur-kompass` MCP server. Measures retrieval quality + whether the surfaced doc actually contains the answer. Run with `./mcp/run.sh`.
 
 ## Quick Start
 
@@ -51,6 +51,8 @@ go run . --model sonnet
 | 19-jvm-docker-golden-path | Java/Kotlin Docker runtime defaults to distroless, not Liberica |
 | 20-kotlin-codeql-version | Kotlin version follows Entur CodeQL support, not newest stable blindly |
 | 21-redis-not-default | Redis is not added without a concrete cache/lock/session/dedup use case |
+| 22-it-systems-saas-checklist | IT systems policy checks for SaaS: Entra ID, System Overview, System Owner, classification |
+| 23-it-systems-sso-and-licences | IT systems policy rejects local-user defaults and licence purchases before reuse checks |
 
 ## CLI Options
 
