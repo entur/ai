@@ -115,12 +115,12 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
       contents: read
       checks: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
-      - uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
+      - uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
         with:
           cache-provider: basic
       - name: Build and test
@@ -129,14 +129,14 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
           ARTIFACTORY_AUTH_USER: ${{ secrets.ARTIFACTORY_AUTH_USER }}
           ARTIFACTORY_AUTH_TOKEN: ${{ secrets.ARTIFACTORY_AUTH_TOKEN }}
       # Publish test results as a GitHub check so they are visible directly on the PR
-      - uses: dorny/test-reporter@v2
+      - uses: dorny/test-reporter@v3
         if: always()
         with:
           name: test-results
           path: "{module}/build/test-results/test/*.xml"
           reporter: java-junit
       # Upload the build artifact for the Docker build step
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: build
           path: "{module}/build/distributions/{module}.tar"
@@ -155,8 +155,8 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
       contents: read
       checks: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - run: go test ./...
@@ -176,8 +176,8 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
       contents: read
       checks: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version-file: '.python-version'
       - run: pip install -r requirements.txt && pytest
@@ -353,7 +353,7 @@ jobs:
       image: ${{ steps.resolve.outputs.image }}
       pr_number: ${{ steps.resolve.outputs.pr_number }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -975,12 +975,14 @@ on:
     paths: ['specs/**']
 jobs:
   api-lint:
-    uses: entur/gha-api/.github/workflows/lint.yml@v5
+    uses: entur/gha-api/.github/workflows/lint.yml@v6
     if: github.actor != 'dependabot[bot]'
     secrets: inherit
     with:
-      spec: specs/*.yaml
+      path: specs/openapi.yaml
 ```
+
+`path` does not accept globs -- use a matrix strategy for multiple specs.
 
 ## Step 12: Print Summary
 

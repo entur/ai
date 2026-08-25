@@ -11,7 +11,7 @@ Search the Entur knowledge base to answer:
 
 Q: My team needs to deprecate and shut down an old Entur service. What steps does the platform expect us to follow, and what is the recommended order (Helm release, GCP project, repository)?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 

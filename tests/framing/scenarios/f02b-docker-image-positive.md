@@ -8,7 +8,7 @@ Tests whether positive framing for Docker image selection leads to a clean, corr
 
 You are given the following platform convention:
 
-> ALWAYS use gcr.io/distroless/static-debian12:nonroot as the Docker base image for Go services. This provides a minimal attack surface, runs as non-root by default, and contains only the static binary runtime.
+> ALWAYS use gcr.io/distroless/static-debian13:nonroot as the Docker base image for Go services. This provides a minimal attack surface, runs as non-root by default, and contains only the static binary runtime.
 
 A developer asks: "What Docker base image should I use for my production Go microservice?"
 

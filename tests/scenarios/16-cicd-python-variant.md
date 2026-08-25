@@ -32,7 +32,7 @@ Output the YAML content for each file, clearly labeled.
 {
   "must_contain": [
     "workflow_call:",
-    "setup-python@v5",
+    "setup-python@v7",
     ".python-version",
     "pytest",
     "docker-lint:",

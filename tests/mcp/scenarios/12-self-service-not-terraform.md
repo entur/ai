@@ -12,7 +12,7 @@ Search the Entur knowledge base to answer:
 
 Q: I want to create a new GCP project at Entur. Should I write a Terraform `google_project` resource, run `gcloud projects create`, or use something else?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 
