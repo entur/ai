@@ -19,9 +19,10 @@ All services must produce structured JSON logs to stdout. GCP Cloud Logging auto
 | Field | Description | Example |
 |-------|-------------|---------|
 | `logger` | Logger name (class/package) | `no.entur.myapp.RouteService` |
-| `traceId` | Distributed trace ID | `abc123def456` |
-| `spanId` | Current span ID | `789ghi` |
-| `requestId` | HTTP request correlation ID | `req-abc-123` |
+| `logging.googleapis.com/trace` | Full GCP trace resource | `projects/ent-myapp-dev/traces/4bf92f...` |
+| `logging.googleapis.com/spanId` | Current span ID | `00f067aa0ba902b7` |
+| `logging.googleapis.com/trace_sampled` | Whether the trace is sampled | `true` |
+| `correlationId` | HTTP request correlation ID | `req-abc-123` |
 | `application` | Application name | `my-application` |
 | `environment` | Runtime environment | `dev`, `tst`, `prd` |
 
@@ -29,7 +30,47 @@ All services must produce structured JSON logs to stdout. GCP Cloud Logging auto
 
 ### Java / Kotlin (Spring Boot)
 
-Use [entur/cloud-logging](https://github.com/entur/cloud-logging) -- plug-and-play structured JSON logging for GCP (no manual `logback.xml` needed). Add the BOM and `spring-boot-starter-gcp-web` dependency, then use standard SLF4J (`LoggerFactory.getLogger()`). Optional starters: `request-response-spring-boot-starter-gcp-web` (Logbook HTTP body logging), `on-demand-spring-boot-starter-gcp-web` (buffer and flush only on failure). See [java.md](java.md) for full details.
+Use [entur/cloud-logging v7.1.0](https://github.com/entur/cloud-logging/tree/v7.1.0) with Spring Boot 4.1.x. It provides structured JSON logging for GCP.
+1. Remove any existing logging configuration. Delete application-owned logback.xml, logback-spring.xml, and logbook-test.xml (or equivalent) before adding the library. entur/cloud-logging is plug-and-play - a preexisting Logback config will conflict with it rather than merge with it.
+2. Add the BOM, then the Spring Boot starter for how your service receives requests. The BOM only pins versions - every feature still needs its own artifact added explicitly.
+
+```groovy
+// build.gradle
+ext {
+    cloudLoggingVersion = '7.1.0'
+}
+
+dependencies {
+    implementation platform("no.entur.logging.cloud:bom:${cloudLoggingVersion}")
+    testImplementation platform("no.entur.logging.cloud:bom:${cloudLoggingVersion}")
+
+    implementation "no.entur.logging.cloud:spring-boot-starter-gcp-web"
+    testImplementation "no.entur.logging.cloud:spring-boot-starter-gcp-web-test"
+}
+```
+
+For Spring gRPC, use spring-boot-starter-gcp-grpc-spring and spring-boot-starter-gcp-grpc-spring-test instead of the web starters. Both the main and test starter are required: the main starter gives machine-readable JSON for production, the test starter gives human-readable output for local development.
+
+Optional starters:
+
+- request-response-spring-boot-starter-gcp-web (and its -test counterpart) for Logbook HTTP request/response body logging.
+- on-demand-spring-boot-starter-gcp-web to buffer detailed logs and flush them only when a request fails.
+
+Use standard SLF4J from here (LoggerFactory.getLogger()) - no custom logger API is required for normal logging.
+
+#### 3. Configure log levels
+
+Configure the root and application log levels with Spring properties:
+
+```properties
+# application.properties
+logging.level.root=INFO
+logging.level.no.entur.myapp=WARN
+```
+
+Production runs at `INFO` by default per Entur convention. See [Log Levels](#log-levels) for level guidelines and the data that must never be logged, including secrets, PII, and payment details.
+
+See [java.md](java.md) for full details.
 
 ### Go
 
@@ -72,10 +113,23 @@ Use standard `logging` with `json_log_formatter.JSONFormatter()` for structured 
 
 ### Distributed Tracing
 
-Include `traceId` and `spanId` in every log entry inside a traced request. Cloud Logging joins logs to traces in Trace Explorer when both fields are present. See [tracing.md](tracing.md) for propagation headers, sampling, and the OpenTelemetry SDK setup that produces these IDs.
+Once distributed tracing and cloud logging is set up for your application, logs and traces are correlated automatically and no manual field extraction is needed. Cloud Logging joins logs to traces when a structured log entry contains the full `logging.googleapis.com/trace` resource and `logging.googleapis.com/spanId`. Include `logging.googleapis.com/trace_sampled` when sampling information is available. 
+Version 7.1.0 supports both Java tracing setups documented in [tracing.md](tracing.md).
 
-### Request IDs
+Do not copy trace fields into MDC manually. Use standard SLF4J inside the traced request; cloud-logging selects the correct mapping automatically. Its legacy correlation-ID fallback remains active when no OpenTelemetry trace context exists.
 
-- Generate unique request ID at ingress if not in `X-Request-ID` header
-- Propagate through all downstream calls
-- Include in all log entries and error responses
+See [tracing.md](tracing.md) and for instrumentation, propagation, sampling, API enablement, and IAM setup.
+
+## 5. View logs
+
+Open **GCP Console → Logging → Logs Explorer** in the cluster host project (`ent-kub-<env>`), not the application project. Kubernetes logs are written to the cluster host project by the kubelet.
+
+Filter logs using fields such as:
+
+```text
+resource.labels.namespace_name="my-application"
+resource.labels.pod_name="my-application-..."
+jsonPayload.logger="no.entur.myapp.RouteService"
+```
+
+This project routing differs from Cloud Trace: Kubernetes logs are stored in `ent-kub-<env>`, while traces are stored in `ent-<app>-<env>`.
