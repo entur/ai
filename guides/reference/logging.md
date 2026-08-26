@@ -31,6 +31,7 @@ All services must produce structured JSON logs to stdout. GCP Cloud Logging auto
 ### Java / Kotlin (Spring Boot)
 
 Use [entur/cloud-logging v7.1.0](https://github.com/entur/cloud-logging/tree/v7.1.0) with Spring Boot 4.1.x. It provides structured JSON logging for GCP.
+
 1. Remove any existing logging configuration. Delete application-owned logback.xml, logback-spring.xml, and logbook-test.xml (or equivalent) before adding the library. entur/cloud-logging is plug-and-play - a preexisting Logback config will conflict with it rather than merge with it.
 2. Add the BOM, then the Spring Boot starter for how your service receives requests. The BOM only pins versions - every feature still needs its own artifact added explicitly.
 
@@ -113,7 +114,7 @@ Use standard `logging` with `json_log_formatter.JSONFormatter()` for structured 
 
 ### Distributed Tracing
 
-Once distributed tracing and cloud logging is set up for your application, logs and traces are correlated automatically and no manual field extraction is needed. Cloud Logging joins logs to traces when a structured log entry contains the full `logging.googleapis.com/trace` resource and `logging.googleapis.com/spanId`. Include `logging.googleapis.com/trace_sampled` when sampling information is available. 
+Once distributed tracing and cloud logging is set up for your application, logs and traces are correlated automatically and no manual field extraction is needed. Cloud Logging joins logs to traces when a structured log entry contains the full `logging.googleapis.com/trace` resource and `logging.googleapis.com/spanId`. Include `logging.googleapis.com/trace_sampled` when sampling information is available.
 Version 7.1.0 supports both Java tracing setups documented in [tracing.md](tracing.md).
 
 Do not copy trace fields into MDC manually. Use standard SLF4J inside the traced request; cloud-logging selects the correct mapping automatically. Its legacy correlation-ID fallback remains active when no OpenTelemetry trace context exists.
