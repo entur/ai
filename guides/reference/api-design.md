@@ -6,6 +6,6 @@
 
 ## API guidelines
 
-<https://raw.githubusercontent.com/entur/api-guidelines>
+<https://github.com/entur/api-guidelines>
 
 Entur's authoritative rules for designing RESTful APIs that are described with OpenAPI. Some rules are linted automatically, while others require manual review. Guidelines in markdown format available at <https://raw.githubusercontent.com/entur/api-guidelines/refs/heads/main/guidelines.md>.
