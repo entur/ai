@@ -6,18 +6,18 @@ Always use Entur reusable workflows instead of custom pipeline steps.
 
 ## Available Workflows
 
-| Repository | Purpose | Version |
-|-----------|---------|---------|
-| [gha-docker](https://github.com/entur/gha-docker) | Docker lint, build, push | `@v1` |
-| [gha-helm](https://github.com/entur/gha-helm) | Helm lint, unit test, deploy | `@v1` |
-| [gha-terraform](https://github.com/entur/gha-terraform) | Terraform lint, plan, apply | `@v2` |
-| [gha-security](https://github.com/entur/gha-security) | Code scan (CodeQL), Docker scan (Grype) | `@v2` |
-| [gha-meta](https://github.com/entur/gha-meta) | Releases, PR verification, auth actions | `@v1` |
-| [gha-firebase](https://github.com/entur/gha-firebase) | Firebase Hosting preview and deploy | `@v1` |
-| [gha-docs](https://github.com/entur/gha-docs) | Documentation publishing | `@v1` |
-| [gha-slack](https://github.com/entur/gha-slack) | Slack notifications | `@v3` |
-| [gha-artifactory](https://github.com/entur/gha-artifactory) | Artifactory publishing (Maven/Gradle) | `@v1` |
-| [gha-api](https://github.com/entur/gha-api) | API spec lint, validate, publish (Redocly) | `@v6` |
+| Repository | Purpose |
+|-----------|---------|
+| [gha-docker](https://github.com/entur/gha-docker) | Docker lint, build, push |
+| [gha-helm](https://github.com/entur/gha-helm) | Helm lint, unit test, deploy |
+| [gha-terraform](https://github.com/entur/gha-terraform) | Terraform lint, plan, apply |
+| [gha-security](https://github.com/entur/gha-security) | Code scan (CodeQL), Docker scan (Grype) |
+| [gha-meta](https://github.com/entur/gha-meta) | Releases, PR verification, auth actions |
+| [gha-firebase](https://github.com/entur/gha-firebase) | Firebase Hosting preview and deploy |
+| [gha-docs](https://github.com/entur/gha-docs) | Documentation publishing |
+| [gha-slack](https://github.com/entur/gha-slack) | Slack notifications |
+| [gha-artifactory](https://github.com/entur/gha-artifactory) | Artifactory publishing (Maven/Gradle) |
+| [gha-api](https://github.com/entur/gha-api) | API spec lint, validate, publish |
 
 ## Pipeline Architecture
 
@@ -520,22 +520,6 @@ jobs:
   deploy-prd:
     needs: [build, resolve-image, deploy-tst]
     # ... same pattern, depends on deploy-tst
-```
-
-### lint-api.yml (API Spec Linting)
-
-```yaml
-name: lint-api
-on:
-  pull_request:
-    paths: ['specs/**']
-jobs:
-  api-lint:
-    uses: entur/gha-api/.github/workflows/lint.yml@v6
-    if: github.actor != 'dependabot[bot]'
-    secrets: inherit
-    with:
-      path: specs/openapi.yaml
 ```
 
 `path` does not accept globs. Use a matrix strategy when the repository has
