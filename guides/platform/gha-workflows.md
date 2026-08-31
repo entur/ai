@@ -14,7 +14,7 @@ Always use Entur reusable workflows instead of custom pipeline steps.
 | [gha-security](https://github.com/entur/gha-security) | Code scan (CodeQL), Docker scan (Grype) |
 | [gha-meta](https://github.com/entur/gha-meta) | Releases, PR verification, auth actions |
 | [gha-firebase](https://github.com/entur/gha-firebase) | Firebase Hosting preview and deploy |
-| [gha-docs](https://github.com/entur/gha-docs) | Documentation publishing |
+| [gha-docs](https://github.com/entur/gha-docs) | Documentation publishing (deprecated, DONT USE) |
 | [gha-slack](https://github.com/entur/gha-slack) | Slack notifications |
 | [gha-artifactory](https://github.com/entur/gha-artifactory) | Artifactory publishing (Maven/Gradle) |
 | [gha-api](https://github.com/entur/gha-api) | API spec lint, validate, publish |
