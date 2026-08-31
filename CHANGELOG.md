@@ -2,7 +2,6 @@
 
 ## [0.2.1](https://github.com/entur/ai/compare/v0.2.0...v0.2.1) (2026-08-31)
 
-
 ### Bug Fixes
 
 * Update api guidelines related stuff ([#80](https://github.com/entur/ai/issues/80)) ([d86f550](https://github.com/entur/ai/commit/d86f5501a67c47c4db1c63b20175d65424731f9e))
