@@ -23,7 +23,7 @@ The application stops serving traffic, releases its resources, and is removed cl
 
 ## Steps (Deletion -- destructive, mostly irreversible)
 
-1. **Delete the `.entur/` manifests.** Remove `.entur/<appid>.yaml` (and any data-project manifests). Open a PR, run `entur apply`. The Platform Orchestrator schedules GCP project teardown. See [self-service.md](../platform/self-service.md#aborting-or-rolling-back).
+1. **Delete the `.entur/` manifests.** Remove `.entur/app-<appid>.yaml` (and any data-project manifests). Open a PR, run `entur apply`. The Platform Orchestrator schedules GCP project teardown. See [self-service.md](../platform/self-service.md#aborting-or-rolling-back).
 
 2. **Archive the GitHub repository.** Settings → Danger Zone → Archive. This preserves history but prevents pushes.
 
