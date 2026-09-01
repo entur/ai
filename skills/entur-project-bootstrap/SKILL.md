@@ -61,7 +61,9 @@ Ask the user to confirm before generating files.
 
 ## Step 3: Generate Self-Service Manifests
 
-### `.entur/cicd.yml`
+If `.entur/` already contains manifests, edit them in place -- never rename an existing manifest to match the filenames below.
+
+### `.entur/github-{repoName}.yaml`
 
 ```yaml
 apiVersion: orchestrator.entur.io/github/v1
@@ -72,7 +74,7 @@ spec:
   environments: [{environments}]
 ```
 
-### `.entur/{appId}.yaml`
+### `.entur/app-{appId}.yaml`
 
 ```yaml
 apiVersion: orchestrator.entur.io/apps/v1

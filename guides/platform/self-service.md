@@ -4,7 +4,7 @@ Define YAML manifests in the repository's `.entur/` directory and apply through 
 
 ## How It Works
 
-1. Create/modify YAML manifests in `.entur/` (e.g. `.entur/<appid>.yaml` for a `GoogleCloudApplication`, `.entur/cicd.yaml` for `GitHubActions`).
+1. Create/modify YAML manifests in `.entur/` (e.g. `.entur/app-<metadata.id>.yaml` for a `GoogleCloudApplication`, `.entur/github-<repo-name>.yaml` for `GitHubActions`).
 2. Open a PR. The orchestrator validates and presents a **plan**.
 3. Comment `entur apply` on the PR.
 4. Wait for apply to succeed, then merge.
@@ -33,7 +33,9 @@ The **GitHub manifest** must be applied before any **Application manifest**.
 
 - Manifests live in `.entur/` at repository root
 - ALWAYS use one YAML document per file (single document, no `---` separator)
-- Default naming: `.entur/<metadata.id>.yaml`
+- ALWAYS name application manifests (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`) `.entur/app-<metadata.id>.yaml`
+- ALWAYS name `GitHubActions` manifests `.entur/github-<repo-name>.yaml`
+- NEVER rename existing manifests in `.entur/`. The naming rules above apply to new manifests only -- leave established filenames as they are
 
 ## GCP Project Naming
 
@@ -97,7 +99,7 @@ Common setup: containerized application on Kubernetes in Google Cloud.
 
 ### Step 1: Create the GitHub Manifest
 
-Create `.entur/cicd.yaml`:
+Create `.entur/github-myuniquerepo.yaml`:
 
 ```yaml
 apiVersion: orchestrator.entur.io/github/v1
@@ -110,7 +112,7 @@ spec:
 
 ### Step 2: Create the Application Manifest
 
-Create `.entur/application.yaml`:
+Create `.entur/app-myappid.yaml`:
 
 ```yaml
 apiVersion: orchestrator.entur.io/apps/v1

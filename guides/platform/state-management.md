@@ -146,7 +146,7 @@ Do not store the state bucket name in public documentation or commit credentials
 | Resource drifted (changed outside Terraform) | `terraform plan` shows diff; run `terraform apply` to reconcile or `terraform import` to re-sync |
 | Resource deleted outside Terraform | `terraform state rm <address>` to remove from state, then re-create via apply |
 | Wrong workspace active | `terraform workspace show`; switch with `terraform workspace select <env>` |
-| Cannot find bucket | Verify `metadata.id` in `.entur/<appid>.yaml` matches the bucket suffix |
+| Cannot find bucket | Verify `metadata.id` in `.entur/app-<appid>.yaml` matches the bucket suffix |
 
 ## Best Practices
 

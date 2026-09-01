@@ -36,7 +36,7 @@ The `app_id` variable **must match your self-service manifest `metadata.id`**. T
 ```hcl
 module "init" {
   source      = "github.com/entur/terraform-google-init//modules/init?ref=v1"
-  app_id      = var.app_id       # Must match metadata.id from .entur/<appid>.yaml
+  app_id      = var.app_id       # Must match metadata.id from .entur/app-<appid>.yaml
   environment = var.environment
 }
 ```

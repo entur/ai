@@ -97,7 +97,7 @@ What's wrong: no action in the opening line, hedged ("might", "generally", "usua
 > Create GCP projects via self-service YAML in `.entur/`. Do **not** use `gcloud projects create` or Terraform `google_project` -- the Platform Orchestrator owns project lifecycle.
 >
 > ```yaml
-> # .entur/application.yaml
+> # .entur/app-myappid.yaml
 > apiVersion: orchestrator.entur.io/apps/v1
 > kind: GoogleCloudApplication
 > metadata:

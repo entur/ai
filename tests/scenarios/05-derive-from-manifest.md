@@ -6,7 +6,7 @@ The core confusion test: given a self-service manifest, can the agent correctly 
 
 ## Prompt
 
-An Entur team has the following self-service manifest in `.entur/products.yaml`:
+An Entur team has the following self-service manifest in `.entur/app-products.yaml`:
 
 ```yaml
 apiVersion: orchestrator.entur.io/apps/v1
