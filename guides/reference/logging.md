@@ -19,7 +19,7 @@ All services must produce structured JSON logs to stdout. GCP Cloud Logging auto
 | Field | Description | Example |
 |-------|-------------|---------|
 | `logger` | Logger name (class/package) | `no.entur.myapp.RouteService` |
-| `logging.googleapis.com/trace` | Full GCP trace resource | `projects/ent-myapp-dev/traces/4bf92f...` |
+| `logging.googleapis.com/trace` | Trace ID | `4bf92f3577b34da6a3ce929d0e0e4736` |
 | `logging.googleapis.com/spanId` | Current span ID | `00f067aa0ba902b7` |
 | `logging.googleapis.com/trace_sampled` | Whether the trace is sampled | `true` |
 | `correlationId` | HTTP request correlation ID | `req-abc-123` |
@@ -114,12 +114,12 @@ Use standard `logging` with `json_log_formatter.JSONFormatter()` for structured 
 
 ### Distributed Tracing
 
-Once distributed tracing and cloud logging is set up for your application, logs and traces are correlated automatically and no manual field extraction is needed. Cloud Logging joins logs to traces when a structured log entry contains the full `logging.googleapis.com/trace` resource and `logging.googleapis.com/spanId`. Include `logging.googleapis.com/trace_sampled` when sampling information is available.
+Once distributed tracing and cloud logging is set up for your application, logs and traces are correlated automatically and no manual field extraction is needed. Cloud Logging joins logs to traces when a structured log entry contains the `logging.googleapis.com/trace` trace ID and `logging.googleapis.com/spanId`. Include `logging.googleapis.com/trace_sampled` when sampling information is available.
 Version 7.1.0 supports both Java tracing setups documented in [tracing.md](tracing.md).
 
 Do not copy trace fields into MDC manually. Use standard SLF4J inside the traced request; cloud-logging selects the correct mapping automatically. Its legacy correlation-ID fallback remains active when no OpenTelemetry trace context exists.
 
-See [tracing.md](tracing.md) and for instrumentation, propagation, sampling, API enablement, and IAM setup.
+See [tracing.md](tracing.md) for instrumentation, propagation, and sampling.
 
 ## 5. View logs
 
@@ -133,4 +133,4 @@ resource.labels.pod_name="my-application-..."
 jsonPayload.logger="no.entur.myapp.RouteService"
 ```
 
-This project routing differs from Cloud Trace: Kubernetes logs are stored in `ent-kub-<env>`, while traces are stored in `ent-<app>-<env>`.
+Traces land in the same host project (`ent-kub-<env>`), so logs and traces can be viewed together. See [tracing.md](tracing.md#view-traces).
