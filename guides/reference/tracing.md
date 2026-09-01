@@ -4,54 +4,16 @@ How to instrument an Entur service with OpenTelemetry and export spans to Google
 
 - **Target audience**: developers adding tracing to a new service or fixing tracing in an existing service.
 - **Intent**: inbound requests produce traces in Cloud Trace Explorer, with logs correlated to their trace and span.
-- **Scope**: workload IAM, required APIs, Java Agent setup, manual instrumentation for non-Java services, runtime configuration, sampling, log correlation, and trace viewing. Metrics and probes live in [observability.md](observability.md), structured logging in [logging.md](logging.md), and profiling in [profiler.md](profiler.md).
-- **Prerequisites**: an application project (`ent-<app>-<env>`), a `GoogleCloudApplication` manifest, and a deployed workload service account.
+- **Scope**: Java Agent setup, manual instrumentation for non-Java services, sampling, log correlation, and trace viewing. Metrics and probes live in [observability.md](observability.md), structured logging in [logging.md](logging.md), and profiling in [profiler.md](profiler.md).
+- **Prerequisites**: a `GoogleCloudApplication` manifest and a workload deployed on Kubernetes or Cloud Run. IAM roles and the required Google Cloud APIs for tracing are provisioned automatically through the common Helm chart — no manual setup is needed.
 
-## 1. Grant the workload service account `roles/cloudtrace.agent`
+If the service is not written in Java, skip to [2. Instrument OpenTelemetry manually](#2-instrument-opentelemetry-manually). For Java services, the Java Agent is the Golden Path. Instrument Java manually only when there is a specific reason to do so.
 
-The OpenTelemetry exporter needs permission to write trace data to Google Cloud Trace. `roles/cloudtrace.agent` provides write access to traces only, in line with least privilege.
+## 1. Connect the Java Agent
 
-Add the role to the default application service account in the `GoogleCloudApplication` manifest at `.entur/app-<service_name>.yaml`. Merge this fragment under `spec`:
+The OpenTelemetry Java Agent instruments Spring Boot services at startup without code changes. It uses bytecode injection to capture inbound requests, outbound HTTP calls, and database calls automatically.
 
-```yaml
-serviceAccounts:
-  - id: application
-    additionalRoles:
-      - roles/cloudtrace.agent
-```
-
-Do not bind `roles/cloudtrace.user`, `roles/cloudtrace.admin`, or `roles/cloudtrace.editor` to the workload. The exporter only needs to write traces. Engineers and CD pipelines receive read access separately through folder-level bindings.
-
-The application also needs these APIs enabled in every application project:
-
-- `cloudtrace.googleapis.com`
-- `telemetry.googleapis.com`
-
-Team Plattform is working to enable them by default for all projects. Until then, initialize them in Terraform:
-
-```hcl
-# terraform/main.tf
-resource "google_project_service" "tracing" {
-  for_each = toset([
-    "cloudtrace.googleapis.com",
-    "telemetry.googleapis.com",
-  ])
-
-  project            = module.init.app.project_id
-  service            = each.value
-  disable_on_destroy = false
-}
-```
-
-If the repository does not have Terraform yet, enable both APIs manually from **Google Cloud Console → APIs & Services → API Library**. Select the application project in the project selector before enabling them.
-
-If the service is not written in Java, skip to [3. Instrument OpenTelemetry manually](#3-instrument-opentelemetry-manually). For Java services, the Java Agent is the Golden Path. Instrument Java manually only when there is a specific reason to do so.
-
-## 2. Connect the Java Agent
-
-The OpenTelemetry Java Agent instruments Spring Boot services at startup without code changes. It uses bytecode injection to capture inbound requests, outbound HTTP calls, database calls, messaging, and other supported operations automatically.
-
-The agent is a JAR attached to the JVM at startup through the `-javaagent` flag. Use a multi-stage build so a temporary Alpine stage downloads the JARs and the final distroless image contains only the runtime files. If the service does not use multi-stage builds, download the JARs another way and copy them into the runtime image.
+The agent is a JAR attached to the JVM at startup through the `-javaagent` flag. A multi-stage build is the recommended approach — it keeps the final image clean by using a temporary Alpine stage to download the JARs before copying them into the distroless runtime. If your team does not use multi-stage builds, you can download the JARs another way and copy them in, but the Dockerfile below shows the recommended pattern.
 
 ```dockerfile
 # Dockerfile
@@ -66,135 +28,87 @@ RUN mkdir /otel && \
 # final image - no shell, no package manager, minimal attack surface
 FROM gcr.io/distroless/java25-debian13:nonroot
 WORKDIR /app
+
 # only the JARs are carried over from the Alpine stage
 COPY --from=otel /otel /otel
 COPY build/libs/app.jar app.jar
-# ENTRYPOINT in distroless is ["java"] - CMD entries are arguments to that process
+
+# ENTRYPOINT in distroless is ["java"] - CMD entries are the arguments passed to that java process
 CMD ["-javaagent:/otel/opentelemetry-javaagent.jar", \
      "-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar", \
      "-Dotel.javaagent.logging=application", \
      "-jar", "/app/app.jar"]
 ```
 
-Check the OpenTelemetry Java instrumentation releases before updating the pinned versions. Both JARs must be present:
+Check the [opentelemetry-java-instrumentation releases](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases) for the latest versions.
 
-- `opentelemetry-javaagent.jar` contains the instrumentation library maintained by the OpenTelemetry project. The `-javaagent` JVM flag activates it; application code does not call it directly.
-- `gcp-auth-extension-*-shadow.jar` comes from `opentelemetry-java-contrib`. It intercepts calls from the agent's OTLP exporter and attaches a GCP access token obtained through Workload Identity. Without it, `telemetry.googleapis.com` rejects requests as unauthenticated. Its dependencies are shaded into the JAR to avoid classpath conflicts.
+The two JARs serve different purposes and must both be present:
 
-If the application also uses Google Cloud Profiler, merge the flags from [profiler.md](profiler.md) into the same `CMD`. Do not add a second `CMD`; Docker uses only the last one.
+- `opentelemetry-javaagent.jar` is the OpenTelemetry Java agent, a single JAR maintained by the OpenTelemetry project that contains the full instrumentation library. It attaches to the JVM at startup and uses bytecode injection to automatically wrap HTTP servers, HTTP clients, database drivers, messaging systems, and more with tracing code. You never call it directly; the `-javaagent` JVM flag is what activates it.
+- `gcp-auth-extension-*-shadow.jar` is the GCP auth extension, a separate JAR from the `opentelemetry-java-contrib` project. It does one thing: it intercepts outbound calls from the agent's OpenTelemetry Protocol (OTLP) exporter and attaches a valid GCP access token obtained via Application Default Credentials (ADC). Without it, requests to `telemetry.googleapis.com` would be rejected as unauthenticated. It contains all its dependencies shaded inside the shadow JAR, so it does not conflict with anything else on the classpath.
 
-### Configure the Java Agent with environment variables
+If you are also using the Google Cloud Profiler, see [profiler.md](profiler.md). The Profiler agent also runs as a JVM flag, so you need to merge the flags from both guides into a single `CMD` — do not have two separate `CMD` instructions, as only the last one takes effect.
 
-Keep JVM agent flags in the Dockerfile `CMD`. Configure the exporter and service identity through runtime environment variables.
+### Sampling
 
-#### Kubernetes
+Sampling must be set explicitly per environment, do not rely on the default everywhere.
 
-Put environment-independent settings in the common values file:
-
-```yaml
-# values.yaml
-common:
-  configmap:
-    enabled: true
-    data:
-      OTEL_SERVICE_NAME: "<my-service>" # replace with the actual service name
-      OTEL_TRACES_EXPORTER: "otlp" # export traces using OTLP
-      OTEL_EXPORTER_OTLP_ENDPOINT: "https://telemetry.googleapis.com"
-      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
-      OTEL_METRICS_EXPORTER: "none" # metrics are handled separately
-      OTEL_LOGS_EXPORTER: "none" # logs are handled through Cloud Logging
-      TRACING_ENABLED: "true" # Entur convention
-```
-
-Put project-specific settings in each environment values file:
-
-```yaml
-# values-kub-ent-<env>.yaml
-common:
-  configmap:
-    data:
-      OTEL_RESOURCE_ATTRIBUTES: "gcp.project_id=ent-<app>-<env>"
-      GOOGLE_CLOUD_PROJECT: "ent-<app>-<env>"
-      GCP_PROJECT_ID: "ent-<app>-<env>"
-```
-
-`GOOGLE_CLOUD_PROJECT` identifies the target project to Google libraries. `GCP_PROJECT_ID` is available to application code and logging configuration. Always use the application's per-environment project, never the Kubernetes cluster host project (`ent-kub-<env>`).
-
-#### Cloud Run
-
-Set the variables on the container specification:
-
-```yaml
-# cloudrun.yaml
-container:
-  env:
-    - name: OTEL_TRACES_EXPORTER
-      value: "otlp"
-    - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: "https://telemetry.googleapis.com"
-    - name: OTEL_EXPORTER_OTLP_PROTOCOL
-      value: "grpc"
-    - name: OTEL_SERVICE_NAME
-      value: "<my-service>"
-    - name: TRACING_ENABLED
-      value: "true"
-    - name: GCP_PROJECT_ID
-      value: "ent-<app>-<env>"
-    - name: GOOGLE_CLOUD_PROJECT
-      value: "ent-<app>-<env>"
-```
-
-`OTEL_TRACES_EXPORTER=otlp` sends traces to Google's managed OTLP endpoint. The GCP auth extension authenticates through Workload Identity, so the workload does not need API keys or credential files.
-
-### Configure sampling
-
-Set sampling explicitly for each Kubernetes environment instead of relying on the default everywhere.
-
-Use this recommended development configuration:
+Our recommendation for Kubernetes:
 
 ```yaml
 # values-kub-ent-dev.yaml
-common:
-  configmap:
-    data:
-      OTEL_TRACES_SAMPLER: "parentbased_always_on" # sample everything for debugging
+OTEL_TRACES_SAMPLER: "parentbased_always_on" # sample everything, easiest for debugging.
 ```
-
-Use ratio-based sampling in test and production:
 
 ```yaml
-# values-kub-ent-tst.yaml or values-kub-ent-prd.yaml
-common:
-  configmap:
-    data:
-      OTEL_TRACES_SAMPLER: "parentbased_traceidratio"
-      OTEL_TRACES_SAMPLER_ARG: "0.1" # sample 10% of requests
+# values-kub-ent-prd.yaml/values-kub-ent-tst.yaml
+OTEL_TRACES_SAMPLER: "parentbased_traceidratio" # sample a fixed ratio of requests
+OTEL_TRACES_SAMPLER_ARG: "0.1" # 10% of requests
 ```
 
-These are recommended defaults, not hard requirements. Adjust `OTEL_TRACES_SAMPLER_ARG` when a service needs a different ratio. Use the following matrix as a starting point:
+These are our recommended defaults, not hard requirements - adjust `OTEL_TRACES_SAMPLER_ARG` if a service needs a different ratio.
 
 | Calls per minute | Sampling ratio |
-|------------------|----------------|
-| Fewer than 50    | 100%           |
-| 50 to 100        | 50%            |
-| More than 1,000  | 1%             |
-| More than 5,000  | 0.01%          |
+|-------------------|----------------|
+| Fewer than 50      | 100%           |
+| 50 to 100          | 50%            |
+| More than 1,000    | 1%             |
+| More than 5,000    | 0.01%          |
 
-For Cloud Run, do not set `OTEL_TRACES_SAMPLER` in any environment. The Cloud Run load balancer makes an upstream sampling decision and injects it into the trace context. Setting `parentbased_always_on` makes the agent honor that upstream decision, so the service can trace far fewer requests than intended. Omitting the variable lets the agent retain its `always_on` default at the agent level.
+Recommended sampling ratio matrix.
 
-For filters beyond a sampler ratio, use the OpenTelemetry Java Agent Sampler Extension.
+If you want to apply more filters to your traces than just the sampler ratio, you can read more about the Java Agent Sampler Extension.
 
-After configuring the Java Agent, skip to [4. Correlate logs with traces](#4-correlate-logs-with-traces). The next section is for non-Java services.
+If you are finished setting up your Java agent, you've completed implementation tracing and can jump to [3. Correlate logs with traces](#3-correlate-logs-with-traces) to see how to correlate with logs and view your tracing. The following section is for non-Java code.
 
-## 3. Instrument OpenTelemetry manually
+## 2. Instrument OpenTelemetry manually
 
-Manual instrumentation is not Go-specific; the following example happens to use Go. Apply the same approach to any non-Java service.
+Manual instrumentation is not Go-specific, the example below just happens to use Go. The same approach applies to any non-Java service.
 
-The Go OTLP exporter sends traces over gRPC to `telemetry.googleapis.com`. Google's managed ingestion endpoint routes them into Cloud Trace in the application project. The `roles/cloudtrace.agent` binding from step 1 authorizes the workload service account to write traces, so apply it before deploying.
+The Go OTLP exporter sends traces over gRPC to `telemetry.googleapis.com`, Google's managed ingestion endpoint, which receives them and routes them into Cloud Trace.
 
-### 3a. Create the tracer provider and instrument the HTTP handler
+### 2a. Create the tracer provider and instrument the HTTP handler
 
-Create the tracer provider and configure the OTLP exporter:
+If the `internal/tracing` folder structure does not already exist, create it manually from the repository root.
+
+If the imports in `tracing.go` fail after you paste the code, run these commands in your terminal:
+
+```shell
+go get go.opentelemetry.io/otel
+go get go.opentelemetry.io/otel/sdk/trace
+go get go.opentelemetry.io/otel/sdk/resource
+go get go.opentelemetry.io/otel/propagation
+go get go.opentelemetry.io/otel/semconv/v1.26.0
+go get go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
+go get google.golang.org/grpc
+go get google.golang.org/grpc/credentials/google
+```
+
+Then tidy the module:
+
+```shell
+go mod tidy
+```
 
 ```go
 // internal/tracing/tracing.go
@@ -204,18 +118,17 @@ import (
     "context"
     "fmt"
 
+    googlegrpc "google.golang.org/grpc/credentials/google"
+    "google.golang.org/grpc"
     "go.opentelemetry.io/otel"
-    "go.opentelemetry.io/otel/attribute"
     "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
     "go.opentelemetry.io/otel/propagation"
     "go.opentelemetry.io/otel/sdk/resource"
     sdktrace "go.opentelemetry.io/otel/sdk/trace"
     semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
-    "google.golang.org/grpc"
-    googlegrpc "google.golang.org/grpc/credentials/google"
 )
 
-func Init(ctx context.Context, projectID, serviceName, serviceVersion string) (func(context.Context) error, error) {
+func Init(ctx context.Context, serviceName, serviceVersion string) (func(context.Context) error, error) {
     exp, err := otlptracegrpc.New(ctx,
         otlptracegrpc.WithEndpoint("telemetry.googleapis.com:443"),
         otlptracegrpc.WithDialOption(
@@ -226,33 +139,30 @@ func Init(ctx context.Context, projectID, serviceName, serviceVersion string) (f
         return nil, fmt.Errorf("otlp trace exporter: %w", err)
     }
 
-    res, err := resource.New(ctx, resource.WithAttributes(
+    res, _ := resource.New(ctx, resource.WithAttributes(
         semconv.ServiceName(serviceName),
         semconv.ServiceVersion(serviceVersion),
-        attribute.String("gcp.project_id", projectID),
     ))
-    if err != nil {
-        return nil, fmt.Errorf("create trace resource: %w", err)
-    }
 
     tp := sdktrace.NewTracerProvider(
         sdktrace.WithBatcher(exp),
         sdktrace.WithResource(res),
         sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.AlwaysSample())),
-        // Use sdktrace.AlwaysSample() instead if the application runs on Cloud Run.
     )
+
     otel.SetTracerProvider(tp)
     otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
         propagation.TraceContext{},
         propagation.Baggage{},
     ))
+
     return tp.Shutdown, nil
 }
 ```
 
-`googlegrpc.NewDefaultCredentials()` combines TLS for the connection with Application Default Credentials for authentication. On GCP, authentication resolves to the workload service account through Workload Identity, so the container does not need API keys or credential files.
+`googlegrpc.NewDefaultCredentials()` bundles TLS encryption for connection and Application Default Credentials for authentication into a single gRPC credential.
 
-Wrap the outermost HTTP handler with `otelhttp.NewHandler` so every inbound request creates a span. Filter probe and metrics paths so they do not overwhelm the trace stream:
+Wrap the outermost HTTP handler with `otelhttp.NewHandler` so every inbound request creates a span. Filter out probe and metrics paths so they do not drown the trace stream. Add this to `main.go`:
 
 ```go
 // main.go
@@ -263,7 +173,7 @@ import (
     "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-handler := otelhttp.NewHandler(mux, "<service-name>", // replace with the service name
+handler := otelhttp.NewHandler(mux, "<service-name>", // replace with your 'service-name'
     otelhttp.WithFilter(func(r *http.Request) bool {
         return r.URL.Path != "/metrics" && !strings.HasPrefix(r.URL.Path, "/health/")
     }),
@@ -271,138 +181,90 @@ handler := otelhttp.NewHandler(mux, "<service-name>", // replace with the servic
 http.ListenAndServe(":8080", handler)
 ```
 
-Always call `defer span.End()` for a manual span created with `tracer.Start(ctx, ...)`. An unended span is never exported.
+Always call `defer span.End()` for any manual span created with `tracer.Start(ctx, ...)`. A span that is not ended will never be exported.
 
-### 3b. Initialize tracing in `main()`
+### 2b. Initialize tracing in `main()`
 
-Creating `internal/tracing/tracing.go` defines the setup logic, but does not run it. Call it near the start of `main()`, before registering routes or handlers:
+Creating `internal/tracing/tracing.go` defines the setup logic, but it does nothing until you call it. Add the following at the top of your `main()` function, before registering any routes or handlers:
 
 ```go
 // main.go
 import (
-    "context"
-    "os"
-
-    "my-module-name/internal/tracing" // match the module name in go.mod
+  "context"
+  "my-module-name/internal/tracing" // matches the module name in your go.mod.
 )
 
 ctx := context.Background()
-if os.Getenv("TRACING_ENABLED") == "true" {
-    projectID := os.Getenv("GCP_PROJECT_ID")
-    shutdown, err := tracing.Init(ctx, projectID, "my-service", "1.0.0")
-    if err != nil {
-        logging.Fatal().Err(err).Msg("failed to initialize tracing")
-    }
-    defer shutdown(ctx)
+shutdown, err := tracing.Init(ctx, "my-service", "1.0.0")
+if err != nil {
+    logging.Fatal().Err(err).Msg("failed to initialize tracing")
 }
+defer shutdown(ctx)
 ```
 
-Replace `my-service` with the service name and `1.0.0` with the service version. `defer shutdown(ctx)` flushes buffered spans before the process exits; without it, spans created near shutdown may be lost.
+Replace `my-service` with your actual service name and `1.0.0` with your service version. `defer shutdown(ctx)` ensures that tracing flushes any buffered spans before the process exits - without this, spans collected near shutdown may be lost.
 
-### 3c. Set runtime environment variables
+## 3. Correlate logs with traces
 
-Configure the variables for every runtime. Both Spring Boot and Go services use the application project ID, and `TRACING_ENABLED` follows the Entur convention for toggling tracing.
+Cloud Logging joins log entries to traces in Trace Explorer when each log line includes a trace field and a spanId. Include these fields on every log line emitted inside a traced HTTP request - otherwise, logs and traces appear separately and cannot be correlated.
 
-#### Kubernetes
+Each log entry must also include the required fields `timestamp` (ISO 8601), `severity`/`level`, and `message`/`msg`. For trace correlation, include these three fields on every log line emitted inside a traced request:
 
-Use the common Helm chart environment-variable syntax:
+- `logging.googleapis.com/trace` - the full trace identifier as `traceId`, used by Cloud Logging to find the corresponding trace in Cloud Trace.
+- `logging.googleapis.com/spanId` - identifies which specific span within the trace this log line belongs to.
+- `logging.googleapis.com/trace_sampled` - whether this trace was sampled; without this, Cloud Logging may not surface the correlation in the UI even if the other fields are correct.
 
-```yaml
-# values-kub-ent-<env>.yaml
-common:
-  env: <env>
-  ingress:
-    host: <host>
-  container:
-    env:
-      - name: TRACING_ENABLED
-        value: "true"
-      - name: GCP_PROJECT_ID
-        value: "ent-<app>-<env>" # application project, never ent-kub-<env>
-```
-
-#### Cloud Run
-
-Set the same variables on the container specification:
-
-```yaml
-# cloudrun.yaml
-common:
-  env: <env>
-  ingress:
-    host: <host>
-  container:
-    env:
-      - name: TRACING_ENABLED
-        value: "true"
-      - name: GCP_PROJECT_ID
-        value: "ent-<app>-<env>" # application project, never ent-kub-<env>
-```
-
-## 4. Correlate logs with traces
-
-Cloud Logging joins log entries to traces in Trace Explorer when each log line includes the trace and span fields. Include them on every log line emitted inside a traced request; otherwise, logs and traces appear separately.
-
-Each entry must also include the required `timestamp` (ISO 8601), `severity`/`level`, and `message`/`msg` fields. For trace correlation, include these fields:
-
-- `logging.googleapis.com/trace` contains the full trace identifier in the format `projects/<project>/traces/<id>`.
-- `logging.googleapis.com/spanId` identifies the span within the trace.
-- `logging.googleapis.com/trace_sampled` states whether the trace was sampled. Without it, Cloud Logging might not surface the correlation in the UI even when the other fields are correct.
-
-See [logging.md](logging.md) for the complete structured logging requirements.
+For more details, see [logging.md](logging.md).
 
 ### Java / Kotlin (Spring Boot)
 
-No manual correlation code is required. When [entur/cloud-logging v7.1.0](https://github.com/entur/cloud-logging/tree/v7.1.0) and `spring-boot-starter-gcp-web` are configured correctly, the library adds the Google trace fields through Micrometer Tracing. Use standard SLF4J within a traced request.
+For Java and Kotlin Spring Boot services, no manual work is needed. If [entur/cloud-logging](https://github.com/entur/cloud-logging) (v7.1.0) together with `spring-boot-starter-gcp-web` is correctly set up, those two handle all of this automatically. The library injects `logging.googleapis.com/trace` and `logging.googleapis.com/spanId` fields automatically through Micrometer Tracing, use standard SLF4J logging and the fields are already present on log lines within a traced request. For every other language, add the fields manually as shown below.
 
 ### Python
 
-Use the standard `logging` module with `json_log_formatter.JSONFormatter()`. Extract the OpenTelemetry span context and pass the fields through `extra`:
+For Python services, use the standard `logging` module with `json_log_formatter.JSONFormatter()`. Extract the trace context from the OTel span and pass the fields through the `extra` parameter:
 
 ```python
 from opentelemetry import trace
 
 span = trace.get_current_span()
 ctx = span.get_span_context()
-project_id = os.environ["GCP_PROJECT_ID"]
 
 logger.info("handling request", extra={
-    "logging.googleapis.com/trace": f"projects/{project_id}/traces/{format(ctx.trace_id, '032x')}",
-    "logging.googleapis.com/spanId": format(ctx.span_id, "016x"),
+    "logging.googleapis.com/trace": format(ctx.trace_id, '032x'),
+    "logging.googleapis.com/spanId": format(ctx.span_id, '016x'),
     "logging.googleapis.com/trace_sampled": ctx.trace_flags.sampled,
 })
 ```
 
 ### Go
 
-Install [entur/go-logging](https://github.com/entur/go-logging) with `go get github.com/entur/go-logging`. Extract the span context from the request context and add the fields to every log call inside the handler:
+For Go services, start by installing [entur/go-logging](https://github.com/entur/go-logging): `go get github.com/entur/go-logging`. Then use `entur/go-logging` and extract the span context from the request context at the start of each handler. Pass the trace and spanId fields on every log call inside that handler:
 
 ```go
 sc := trace.SpanFromContext(r.Context()).SpanContext()
-projectID := os.Getenv("GCP_PROJECT_ID")
-
 logging.Info().
-    Str("logging.googleapis.com/trace", fmt.Sprintf("projects/%s/traces/%s", projectID, sc.TraceID())).
+    Str("logging.googleapis.com/trace", sc.TraceID().String()).
     Str("logging.googleapis.com/spanId", sc.SpanID().String()).
     Bool("logging.googleapis.com/trace_sampled", sc.IsSampled()).
     Msg("handling /home request")
 ```
 
-Apply the same pattern to error and warning logs within the handler. Health probe endpoints excluded from tracing do not need these fields.
-
-Set `GCP_PROJECT_ID` to `ent-<app>-<env>` in every environment. Never use the cluster host project (`ent-kub-<env>`), because traces are stored in the application project.
+Apply the same pattern to error and warning log lines within the same handler. Health probe endpoints filtered from tracing do not need these fields.
 
 ## View traces
 
-Open **Google Cloud Console**, select the application project (`ent-<app>-<env>`) in the project selector, and go to **Monitoring → Trace → Trace Explorer**.
+Go to [GCP Console](https://console.cloud.google.com/welcome).
 
-The `_Trace` bucket provisions automatically when a trace span is first written successfully. Provisioning and ingestion can take a few minutes, so the trace might not appear immediately.
+Select the host project in the top left corner - `ent-kub-<env>`.
 
-Cloud Trace spans always go to the application's per-environment project, whether the workload runs on Kubernetes or Cloud Run. The exporter reports the project through its resource configuration. Always use the workload's application project, never the Kubernetes cluster host project.
+Open the navigation menu on the left, select **Monitoring → Trace → Trace Explorer**.
 
-To view logs together with traces, create a trace scope in the application project that includes both the host project and the application project, then set that scope as the default. More detailed instructions will be added when the setup is finalized.
+Trace storage (the `_Trace` bucket) should provision automatically the first time a trace span is successfully written to the project. It's not instant, so don't expect it to appear in the Trace Explorer console within seconds - give it a few minutes.
 
-We is also working on a solution for viewing traces in Grafana.
+Since traces from multiple applications land in the shared host project, filter Trace Explorer down to your own service before reading anything into it: use the filter bar and search by `service.name` to scope the view to just your application's spans.
+
+We are also currently working on a solution to view traces in Grafana.
 
 ## Further reading
 
