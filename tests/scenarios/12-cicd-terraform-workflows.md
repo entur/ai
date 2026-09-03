@@ -28,9 +28,9 @@ Output the YAML content for each file, clearly labeled.
   "must_contain": [
     "name: Terraform",
     "workflow_dispatch",
-    "entur/gha-terraform/.github/workflows/lint.yml@v2",
-    "entur/gha-terraform/.github/workflows/plan.yml@v2",
-    "entur/gha-terraform/.github/workflows/apply.yml@v2",
+    "entur/gha-terraform/.github/workflows/lint.yml@v3",
+    "entur/gha-terraform/.github/workflows/plan.yml@v3",
+    "entur/gha-terraform/.github/workflows/apply.yml@v3",
     "terraform-lint:",
     "tf-plan-dev:",
     "tf-plan-tst:",
