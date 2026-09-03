@@ -265,13 +265,13 @@ helm-deploy:
 ```yaml
 # Lint
 terraform-lint:
-  uses: entur/gha-terraform/.github/workflows/lint.yml@v2
+  uses: entur/gha-terraform/.github/workflows/lint.yml@v3
   permissions:
     contents: read
 
 # Plan (outputs: has_changes, plan_summary)
 terraform-plan:
-  uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+  uses: entur/gha-terraform/.github/workflows/plan.yml@v3
   permissions:
     contents: read
     id-token: write
@@ -281,7 +281,7 @@ terraform-plan:
 
 # Apply
 terraform-apply:
-  uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+  uses: entur/gha-terraform/.github/workflows/apply.yml@v3
   permissions:
     contents: read
     id-token: write

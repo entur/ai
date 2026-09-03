@@ -682,7 +682,7 @@ on:
 jobs:
   # --- Lint ---
   terraform-lint:
-    uses: entur/gha-terraform/.github/workflows/lint.yml@v2
+    uses: entur/gha-terraform/.github/workflows/lint.yml@v3
     permissions:
       contents: read
     concurrency:
@@ -696,7 +696,7 @@ jobs:
   tf-plan-dev:
     needs: [terraform-lint]
     if: github.event_name != 'push'
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    uses: entur/gha-terraform/.github/workflows/plan.yml@v3
     permissions:
       contents: read
       id-token: write
@@ -709,7 +709,7 @@ jobs:
 
   tf-plan-tst:
     needs: [terraform-lint]
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    uses: entur/gha-terraform/.github/workflows/plan.yml@v3
     permissions:
       contents: read
       id-token: write
@@ -722,7 +722,7 @@ jobs:
 
   tf-plan-prd:
     needs: [terraform-lint]
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    uses: entur/gha-terraform/.github/workflows/plan.yml@v3
     permissions:
       contents: read
       id-token: write
@@ -740,7 +740,7 @@ jobs:
   tf-apply-dev:
     if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-dev]
-    uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    uses: entur/gha-terraform/.github/workflows/apply.yml@v3
     permissions:
       contents: read
       id-token: write
@@ -759,7 +759,7 @@ jobs:
   tf-apply-tst:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-tst]
-    uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    uses: entur/gha-terraform/.github/workflows/apply.yml@v3
     permissions:
       contents: read
       id-token: write
@@ -774,7 +774,7 @@ jobs:
   tf-apply-prd:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: [tf-plan-prd, tf-apply-tst]
-    uses: entur/gha-terraform/.github/workflows/apply.yml@v2
+    uses: entur/gha-terraform/.github/workflows/apply.yml@v3
     permissions:
       contents: read
       id-token: write
@@ -821,7 +821,7 @@ jobs:
   # Per-job permissions are required: plan.yml@v2 needs contents:read,
   # id-token:write, pull-requests:write. See Step 8 for the full rationale.
   tf-plan-dev:
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    uses: entur/gha-terraform/.github/workflows/plan.yml@v3
     permissions:
       contents: read
       id-token: write
@@ -830,7 +830,7 @@ jobs:
       environment: dev
 
   tf-plan-tst:
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    uses: entur/gha-terraform/.github/workflows/plan.yml@v3
     permissions:
       contents: read
       id-token: write
@@ -839,7 +839,7 @@ jobs:
       environment: tst
 
   tf-plan-prd:
-    uses: entur/gha-terraform/.github/workflows/plan.yml@v2
+    uses: entur/gha-terraform/.github/workflows/plan.yml@v3
     permissions:
       contents: read
       id-token: write
