@@ -63,18 +63,6 @@
         "authentication": "ON_INSTALL"
       },
       "category": "DevOps"
-    },
-    {
-      "name": "setup-tracing-go",
-      "source": {
-        "source": "local",
-        "path": "./plugins/setup-tracing-go"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "DevOps"
     }
   ]
 }

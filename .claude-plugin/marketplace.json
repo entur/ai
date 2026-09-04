@@ -78,20 +78,6 @@
       "homepage": "https://github.com/entur/ai",
       "repository": "https://github.com/entur/ai",
       "license": "EUPL-1.2"
-    },
-    {
-      "name": "setup-tracing-go",
-      "source": "./plugins/setup-tracing-go",
-      "description": "Instrument a Go service with manual OpenTelemetry SDK wiring and ship traces to Google Cloud Trace, following the Entur tracing golden path.",
-      "category": "observability",
-      "keywords": ["entur", "tracing", "opentelemetry", "cloud-trace", "observability", "go"],
-      "author": {
-        "name": "Team Kvalitet",
-        "email": "support@entur.org"
-      },
-      "homepage": "https://github.com/entur/ai",
-      "repository": "https://github.com/entur/ai",
-      "license": "EUPL-1.2"
     }
   ]
 }

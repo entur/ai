@@ -6,22 +6,12 @@ description: >
     Trace. Use when the user says "add tracing", "set up OpenTelemetry",
     "instrument for Cloud Trace", or "add distributed tracing" for a Kotlin,
     Java, or Spring Boot service -- typically a repo with `build.gradle.kts`.
-    For a Go service, use the `setup-tracing-go` skill instead.
 ---
 
 # Set Up Tracing -- Kotlin/Java (Golden Path)
 
 Wire distributed tracing into an Entur Kotlin/Java service so every inbound request produces a span in Cloud Trace, correlated with structured logs. This golden path covers **Spring Boot via the OpenTelemetry Java Agent** only -- it does not cover Go, Python, or any other language. Trace spans are exported to a shared host project (`ent-kub-<env>`), not the application's own project -- this is what makes it possible to correlate a trace with the logs from the same request.
 
-## Step 0: Confirm prerequisites -- do not guess these
-
-Ask the user directly; do not infer silently.
-
-1. **Language.** Detect from the repo: `build.gradle.kts` → Kotlin/Java. State the detected language and ask the user to confirm it.
-   - If the repo is Go (`go.mod`), **stop** and point the user to the `setup-tracing-go` skill instead.
-   - If the repo is neither Kotlin/Java nor Go (Python, Node, etc.), **stop**. Tell the user this golden path only documents Java Agent instrumentation for Kotlin/Java -- do not improvise OpenTelemetry setup for another language.
-2. **Runtime.** Kubernetes (`helm/<app>/env/values-kub-ent-<env>.yaml`) or Cloud Run (`cloudrun.yaml`)? Determines where the sampler env var in Step 2 is set.
-3. **Manifest check.** Confirm a `GoogleCloudApplication` manifest exists under `.entur/*.yaml` and the service is deployed on Kubernetes or Cloud Run. IAM roles and the required Google Cloud APIs for tracing are provisioned automatically through the common Helm chart -- do not add Terraform for either.
 
 ## Step 1: Instrument the application
 
@@ -51,7 +41,6 @@ CMD ["-javaagent:/otel/opentelemetry-javaagent.jar", \
 - Both JARs are required: `opentelemetry-javaagent.jar` does the bytecode instrumentation; `gcp-auth-extension` attaches a valid GCP access token (via Application Default Credentials) to outbound OTLP calls -- without it, `telemetry.googleapis.com` rejects the export as unauthenticated.
 - Use the pinned versions above as-is -- `v2.29.0` (agent) / `1.58.0-alpha` (gcp-auth-extension). Do not spend time checking upstream for a newer release. In Step 4's summary, tell the user which versions were used and point to the `otel` build stage in the Dockerfile as where to bump them later.
 - `java25-debian13` is an example tag, not a guarantee -- match the distroless image version to the project's own Java toolchain (`build.gradle.kts`/`.tool-versions`), and confirm the resulting tag actually exists before using it. Flag the tag used in the Step 4 summary as something the user may need to change.
-- If the project also uses Cloud Profiler, merge its `-javaagent`/flags into this **same** `CMD` -- a Dockerfile only honors its last `CMD`, a second one silently disables the first.
 
 ## Step 2: Set the sampler explicitly
 
@@ -81,32 +70,19 @@ common:
 
 If the file already exists with its own `common.container.env` entries, append these to the existing list instead of overwriting the file -- check for entries with the same `name` first and update their `value` in place rather than duplicating.
 
-These are recommended defaults, not hard requirements -- adjust `OTEL_TRACES_SAMPLER_ARG` if a service needs a different ratio:
-
-| Calls per minute | Sampling ratio |
-|-------------------|----------------|
-| Fewer than 50      | 100%           |
-| 50 to 100          | 50%            |
-| More than 1,000    | 1%             |
-| More than 5,000    | 0.01%          |
-
 Only create the single env file this way -- do not scaffold `helm/<app>/Chart.yaml` or `helm/<app>/values.yaml` ad hoc. If those don't exist either, Helm hasn't been bootstrapped for this service at all, which is out of scope for this skill.
 
-**On Cloud Run**, set the variable on the `cloudrun.yaml` container spec instead, with one difference: omit `OTEL_TRACES_SAMPLER`/`OTEL_TRACES_SAMPLER_ARG` entirely. The Cloud Run load balancer injects its own (thin) sampling decision upstream, and `parentbased_always_on` would defer to it, sampling far less than intended. Omitting the variable lets the agent default to `always_on`.
-
 ## Step 3: Correlate logs with traces
-
-Every log line inside a traced request needs `logging.googleapis.com/trace`, `logging.googleapis.com/spanId`, and `logging.googleapis.com/trace_sampled` -- otherwise Cloud Logging can't join it to the trace in Trace Explorer.
 
 For Java/Kotlin Spring Boot services, no manual work is needed. If `entur/cloud-logging` (v7.1.0) together with `spring-boot-starter-gcp-web` is correctly set up, those two handle all of this automatically -- the library injects the fields via Micrometer Tracing, and standard SLF4J logging picks them up on every log line within a traced request.
 
 ## Step 4: Tell the user what's left
 
-Steps 0-3 are everything this skill can do by editing the repo. Verifying traces actually arrive requires a live deploy and real traffic, which happens outside this skill -- tell the user to:
+Steps 1-3 are everything this skill can do by editing the repo. Verifying traces actually arrive requires a live deploy and real traffic, which happens outside this skill -- tell the user to:
 
 1. Commit and merge the changes, and let the normal CD pipeline deploy.
 2. Send a few requests to the deployed service to generate spans.
-3. Check **Monitoring → Trace → Trace Explorer** in the GCP Console under the shared host project `ent-kub-<env>` (not the application project, even for Kubernetes workloads -- traces always land in the host project). Since traces from multiple applications land in the same project, filter Trace Explorer by `service.name` to scope the view to just this service.
+3. Check **Monitoring → Trace → Trace Explorer** in the GCP Console under the shared host project `ent-kub-<env>` (not the application project, traces always land in the host project). Since traces from multiple applications land in the same project, filter Trace Explorer by `service.name` to scope the view to just this service.
 4. If no spans show up: trace storage provisions automatically the first time a span is successfully written to the project, and it isn't instant -- give it a few minutes before assuming something is broken. Also double check the sampler env var actually reached the deployed container for that environment (a common miss is setting it in the wrong Helm values file).
 
 Also state in the summary: the OpenTelemetry Java agent (`v2.29.0`) and gcp-auth-extension (`1.58.0-alpha`) versions were pinned as-is, not checked against upstream for something newer, and are set in the Dockerfile's `otel` build stage if the user wants to bump them later. Also state the distroless base image tag used and that it may need to change to match the project's Java toolchain.
@@ -118,4 +94,3 @@ Also state in the summary: the OpenTelemetry Java agent (`v2.29.0`) and gcp-auth
 - **Trace storage auto-provisions** on first successful span write -- never tell the user to manually enable it in the console, and never script it.
 - **Defaults to the Java Agent.** Only hand-roll manual OpenTelemetry instrumentation if the user gives a specific reason.
 - **One `CMD` per Dockerfile.** Merge Cloud Profiler flags into the same `CMD` as the tracing agent flags if present.
-- **Kubernetes vs Cloud Run sampler differs** -- see Step 2. Getting this backwards silently under-samples on Cloud Run or double-samples on Kubernetes.
