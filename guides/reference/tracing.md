@@ -1,6 +1,8 @@
 # Distributed Tracing
 
-How to instrument an Entur service with OpenTelemetry and export spans to Google Cloud Trace.
+Distributed tracing lets you follow a single request as it moves through a service and out to its dependencies, so you can see where time is spent and where failures occur. At Entur, trace spans are exported to Google Cloud Trace in a shared host project (ent-kub-<env>), rather than each team's own project — this is what makes it possible to correlate a trace with the logs from the same request. 
+
+## How to instrument an Entur service with OpenTelemetry tracing and export spans to Google Cloud Trace.
 
 - **Target audience**: developers adding tracing to a new service or fixing tracing in an existing service.
 - **Intent**: inbound requests produce traces in Cloud Trace Explorer, with logs correlated to their trace and span.
@@ -90,25 +92,6 @@ The Go OTLP exporter sends traces over gRPC to `telemetry.googleapis.com`, Googl
 ### 2a. Create the tracer provider and instrument the HTTP handler
 
 If the `internal/tracing` folder structure does not already exist, create it manually from the repository root.
-
-If the imports in `tracing.go` fail after you paste the code, run these commands in your terminal:
-
-```shell
-go get go.opentelemetry.io/otel
-go get go.opentelemetry.io/otel/sdk/trace
-go get go.opentelemetry.io/otel/sdk/resource
-go get go.opentelemetry.io/otel/propagation
-go get go.opentelemetry.io/otel/semconv/v1.26.0
-go get go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
-go get google.golang.org/grpc
-go get google.golang.org/grpc/credentials/google
-```
-
-Then tidy the module:
-
-```shell
-go mod tidy
-```
 
 ```go
 // internal/tracing/tracing.go
@@ -254,20 +237,19 @@ Apply the same pattern to error and warning log lines within the same handler. H
 
 ## View traces
 
-Go to [GCP Console](https://console.cloud.google.com/welcome).
-
-Select the host project in the top left corner - `ent-kub-<env>`.
-
-Open the navigation menu on the left, select **Monitoring → Trace → Trace Explorer**.
+1. Go to [GCP Console](https://console.cloud.google.com/welcome).
+2. Select the host project in the top left corner - `ent-kub-<env>`.
+3. Open the navigation menu on the left, select **Monitoring → Trace → Trace Explorer**.
 
 Trace storage (the `_Trace` bucket) should provision automatically the first time a trace span is successfully written to the project. It's not instant, so don't expect it to appear in the Trace Explorer console within seconds - give it a few minutes.
 
 Since traces from multiple applications land in the shared host project, filter Trace Explorer down to your own service before reading anything into it: use the filter bar and search by `service.name` to scope the view to just your application's spans.
 
-We are also currently working on a solution to view traces in Grafana.
+***We are also currently working on a solution to view traces in Grafana.***
 
 ## Further reading
 
+- [Migrate from the Trace exporter to the OTLP endpoint](https://docs.cloud.google.com/stackdriver/docs/instrumentation/migrate-to-otlp-endpoints)
 - [Structured logging](logging.md)
 - [Observability](observability.md)
 - [Google Cloud Profiler](profiler.md)
