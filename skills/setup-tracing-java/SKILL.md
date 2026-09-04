@@ -1,46 +1,58 @@
 ---
 name: setup-tracing-java
 description: >
-    Wire distributed tracing into an Entur Kotlin/Java (Spring Boot) service
+    Wire distributed tracing into an Entur Kotlin/Java Spring Boot service
     using the OpenTelemetry Java Agent, following the golden path to Cloud
     Trace. Use when the user says "add tracing", "set up OpenTelemetry",
-    "instrument for Cloud Trace", or "add distributed tracing" for a Kotlin,
-    Java, or Spring Boot service -- typically a repo with `build.gradle.kts`.
+    "instrument for Cloud Trace", or "add distributed tracing" for a Kotlin
+    or Java service that runs on Spring Boot -- typically a repo with
+    `build.gradle.kts` and a `spring-boot-starter-*` dependency. Does not
+    apply to non-Spring-Boot Kotlin/Java services (e.g. plain Ktor, Micronaut,
+    or CLI apps) -- those need manual OpenTelemetry SDK instrumentation,
+    which is out of scope for this skill.
 ---
 
 # Set Up Tracing -- Kotlin/Java (Golden Path)
 
 Wire distributed tracing into an Entur Kotlin/Java service so every inbound request produces a span in Cloud Trace, correlated with structured logs. This golden path covers **Spring Boot via the OpenTelemetry Java Agent** only -- it does not cover Go, Python, or any other language. Trace spans are exported to a shared host project (`ent-kub-<env>`), not the application's own project -- this is what makes it possible to correlate a trace with the logs from the same request.
 
+**Before starting, confirm the project is actually Spring Boot** (a `spring-boot-starter-*` dependency in `build.gradle.kts`). If it isn't -- e.g. a plain Ktor, Micronaut, or non-web service -- stop and tell the user this skill only covers Spring Boot; manual OpenTelemetry SDK instrumentation is out of scope here.
 
 ## Step 1: Instrument the application
 
 ### OpenTelemetry Java Agent (default; do not hand-instrument without a specific reason)
 
-Attach the agent via `-javaagent` in a multi-stage Dockerfile -- a temporary Alpine stage downloads the JARs, the distroless final stage only carries the JARs themselves:
+Attach the agent via `-javaagent` in the existing Dockerfile: add one temporary stage that downloads the JARs, and merge the flags into the final stage's `ENTRYPOINT` -- do not touch any other existing stages (bundler, builder, layers, etc.) and do not introduce a `CMD`. Entur's Docker golden path ([docker.md](../../guides/reference/docker.md)) always launches the JVM via `ENTRYPOINT`, both in the preferred layered-JAR pattern and the single-jar Alpine alternative, so the agent flags belong in that array, prepended before the existing launch arguments.
 
 ```dockerfile
-# Dockerfile
+# Stage: download OTel JARs (temporary -- never shipped)
 FROM alpine:3.24 AS otel
 RUN mkdir /otel && \
     wget -q -O /otel/opentelemetry-javaagent.jar \
       https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.29.0/opentelemetry-javaagent.jar && \
     wget -q -O /otel/gcp-auth-extension.jar \
       https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-gcp-auth-extension/1.58.0-alpha/opentelemetry-gcp-auth-extension-1.58.0-alpha-shadow.jar
-
-FROM gcr.io/distroless/java25-debian13:nonroot
-WORKDIR /app
-COPY --from=otel /otel /otel
-COPY build/libs/app.jar app.jar
-CMD ["-javaagent:/otel/opentelemetry-javaagent.jar", \
-     "-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar", \
-     "-Dotel.javaagent.logging=application", \
-     "-jar", "/app/app.jar"]
 ```
+
+Then, in the project's existing final (runtime) stage, add `COPY --from=otel /otel /otel` and prepend the agent flags to the existing `ENTRYPOINT`. For the **preferred layered-JAR pattern** (docker.md's default), that looks like:
+
+```dockerfile
+# Final runtime stage -- only the two lines below are new; everything else
+# (the COPY --from=layers lines, base image, etc.) is whatever the project already has
+COPY --from=otel /otel /otel
+ENTRYPOINT ["java", \
+    "-javaagent:/otel/opentelemetry-javaagent.jar", \
+    "-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar", \
+    "-Dotel.javaagent.logging=application", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "org.springframework.boot.loader.launch.JarLauncher"]
+```
+
+For the **single-jar Alpine alternative** (`ENTRYPOINT ["java", "-jar", "app.jar"]`), insert the same three `-javaagent`/`-D` flags immediately before `-jar` in that array instead.
 
 - Both JARs are required: `opentelemetry-javaagent.jar` does the bytecode instrumentation; `gcp-auth-extension` attaches a valid GCP access token (via Application Default Credentials) to outbound OTLP calls -- without it, `telemetry.googleapis.com` rejects the export as unauthenticated.
 - Use the pinned versions above as-is -- `v2.29.0` (agent) / `1.58.0-alpha` (gcp-auth-extension). Do not spend time checking upstream for a newer release. In Step 4's summary, tell the user which versions were used and point to the `otel` build stage in the Dockerfile as where to bump them later.
-- `java25-debian13` is an example tag, not a guarantee -- match the distroless image version to the project's own Java toolchain (`build.gradle.kts`/`.tool-versions`), and confirm the resulting tag actually exists before using it. Flag the tag used in the Step 4 summary as something the user may need to change.
+- The base/runtime image (e.g. `java25-debian13`) is whatever the project's Dockerfile already uses -- do not change it. Only add the `otel` stage and edit the final stage's `ENTRYPOINT`.
 
 ## Step 2: Set the sampler explicitly
 
@@ -74,7 +86,12 @@ Only create the single env file this way -- do not scaffold `helm/<app>/Chart.ya
 
 ## Step 3: Correlate logs with traces
 
-For Java/Kotlin Spring Boot services, no manual work is needed. If `entur/cloud-logging` (v7.1.0) together with `spring-boot-starter-gcp-web` is correctly set up, those two handle all of this automatically -- the library injects the fields via Micrometer Tracing, and standard SLF4J logging picks them up on every log line within a traced request.
+For Java/Kotlin Spring Boot services, no manual work is needed -- **provided the project is on `entur/cloud-logging` v7.1.0 or later**. Only 7.1.0+ injects the trace/span fields via Micrometer Tracing; earlier versions do not support this correlation. Together with `spring-boot-starter-gcp-web`, that's all that's required for standard SLF4J logging to pick up the trace/span ID on every log line within a traced request.
+
+Check the `entur/cloud-logging` version pinned in `build.gradle.kts` (or the version catalog):
+
+- **v7.1.0 or later already present**: nothing to do.
+- **Older version, or not present at all**: log/trace correlation will not work until this is fixed, and it's outside what this skill edits. Tell the user their logs won't correlate with traces yet, and point them to [logging.md](../../guides/reference/logging.md) to add or upgrade `entur/cloud-logging` and `spring-boot-starter-gcp-web`. Note that `cloud-logging` 7.x requires Spring Boot 4.1.x -- if the project is on an older Spring Boot line, upgrading `cloud-logging` alone won't be enough; flag that dependency too.
 
 ## Step 4: Tell the user what's left
 
@@ -85,7 +102,7 @@ Steps 1-3 are everything this skill can do by editing the repo. Verifying traces
 3. Check **Monitoring → Trace → Trace Explorer** in the GCP Console under the shared host project `ent-kub-<env>` (not the application project, traces always land in the host project). Since traces from multiple applications land in the same project, filter Trace Explorer by `service.name` to scope the view to just this service.
 4. If no spans show up: trace storage provisions automatically the first time a span is successfully written to the project, and it isn't instant -- give it a few minutes before assuming something is broken. Also double check the sampler env var actually reached the deployed container for that environment (a common miss is setting it in the wrong Helm values file).
 
-Also state in the summary: the OpenTelemetry Java agent (`v2.29.0`) and gcp-auth-extension (`1.58.0-alpha`) versions were pinned as-is, not checked against upstream for something newer, and are set in the Dockerfile's `otel` build stage if the user wants to bump them later. Also state the distroless base image tag used and that it may need to change to match the project's Java toolchain.
+Also state in the summary: the OpenTelemetry Java agent (`v2.29.0`) and gcp-auth-extension (`1.58.0-alpha`) versions were pinned as-is, not checked against upstream for something newer, and are set in the Dockerfile's `otel` build stage if the user wants to bump them later.
 
 ## Critical Rules
 
@@ -93,4 +110,4 @@ Also state in the summary: the OpenTelemetry Java agent (`v2.29.0`) and gcp-auth
 - **IAM roles and the required Google Cloud APIs are provisioned automatically** through the common Helm chart. Never add Terraform to enable `cloudtrace.googleapis.com`/`telemetry.googleapis.com` or to grant a trace-related IAM role for this.
 - **Trace storage auto-provisions** on first successful span write -- never tell the user to manually enable it in the console, and never script it.
 - **Defaults to the Java Agent.** Only hand-roll manual OpenTelemetry instrumentation if the user gives a specific reason.
-- **One `CMD` per Dockerfile.** Merge Cloud Profiler flags into the same `CMD` as the tracing agent flags if present.
+- **One JVM launch entrypoint per Dockerfile, and it's `ENTRYPOINT`, not `CMD`** -- Entur's Docker golden path launches the JVM via `ENTRYPOINT` (see [docker.md](../../guides/reference/docker.md)). If the project also uses [Cloud Profiler](../../guides/reference/profiler.md) (its own `-javaagent`/`-D` flags for the profiler agent), merge those into the same `ENTRYPOINT` array as the tracing flags rather than adding a second launch mechanism.
