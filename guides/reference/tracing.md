@@ -1,6 +1,6 @@
 # Distributed Tracing
 
-Distributed tracing lets you follow a single request as it moves through a service and out to its dependencies, so you can see where time is spent and where failures occur. At Entur, trace spans are exported to Google Cloud Trace in a shared host project (ent-kub-<env>), rather than each team's own project — this is what makes it possible to correlate a trace with the logs from the same request. 
+Distributed tracing lets you follow a single request as it moves through a service and out to its dependencies, so you can see where time is spent and where failures occur. At Entur, trace spans are exported to Google Cloud Trace in a shared host project (ent-kub-<env>), rather than each team's own project — this is what makes it possible to correlate a trace with the logs from the same request.
 
 ## How to instrument an Entur service with OpenTelemetry tracing and export spans to Google Cloud Trace.
 
