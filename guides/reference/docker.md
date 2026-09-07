@@ -20,9 +20,9 @@ Prefer **distroless** or **slim-musl** images. Use Alpine only when you need a s
 | Language | Recommended | Alternative |
 |----------|------------|-------------|
 | Java/Kotlin | `gcr.io/distroless/java25-debian13:nonroot` | `eclipse-temurin:25-jre-alpine` |
-| Go | `gcr.io/distroless/static-debian12:nonroot` | `golang:1.25-alpine` (build only) |
-| Node.js | `gcr.io/distroless/nodejs24-debian12` | `node:24-alpine` |
-| Python | `gcr.io/distroless/python3-debian12` | `python:3.12-slim` |
+| Go | `gcr.io/distroless/static-debian13:nonroot` | `golang:1.26-alpine` (build only) |
+| Node.js | `gcr.io/distroless/nodejs24-debian13` | `node:24-alpine` |
+| Python | `gcr.io/distroless/python3-debian13` | `python:3.13-slim` |
 
 Use distroless runtime images by default. Use Alpine-based images only when the container needs a shell, package manager, or runtime debugging tools. Do **not** use Liberica as the Golden Path Java/Kotlin runtime image. ALWAYS pin base image versions to specific tags.
 
@@ -34,13 +34,13 @@ Four stages: bundler (OpenAPI spec) → builder (compile) → layers (extract la
 
 ```dockerfile
 # Stage 1: Bundle OpenAPI specification (contract-first only)
-FROM node:25-slim AS bundler
+FROM node:24-slim AS bundler
 WORKDIR /app
 COPY specs specs
 RUN npx @redocly/cli bundle specs/products.yaml --output specs/openapi.json
 
 # Stage 2: Build the application
-FROM gradle:9.3.1-jdk25-alpine AS builder
+FROM gradle:9.6.1-jdk25-alpine AS builder
 WORKDIR /app
 COPY build.gradle.kts settings.gradle.kts ./
 COPY gradle/libs.versions.toml gradle/libs.versions.toml
@@ -105,7 +105,7 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 
 ```dockerfile
 # Build stage
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
@@ -113,7 +113,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server ./cmd/my-service
 
 # Runtime stage
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM gcr.io/distroless/static-debian13:nonroot
 COPY --from=builder /app/server /server
 EXPOSE 8080
 ENTRYPOINT ["/server"]
@@ -122,12 +122,12 @@ ENTRYPOINT ["/server"]
 ### Python
 
 ```dockerfile
-FROM python:3.12-slim AS builder
+FROM python:3.13-slim AS builder
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-FROM python:3.12-slim
+FROM python:3.13-slim
 WORKDIR /app
 COPY --from=builder /install /usr/local
 COPY . .

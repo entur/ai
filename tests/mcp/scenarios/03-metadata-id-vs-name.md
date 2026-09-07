@@ -13,7 +13,7 @@ Search the Entur knowledge base to answer:
 
 Q: In an Entur self-service manifest, what is the difference between `metadata.id` and `metadata.name`? Which one drives GCP project naming, and which one becomes the Kubernetes namespace?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 

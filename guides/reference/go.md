@@ -8,10 +8,10 @@ Go conventions for Entur applications. Read [CONVENTIONS.md](../../CONVENTIONS.m
 
 ## Runtime and Build
 
-- **Go version**: latest stable (currently 1.25+)
+- **Go version**: latest stable (currently 1.26+)
 - **Modules**: Go modules (`go.mod`)
 - **Linting**: `golangci-lint`
-- **Framework**: standard library `net/http` (Go 1.25+ routing) or minimal frameworks only
+- **Framework**: standard library `net/http` (Go 1.26+ routing) or minimal frameworks only
 
 ## Project Structure
 
@@ -42,14 +42,14 @@ my-service/
 See [docker.md](docker.md) for Dockerfile conventions and base images. Go-specific example:
 
 ```dockerfile
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server ./cmd/my-service
 
-FROM gcr.io/distroless/static-debian12:nonroot
+FROM gcr.io/distroless/static-debian13:nonroot
 COPY --from=builder /app/server /server
 EXPOSE 8080
 ENTRYPOINT ["/server"]

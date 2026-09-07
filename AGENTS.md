@@ -75,6 +75,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 |------------|------|
 | Bootstrap a new service | [playbooks/bootstrap-service.md](guides/playbooks/bootstrap-service.md) |
 | Set up CI/CD workflows | Load skill: [`skills/setup-cicd-workflows/SKILL.md`](skills/setup-cicd-workflows/SKILL.md) |
+| Set up AI agent config for an existing repo | Load skill: [`skills/setup-agent-config/SKILL.md`](skills/setup-agent-config/SKILL.md) |
 | Introduce or recommend IT systems and software | [it-systems-policy.md](it-systems-policy.md) |
 | Provision Postgres | [playbooks/add-postgres.md](guides/playbooks/add-postgres.md) |
 | Add Redis (caching, locks, dedup) | [playbooks/add-redis.md](guides/playbooks/add-redis.md) |
@@ -120,7 +121,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | Code review | [reference/code-review.md](guides/reference/code-review.md) |
 | Markdown format | [reference/markdown.md](guides/reference/markdown.md) |
 | Writing documentation | [reference/documentation.md](guides/reference/documentation.md) |
-| UI / Design system / Branding | Load skill: `https://raw.githubusercontent.com/entur/design-system/main/skills/entur-linje/SKILL.md` |
+| UI / Design system / Branding | Use the `entur-linje` skill if the `entur-linje` plugin is installed. Otherwise load `https://raw.githubusercontent.com/entur/design-system/main/skills/entur-linje/SKILL.md` |
 
 ## Critical Rules
 

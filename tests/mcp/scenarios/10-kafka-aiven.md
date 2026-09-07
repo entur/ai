@@ -12,7 +12,7 @@ Search the Entur knowledge base to answer:
 
 Q: I need a Spring Boot service to produce and consume Kafka events at Entur. What is the recommended setup -- which Kafka cluster, and is there a Spring starter I should use?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 
