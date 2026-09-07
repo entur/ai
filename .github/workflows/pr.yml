@@ -42,7 +42,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Auto-fix markdown
-        run: npx --yes markdownlint-cli2@0.17.2 --fix "**/*.md" "!tmp/**" "!CHANGELOG.md"
+        run: npx --yes markdownlint-cli2@0.23.2 --fix "**/*.md" "!tmp/**" "!CHANGELOG.md"
 
       - name: Commit formatting fixes (same-repo PRs only)
         # Same-repo PR + diff present + not a fork → push the fix back.

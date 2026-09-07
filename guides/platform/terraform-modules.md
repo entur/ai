@@ -11,7 +11,7 @@ Always use Entur shared modules instead of raw `google_*` resources for managed 
 | [terraform-google-init](https://github.com/entur/terraform-google-init) | Platform and app discovery (required by other modules) | `github.com/entur/terraform-google-init//modules/init?ref=v1` |
 | [terraform-google-sql-db](https://github.com/entur/terraform-google-sql-db) | Cloud SQL (PostgreSQL) | `github.com/entur/terraform-google-sql-db//modules/postgresql?ref=v1` |
 | [terraform-google-memorystore](https://github.com/entur/terraform-google-memorystore) | Memorystore (Redis) | `github.com/entur/terraform-google-memorystore//modules/redis?ref=v2` |
-| [terraform-google-cloud-storage](https://github.com/entur/terraform-google-cloud-storage) | Cloud Storage buckets | `github.com/entur/terraform-google-cloud-storage//modules/bucket?ref=v0.2.2` |
+| [terraform-google-cloud-storage](https://github.com/entur/terraform-google-cloud-storage) | Cloud Storage buckets | `github.com/entur/terraform-google-cloud-storage//modules/bucket?ref=v0.2.4` |
 
 ## Directory Structure
 
@@ -230,7 +230,7 @@ Buckets are private by default. Avoid making them public unless absolutely neces
 
 ```hcl
 module "cloud-storage" {
-  source = "github.com/entur/terraform-google-cloud-storage//modules/bucket?ref=v0.2.2"
+  source = "github.com/entur/terraform-google-cloud-storage//modules/bucket?ref=v0.2.4"
   init   = module.init
 }
 

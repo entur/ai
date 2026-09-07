@@ -13,7 +13,7 @@ Search the Entur knowledge base to answer:
 
 Q: For a `GoogleCloudDataProject` with `metadata.id: routes` that needs to share data externally, what GCP project IDs are created? How does the naming differ from an internal-only data project?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 

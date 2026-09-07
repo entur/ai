@@ -12,7 +12,7 @@ Search the Entur knowledge base to answer:
 
 Q: I need fine-grained authorization in my Entur service (per-user, per-resource permissions). What is the Permission Store, and what is the Permission Client used for?
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
 

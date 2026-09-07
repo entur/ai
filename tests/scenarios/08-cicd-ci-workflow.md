@@ -52,7 +52,7 @@ Generate the complete `.github/workflows/ci.yml` file for this project. Output O
   "must_match": [
     "distribution.*temurin",
     "java-version.*25",
-    "setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e",
+    "setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92",
     "build_artifact_path.*app/build/distributions",
     "app/build/test-results/test",
     "app/build/distributions/app\\.tar",

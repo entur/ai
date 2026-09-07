@@ -1,8 +1,8 @@
 # MCP Knowledge-Base Quality Tests
 
-Black-box tests for the [`entur-kb` MCP server](../../../ai-portal-mcp) and the
+Black-box tests for the [`entur-kompass` MCP server](https://github.com/entur/kompass) and the
 markdown documents in this repo that feed it. Each scenario sends a natural-language
-question through `mcp__entur-kb__search_entur_kb`, then asserts on (a) which docs
+question through `mcp__entur-kompass__search_entur_kb`, then asserts on (a) which docs
 the MCP surfaced and (b) whether Claude can extract the right answer from those
 docs alone.
 
@@ -43,7 +43,7 @@ cd tests
 
 ```text
 --dir mcp/scenarios
---allowed-tools "mcp__entur-kb__search_entur_kb,mcp__entur-kb__report_search_feedback"
+--allowed-tools "mcp__entur-kompass__search_entur_kb,mcp__entur-kompass__report_feedback"
 --system-prompt "<MCP-only prompt -- forbids Read/Grep/Glob and prior knowledge>"
 ```
 
@@ -54,10 +54,10 @@ You can pass any of the runner's flags through to the wrapper
 ## Prerequisites
 
 1. `claude` CLI installed (`npm install -g @anthropic-ai/claude-code`).
-2. The `entur-kb` MCP added to your Claude CLI config:
+2. The `entur-kompass` MCP added to your Claude CLI config:
 
    ```bash
-   claude mcp add --scope user --transport http entur-kb https://ki.entur.io/mcp
+   claude mcp add --scope user --transport http entur-kompass https://ki.entur.io/mcp
    ```
 
    First invocation opens a browser for Google sign-in; cached after that.
@@ -97,7 +97,7 @@ Search the Entur knowledge base to answer:
 
 Q: <natural-language question>
 
-Use the mcp__entur-kb__search_entur_kb tool to research this. Do not call any
+Use the mcp__entur-kompass__search_entur_kb tool to research this. Do not call any
 other tool. Do not use prior knowledge of Entur.
 
 Then output EXACTLY this format and nothing else:
@@ -115,7 +115,7 @@ The `top_results:` line lets assertions target document IDs like
 key facts (`ent-{appid}-{env}`, `terraform-google-sql-db`, etc).
 
 The template intentionally does **not** ask Claude to call
-`mcp__entur-kb__report_search_feedback`. An earlier version did, and the
+`mcp__entur-kompass__report_feedback`. An earlier version did, and the
 behavior was that Claude would call the feedback tool as its last action and
 then end the turn with an empty `result` field (no final assistant text),
 which made every scenario "fail" with empty output. Tests should not pollute
