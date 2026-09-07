@@ -20,7 +20,7 @@ Wire distributed tracing into an Entur Kotlin/Java service so every inbound requ
 
 ## Step 1: Instrument the application
 
-### OpenTelemetry Java Agent (default; do not hand-instrument without a specific reason)
+OpenTelemetry Java Agent, do not hand-instrument without a specific reason.
 
 Attach the agent via `-javaagent` in the existing Dockerfile: add one temporary stage that downloads the JARs, and merge the flags into the final stage's `ENTRYPOINT` -- do not touch any other existing stages (bundler, builder, layers, etc.) and do not introduce a `CMD`. Entur's Docker golden path ([docker.md](../../guides/reference/docker.md)) always launches the JVM via `ENTRYPOINT`, both in the preferred layered-JAR pattern and the single-jar Alpine alternative, so the agent flags belong in that array, prepended before the existing launch arguments.
 
@@ -101,13 +101,16 @@ Steps 1-3 are everything this skill can do by editing the repo. Verifying traces
 2. Send a few requests to the deployed service to generate spans.
 3. Check **Monitoring → Trace → Trace Explorer** in the GCP Console under the shared host project `ent-kub-<env>` (not the application project, traces always land in the host project). Since traces from multiple applications land in the same project, filter Trace Explorer by `service.name` to scope the view to just this service.
 4. If no spans show up: trace storage provisions automatically the first time a span is successfully written to the project, and it isn't instant -- give it a few minutes before assuming something is broken. Also double check the sampler env var actually reached the deployed container for that environment (a common miss is setting it in the wrong Helm values file).
+5. Sampling rate is per environment, (100% for dev, and 10% for prd and tst) so do not expect to see every request in prd.
 
 Also state in the summary: the OpenTelemetry Java agent (`v2.29.0`) and gcp-auth-extension (`1.58.0-alpha`) versions were pinned as-is, not checked against upstream for something newer, and are set in the Dockerfile's `otel` build stage if the user wants to bump them later.
 
 ## Critical Rules
 
-- **Traces land in the shared host project `ent-kub-<env>`**, never the application's own project -- this applies to Kubernetes and Cloud Run alike. No `GCP_PROJECT_ID`/`GOOGLE_CLOUD_PROJECT` env var configuration is needed for tracing to work.
+- **Traces land in the shared host project `ent-kub-<env>`**, never the application's own project -- this applies to Kubernetes. No `GCP_PROJECT_ID`/`GOOGLE_CLOUD_PROJECT` env var configuration is needed for tracing to work.
 - **IAM roles and the required Google Cloud APIs are provisioned automatically** through the common Helm chart. Never add Terraform to enable `cloudtrace.googleapis.com`/`telemetry.googleapis.com` or to grant a trace-related IAM role for this.
+- **The common Helm chart injects OTEL_EXPORTER_OTLP_ENDPOINT** (and any other exporter routing config) pointing at the shared host project's collector. Never add this env var yourself in a values-kub-ent-<env>.yaml file - if you see it already present when appending the sampler vars, leave it, but inform the user; if a user asks you to add or change the endpoint, tell them that's owned by the common chart, not this skill.
 - **Trace storage auto-provisions** on first successful span write -- never tell the user to manually enable it in the console, and never script it.
-- **Defaults to the Java Agent.** Only hand-roll manual OpenTelemetry instrumentation if the user gives a specific reason.
-- **One JVM launch entrypoint per Dockerfile, and it's `ENTRYPOINT`, not `CMD`** -- Entur's Docker golden path launches the JVM via `ENTRYPOINT` (see [docker.md](../../guides/reference/docker.md)). If the project also uses [Cloud Profiler](../../guides/reference/profiler.md) (its own `-javaagent`/`-D` flags for the profiler agent), merge those into the same `ENTRYPOINT` array as the tracing flags rather than adding a second launch mechanism.
+- **Defaults to the Java Agent.** Never hand-roll manual OpenTelemetry instrumentation, if the user asks for it tell them that is out of scope for this skill.
+- **One `CMD` per Dockerfile.** Merge Cloud Profiler flags into the same `CMD` as the tracing agent flags if present.
+- **OTEL_SERVICE_NAME is set automatically by the common Helm chart** (derived from the app/release name), not by this skill. Don't add it to the values file.
