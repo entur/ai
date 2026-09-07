@@ -86,7 +86,7 @@ Only create the single env file this way -- do not scaffold `helm/<app>/Chart.ya
 
 ## Step 3: Correlate logs with traces
 
-For Java/Kotlin Spring Boot services, no manual work is needed -- **provided the project is on `entur/cloud-logging` v7.1.0 or later**. Only 7.1.0+ injects the trace/span fields via Micrometer Tracing; earlier versions do not support this correlation. Together with `spring-boot-starter-gcp-web`, that's all that's required for standard SLF4J logging to pick up the trace/span ID on every log line within a traced request.
+For Java/Kotlin Spring Boot services, no manual work is needed -- **provided the project is on `entur/cloud-logging` v7.1.0 or later**. Only 7.1.0 or newer versions injects the trace/span fields via Micrometer Tracing; earlier versions do not support this correlation. Together with `spring-boot-starter-gcp-web`, that's all that's required for standard SLF4J logging to pick up the trace/span ID on every log line within a traced request.
 
 Check the `entur/cloud-logging` version pinned in `build.gradle.kts` (or the version catalog):
 
