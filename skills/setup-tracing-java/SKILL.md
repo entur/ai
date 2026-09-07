@@ -112,5 +112,5 @@ Also state in the summary: the OpenTelemetry Java agent (`v2.29.0`) and gcp-auth
 - **The common Helm chart injects OTEL_EXPORTER_OTLP_ENDPOINT** (and any other exporter routing config) pointing at the shared host project's collector. Never add this env var yourself in a values-kub-ent-<env>.yaml file - if you see it already present when appending the sampler vars, leave it, but inform the user; if a user asks you to add or change the endpoint, tell them that's owned by the common chart, not this skill.
 - **Trace storage auto-provisions** on first successful span write -- never tell the user to manually enable it in the console, and never script it.
 - **Defaults to the Java Agent.** Never hand-roll manual OpenTelemetry instrumentation, if the user asks for it tell them that is out of scope for this skill.
-- **One `CMD` per Dockerfile.** Merge Cloud Profiler flags into the same `CMD` as the tracing agent flags if present.
+- **One `JVM invocation` per Dockerfile.** Merge Cloud Profiler flags or any other JVM flags into the same `ENTRYPOINT` as the tracing agent flags if present.
 - **OTEL_SERVICE_NAME is set automatically by the common Helm chart** (derived from the app/release name), not by this skill. Don't add it to the values file.
