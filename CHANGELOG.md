@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.1](https://github.com/entur/ai/compare/v0.2.0...v0.2.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* Update api guidelines related stuff ([#80](https://github.com/entur/ai/issues/80)) ([d86f550](https://github.com/entur/ai/commit/d86f5501a67c47c4db1c63b20175d65424731f9e))
+
+
+### Documentation
+
+* **alerting:** align PagerDuty routing with so-incident-management ([#84](https://github.com/entur/ai/issues/84)) ([80a53d6](https://github.com/entur/ai/commit/80a53d68b4d13bd2b57033433e58601787f4569b))
+
 ## [0.2.0](https://github.com/entur/ai/compare/v0.1.2...v0.2.0) (2026-08-07)
 
 ### Features
