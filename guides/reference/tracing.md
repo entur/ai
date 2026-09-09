@@ -54,6 +54,7 @@ The two JARs serve different purposes and must both be present:
 If you are also using the Google Cloud Profiler, see [profiler.md](profiler.md). The Profiler agent also runs as a JVM flag, so you need to merge the flags from both guides into a single `CMD` — do not have two separate `CMD` instructions, as only the last one takes effect.
 
 ### 1.2 Manuel Instrumentation
+
 For manual instrumentation look at OpenTelemetry’s documentation [Java] (https://opentelemetry.io/docs/languages/java/)
 
 ## 2. Sampling
@@ -99,7 +100,7 @@ Each log entry must also include the required fields `timestamp` (ISO 8601), `se
 
 For more details, see [logging.md](logging.md).
 
-**For Java and Kotlin Spring Boot services, no manual work is needed**. If [entur/cloud-logging](https://github.com/entur/cloud-logging) (v7.1.0) together with `spring-boot-starter-gcp-web` is set up, those two handle all of this automatically. 
+**For Java and Kotlin Spring Boot services, no manual work is needed**. If [entur/cloud-logging](https://github.com/entur/cloud-logging) (v7.1.0) together with `spring-boot-starter-gcp-web` is set up, those two handle all of this automatically.
 
 ### Go
 
