@@ -102,8 +102,6 @@ For more details, see [logging.md](logging.md).
 
 **For Java and Kotlin Spring Boot services, no manual work is needed**. If [entur/cloud-logging](https://github.com/entur/cloud-logging) (v7.1.0) together with `spring-boot-starter-gcp-web` is set up, those two handle all of this automatically.
 
-### Go
-
 **For Go services, start by installing [entur/go-logging](https://github.com/entur/go-logging)**: `go get github.com/entur/go-logging`. Use `entur/go-logging` and extract the span context from the request context at the start of each handler. Pass the trace and spanId fields on every log call inside that handler:
 
 ```go
