@@ -74,7 +74,7 @@ These labels are available on most metrics from Kubernetes workloads:
 | Label | Description | Example |
 |-------|-------------|---------|
 | `app` | Application name | `my-service` |
-| `kubernetes_namespace` | Namespace the pod runs in | `my-service` |
+| `kubernetes_namespace` | Namespace of the scraped pod -- your namespace on application metrics only (see [Pick the Namespace Label by Metric Source](#pick-the-namespace-label-by-metric-source)) | `my-service` |
 | `cluster_environment` | Environment | `dev`, `tst`, `prd` |
 | `prometheus_group` | Cluster identifier | `kub-ent-prd-001` |
 
@@ -92,9 +92,23 @@ These labels are available on most metrics from Kubernetes workloads:
 | Logging (logback) | `logback_` | Log details |
 | Custom application metrics | Varies | Business-specific counters, gauges, histograms |
 
+### Pick the Namespace Label by Metric Source
+
+Filter each metric on the label that holds **your** namespace. The label depends on the metric source:
+
+| Metric source | Prefix / pattern | Filter on |
+|---------------|------------------|-----------|
+| Your application (scraped from your pods) | `http_*`, `jvm_*`, custom metrics | `kubernetes_namespace="my-service"` |
+| kube-state-metrics | `kube_*` | `exported_namespace="my-service"` |
+| cAdvisor / kubelet | `container_*` | `namespace="my-service"` |
+
+Do **not** filter `kube_*` metrics on `namespace` or `kubernetes_namespace`. Prometheus scrapes kube-state-metrics like any other pod, so on `kube_*` series both labels hold `prometheus` -- the namespace kube-state-metrics runs in -- and your namespace is in `exported_namespace`. A wrong label raises no error: the query returns no data and the alert never fires. An alert that combines sources, such as memory usage against the memory limit, uses a different label on each side.
+
+Before saving an alert rule, run its query in Grafana Explore against the `prometheus-thanos` data source and confirm it returns data.
+
 ### PromQL Examples for Common Alerts
 
-All examples below target production. Adjust `prometheus_group`, `kubernetes_namespace`, and thresholds for your service.
+All examples below target production. Adjust `prometheus_group`, the namespace value (on the label for each metric source -- see [Pick the Namespace Label by Metric Source](#pick-the-namespace-label-by-metric-source)), and thresholds for your service.
 
 #### High 5xx Error Rate
 
@@ -133,7 +147,7 @@ Fires when a container restarts more than 3 times in 15 minutes:
 ```promql
 increase(kube_pod_container_status_restarts_total{
   prometheus_group="kub-ent-prd-001",
-  namespace="my-service"
+  exported_namespace="my-service"
 }[15m]) > 3
 ```
 
@@ -151,7 +165,7 @@ Fires when container memory usage exceeds 85% of its limit:
 /
   sum by (pod) (kube_pod_container_resource_limits{
     prometheus_group="kub-ent-prd-001",
-    namespace="my-service",
+    exported_namespace="my-service",
     resource="memory"
   })
 ) > 0.85
@@ -184,7 +198,7 @@ Fires when a pod is not ready for 3 minutes:
 ```promql
 kube_pod_status_ready{
   prometheus_group="kub-ent-prd-001",
-  namespace="my-service",
+  exported_namespace="my-service",
   condition="true"
 } == 0
 ```
