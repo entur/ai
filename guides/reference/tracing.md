@@ -121,7 +121,7 @@ Apply the same pattern to error and warning log lines within the same handler. H
 
 1. Go to [GCP Console](https://console.cloud.google.com/welcome).
 2. Select the host project in the top left corner - `ent-kub-<env>`.
-3. Open the navigation menu on the left, select **Monitoring → Trace → Trace Explorer**.
+3. Open the navigation menu on the left, select **Monitoring → Trace Explorer**.
 
 Trace storage (the `_Trace` bucket) should provision automatically the first time a trace span is successfully written to the project. It's not instant, so don't expect it to appear in the Trace Explorer console within seconds - give it a few minutes.
 

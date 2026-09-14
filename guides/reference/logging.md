@@ -115,7 +115,7 @@ Use standard `logging` with `json_log_formatter.JSONFormatter()` for structured 
 ### Distributed Tracing
 
 Once distributed tracing and cloud logging is set up for your application, logs and traces are correlated automatically and no manual field extraction is needed. Cloud Logging joins logs to traces when a structured log entry contains the `logging.googleapis.com/trace` trace ID and `logging.googleapis.com/spanId`. Include `logging.googleapis.com/trace_sampled` when sampling information is available.
-Version 7.1.0 supports both Java tracing setups documented in [tracing.md](tracing.md).
+Version 7.1.0 supports tracing setups documented in [tracing.md](tracing.md).
 
 Do not copy trace fields into MDC manually. Use standard SLF4J inside the traced request; cloud-logging selects the correct mapping automatically. Its legacy correlation-ID fallback remains active when no OpenTelemetry trace context exists.
 
@@ -123,7 +123,7 @@ See [tracing.md](tracing.md) for instrumentation, propagation, and sampling.
 
 ## 5. View logs
 
-Open **GCP Console → Logging → Logs Explorer** in the cluster host project (`ent-kub-<env>`), not the application project. Kubernetes logs are written to the cluster host project by the kubelet.
+Open **GCP Console → Monitoring → Logs Explorer** in the cluster host project (`ent-kub-<env>`), not the application project. Kubernetes logs are written to the cluster host project by the kubelet.
 
 Filter logs using fields such as:
 
