@@ -105,6 +105,29 @@
       "homepage": "https://linje.entur.no",
       "repository": "https://github.com/entur/design-system",
       "license": "EUPL-1.2"
+    },
+    {
+      "name": "entur-uniformen",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/entur/uniformen.git",
+        "path": "skills",
+        "ref": "main"
+      },
+      "strict": false,
+      "skills": [
+        "./entur-uniformen"
+      ],
+      "description": "Uniformen: Entur's shared header and footer for B2B and partner-facing portals. Integrating @entur/uniformen server-side and language contracts, and the CSP the rendered chrome needs. Sourced directly from entur/uniformen so there is no vendored copy to drift.",
+      "category": "frontend",
+      "keywords": ["entur", "uniformen", "header", "footer", "micro-frontend", "portal", "ssr"],
+      "author": {
+        "name": "Team Portal",
+        "email": "support@entur.org"
+      },
+      "homepage": "https://uniformen.entur.no",
+      "repository": "https://github.com/entur/uniformen",
+      "license": "EUPL-1.2"
     }
   ]
 }

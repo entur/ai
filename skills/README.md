@@ -95,6 +95,7 @@ gh skill install entur/ai
 | [setup-cicd-workflows](setup-cicd-workflows/) | Generate CI/CD GitHub Actions workflows using Entur reusable workflows |
 | [scr-situation-complication-resolution](scr-situation-complication-resolution/) | Structure problems and decisions in SCR format for leadership |
 | [entur-linje](https://github.com/entur/design-system/tree/main/skills) | Entur Linje design system: `@entur/*` components, design tokens, brand identity, universell utforming, package upgrades. Lives in `entur/design-system`; install via the `entur-linje` plugin |
+| [entur-uniformen](https://github.com/entur/uniformen/tree/main/skills) | Uniformen: Entur's shared header and footer for B2B and partner-facing portals — `@entur/uniformen` integration and language contracts, and the CSP the rendered chrome needs. Lives in `entur/uniformen`; install via the `entur-uniformen` plugin |
 
 ## 🤝 Contributing
 
