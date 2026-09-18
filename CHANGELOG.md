@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/entur/ai/compare/v0.2.1...v0.3.0) (2026-09-18)
+
+### Features
+
+* **skills:** add uniformen skill to the marketplace ([#82](https://github.com/entur/ai/issues/82)) ([15e16ca](https://github.com/entur/ai/commit/15e16ca7a873beb89e83a97191341375cd505fca))
+* update logging.md and tracing.md to align with newest guidelines. ([#79](https://github.com/entur/ai/issues/79)) ([2705ef6](https://github.com/entur/ai/commit/2705ef6b2752deb9553e8f2d3ea01a0b2d2c32a3))
+
 ## [0.2.1](https://github.com/entur/ai/compare/v0.2.0...v0.2.1) (2026-09-09)
 
 ### Bug Fixes
