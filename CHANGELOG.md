@@ -2,7 +2,6 @@
 
 ## [0.3.0](https://github.com/entur/ai/compare/v0.2.1...v0.3.0) (2026-09-18)
 
-
 ### Features
 
 * **skills:** add uniformen skill to the marketplace ([#82](https://github.com/entur/ai/issues/82)) ([15e16ca](https://github.com/entur/ai/commit/15e16ca7a873beb89e83a97191341375cd505fca))
