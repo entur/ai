@@ -74,6 +74,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | I want to… | Read |
 |------------|------|
 | Bootstrap a new service | [playbooks/bootstrap-service.md](guides/playbooks/bootstrap-service.md) |
+| Run a security review | Load skill: [`skills/entur-ai-security-review/SKILL.md`](skills/entur-ai-security-review/SKILL.md) |
 | Set up CI/CD workflows | Load skill: [`skills/setup-cicd-workflows/SKILL.md`](skills/setup-cicd-workflows/SKILL.md) |
 | Set up AI agent config for an existing repo | Load skill: [`skills/setup-agent-config/SKILL.md`](skills/setup-agent-config/SKILL.md) |
 | Introduce or recommend IT systems and software | [it-systems-policy.md](it-systems-policy.md) |
