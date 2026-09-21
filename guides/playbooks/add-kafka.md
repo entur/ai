@@ -28,7 +28,7 @@ A Spring Boot service that produces and/or consumes Avro (or Protobuf) messages 
 
 7. **Configure retry + DLT.** Enable non-blocking retry (`entur.kafka.retry.enabled: true`) with exponential backoff. Add fatal exceptions (e.g. `JsonParseException`) so poison messages skip retries. Implement a DLT handler bean. See [entur-kafka-starter.md](../platform/entur-kafka-starter.md#error-handling-and-retry).
 
-8. **Add idempotency for at-least-once.** Use Redis `SET NX EX` keyed by event ID to deduplicate redelivered messages. See [add-redis.md](add-redis.md) and [entur-kafka-starter.md](../platform/entur-kafka-starter.md#idempotent-consumer-deduplication).
+8. **Add idempotency for at-least-once.** Check the Redis dedup key before processing, but only mark it done *after* processing succeeds -- marking before processing silently drops the event if a crash follows. See [add-redis.md](add-redis.md) and [entur-kafka-starter.md](../platform/entur-kafka-starter.md#idempotent-consumer-deduplication) for the full pattern, including the transactional-inbox alternative when the business mutation is DB-backed.
 
 9. **Wire metrics.** The starter auto-registers Micrometer listeners. Add `@Timed(value = KAFKA_CONSUMER_PROCESS_TIME, ...)` and record consumption delay with `KAFKA_CONSUMER_CONSUME_DELAY`. See [observability.md](../reference/observability.md#kafka-consumer-metrics).
 

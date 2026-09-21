@@ -145,11 +145,14 @@ not cover. Read the raw output (use `--verbose` and inspect with a manual
 `claude -p`, or temporarily relax the runner to print on pass) to surface
 sub-topic gaps that won't show up as red.
 
-As of writing, `answer_domain` reliably reports the gap: `common.ingress.host`
-and the `*.entur.io` hostname pattern are visible in a `common-helm.md`
-snippet, but no playbook explains the human side (request flow, DNS, TLS
-certificate, platform-team handoff). That is the documentation gap this test
-exists to keep in front of us.
+`guides/playbooks/add-custom-domain.md` now documents the human side of
+custom-domain setup (hostname pattern per environment, Google-managed TLS,
+and that the GKE golden path needs no platform-team ticket), and scenario
+16's assertions require that playbook's doc ID and those facts to appear in
+`answer_domain`. If this scenario starts failing on the domain sub-topic
+again, that is the signal a real regression (stale doc, broken retrieval, or
+the MCP index falling behind the tracked repository) needs investigating --
+it is no longer an expected, accepted gap.
 
 ## Reading failures
 
@@ -164,5 +167,7 @@ exists to keep in front of us.
 
 Each MCP scenario costs roughly the same as a parent-suite scenario (~$0.03--0.08
 with Haiku, since the MCP call adds modest tokens beyond a single Read). The
-suite of ~15 scenarios runs in ~$0.80 with retries enabled. Cap with
-`--budget 1.50` if running cold.
+suite of 16 scenarios totals $1.70 (sum of declared `## Budget` values); with
+retries enabled (worst case, every scenario fails once), ~$3.40. Cap with
+`--budget 2.00` (or higher to cover retries) if running cold -- the default
+`--budget 1.00` is not enough to run the full suite.

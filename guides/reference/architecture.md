@@ -1,6 +1,6 @@
 # Architecture Standards
 
-Guidelines for application architecture at Entur. All services run on GKE in `europe-west1`.
+Guidelines for application architecture at Entur. The default runtime is GKE in `europe-west1`; a documented off-golden-path exception exists for stateless, request-bound services on Cloud Run — see [cloud-run-service.md](../playbooks/cloud-run-service.md).
 
 - **Target audience**: developers and AI agents making service architecture choices.
 - **Intent**: services are independently deployable, resilient, testable, and compatible with Entur platform operations.
@@ -54,9 +54,8 @@ Entur uses Apache Kafka on Aiven. Use **Avro** (default) or **Protobuf** with Co
 
 ### PostgreSQL Conventions
 
-- `snake_case` for table and column names
-- Singular table names: `route`, `stop_place`
-- Always include `id`, `created`, `changed` columns
+Table, column, and audit-column naming, indexing, and migration conventions live in one place: [sql.md](sql.md). Do not restate them here — the canonical rules are plural table names (`routes`, `stop_places`) with `id`, `created_at`, `updated_at` audit columns.
+
 - Use UUID/ULID for distributed systems or `Long` auto-increment for simpler domains
 - Use Flyway for migrations; prefix with version: `V1__create_route_table.sql`
 - Migrations must be backward-compatible (rolling deployments)

@@ -131,6 +131,8 @@ module "postgresql" {
 
 ### Default Machine Sizing
 
+**Last verified against `terraform-google-sql-db@v1`**: not yet recorded. Module defaults can change on a new tag without notice here -- if a `terraform plan` shows different values than this table, trust the plan, and update this line with the date and the module tag you compared against.
+
 | Environment | vCPU | Memory | High Availability |
 |-------------|------|--------|-------------------|
 | Non-production (dev, tst) | Shared | 600 MB | No (ZONAL) |

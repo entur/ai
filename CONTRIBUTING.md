@@ -115,7 +115,7 @@ What's right: imperative opening, wrong paths named and forbidden, runnable exam
 
 - Use outcome-oriented headings ("Provision a Cloud SQL instance"), not topic dumps ("Cloud SQL").
 - State target audience, intent, and scope at the top of each guide.
-- Follow [guides/reference/markdown.md](guides/reference/markdown.md) for formatting and run `npm run lint:md` before committing -- it auto-fixes trailing whitespace, list markers, blank lines, and other mechanical issues, then fails the PR check if any fix would still apply.
+- Follow [guides/reference/markdown.md](guides/reference/markdown.md) for formatting and run `npm run lint:md` before committing -- it auto-fixes trailing whitespace, list markers, blank lines, and other mechanical issues. CI runs the same fixer and auto-commits the result back to same-repository PRs; fork PRs don't get that auto-commit, so the PR check fails there if any fix would still apply.
 
 ## Comprehension Tests
 

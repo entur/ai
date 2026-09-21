@@ -133,4 +133,4 @@ resource.labels.pod_name="my-application-..."
 jsonPayload.logger="no.entur.myapp.RouteService"
 ```
 
-Traces land in the same host project (`ent-kub-<env>`), so logs and traces can be viewed together. See [tracing.md](tracing.md#view-traces).
+Traces land in the same host project (`ent-kub-<env>`), so logs and traces can be viewed together. See [tracing.md](tracing.md#4-view-traces).

@@ -39,6 +39,8 @@ High-volume periods: incidents affecting single services during high-volume peri
 
 ## SLA -- Operational Incidents (Operator Agreements)
 
+The `Avtale` numbers and deadlines below are sourced from Entur's operator agreements. **Last verified against the source agreement**: not yet recorded. These are contractual commitments -- if you are relying on this table for a live incident and are unsure it is current, confirm the deadline with the on-call lead or Virksomhetsstyring rather than assuming this table is up to date.
+
 | Avtale | Nivå | Communication requirements |
 |--------|------|---------------------------|
 | 4.3.5 | **A -- Kritisk** | Notify reporter within **30 minutes**. Work continuously until resolved or a satisfactory workaround is established. Affected parties informed immediately and kept updated. Status feedback to reporter within **2 hours** after case is closed or downgraded. |

@@ -357,6 +357,6 @@ spring:
     password: ${PGPASSWORD}
 ```
 
-`PGUSER`, `PGPASSWORD`, `DB_NAME` come from Kubernetes secrets created by `terraform-google-sql-db`.
+`PGUSER`/`PGPASSWORD` come from Kubernetes secrets created by `terraform-google-sql-db`. `DB_NAME` is **not** auto-injected -- set it explicitly as an application-owned ConfigMap value matching one of the module's `databases` entries. See [common-helm.md](../platform/common-helm.md#database-cloud-sql-proxy).
 
 For query performance, indexing, transactions, and migration patterns see [sql.md](sql.md).

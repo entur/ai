@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -88,16 +90,38 @@ func ParseScenario(path string) (Scenario, error) {
 		return s, fmt.Errorf("scenario %s: no JSON code block found in ## Assertions", path)
 	}
 
-	if err := json.Unmarshal([]byte(jsonBlock), &s.Assertions); err != nil {
+	// DisallowUnknownFields catches a misspelled key (e.g. "must_contains")
+	// silently parsing as an empty, always-passing assertion set instead of
+	// an error.
+	dec := json.NewDecoder(bytes.NewReader([]byte(jsonBlock)))
+	dec.DisallowUnknownFields()
+	if err := dec.Decode(&s.Assertions); err != nil {
 		return s, fmt.Errorf("scenario %s: invalid assertions JSON: %w", path, err)
+	}
+
+	total := len(s.Assertions.MustContain) + len(s.Assertions.MustNotContain) + len(s.Assertions.MustMatch)
+	if total == 0 {
+		return s, fmt.Errorf("scenario %s: assertions block has zero must_contain/must_not_contain/must_match entries -- a scenario with no assertions always passes without checking anything", path)
+	}
+
+	for _, pattern := range s.Assertions.MustMatch {
+		if _, err := regexp.Compile("(?i)" + pattern); err != nil {
+			return s, fmt.Errorf("scenario %s: invalid must_match regex %q: %w", path, pattern, err)
+		}
 	}
 
 	// Extract budget
 	budgetStr := extractH2Section(content, "Budget")
 	if budgetStr != "" {
-		if b, err := strconv.ParseFloat(strings.TrimSpace(budgetStr), 64); err == nil {
-			s.Budget = b
+		trimmed := strings.TrimSpace(budgetStr)
+		b, err := strconv.ParseFloat(trimmed, 64)
+		if err != nil {
+			return s, fmt.Errorf("scenario %s: invalid ## Budget value %q: %w", path, trimmed, err)
 		}
+		if math.IsNaN(b) || math.IsInf(b, 0) || b <= 0 {
+			return s, fmt.Errorf("scenario %s: ## Budget must be a positive finite number, got %v", path, b)
+		}
+		s.Budget = b
 	}
 
 	return s, nil

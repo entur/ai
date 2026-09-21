@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies that the agent picks the **application's** per-env project (`ent-<app>-<env>`) for Cloud Trace reads on a Kubernetes workload, **not** the cluster host project (`ent-kub-<env>`). This is the most-confused routing rule: Cloud Logging routes k8s logs to the cluster host project, but Cloud Trace (and Cloud Profiler) route to the application project regardless of runtime.
+Verifies that the agent picks the shared cluster host project (`ent-kub-<env>`) for Cloud Trace reads on a Kubernetes workload, matching where Cloud Logging writes the workload's k8s logs -- **not** the application's per-env project (`ent-<app>-<env>`). This is the most-confused routing rule: Cloud Trace and Cloud Logging both route Kubernetes signals to the shared host project (which is what lets a trace be correlated with its logs), while Cloud Profiler is the exception that reports to the application's own project regardless of runtime. Agents often assume all telemetry is app-scoped like Cloud Profiler, or that trace and log routing differ from each other.
 
 ## Prompt
 
@@ -22,22 +22,22 @@ Read the Entur AI documentation in this repository (start with AGENTS.md, then r
 
 - trace_project_id: <the GCP project ID to query Cloud Trace in>
 - logs_project_id: <the GCP project ID to query Cloud Logging in for the workload's stdout>
-- one_line_reason: <one sentence explaining why traces and k8s logs live in different projects>
+- one_line_reason: <one sentence explaining why traces and k8s logs land in the same project>
 
 ## Assertions
 
 ```json
 {
   "must_contain": [
-    "trace_project_id: ent-someapp-prd",
+    "trace_project_id: ent-kub-prd",
     "logs_project_id: ent-kub-prd"
   ],
   "must_not_contain": [
-    "trace_project_id: ent-kub-prd",
+    "trace_project_id: ent-someapp-prd",
     "logs_project_id: ent-someapp-prd"
   ],
   "must_match": [
-    "(workload|application|app).*(report|stamp|write|emit|own).*project|kubelet.*cluster|trace.*agent.*workload|exporter.*workload"
+    "(correlat|same project|shared|host project).*(trace|log)|(trace|log).*(correlat|same project|shared|host project)"
   ]
 }
 ```
