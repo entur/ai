@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/entur/ai/compare/v0.2.1...v0.3.0) (2026-09-21)
+
+### Features
+
+* **skills:** add AI security review ([#85](https://github.com/entur/ai/issues/85)) ([1d3cdf0](https://github.com/entur/ai/commit/1d3cdf027ad5628d8564b9af4f8f2b05107de71d))
+* **skills:** add uniformen skill to the marketplace ([#82](https://github.com/entur/ai/issues/82)) ([15e16ca](https://github.com/entur/ai/commit/15e16ca7a873beb89e83a97191341375cd505fca))
+* update logging.md and tracing.md to align with newest guidelines. ([#79](https://github.com/entur/ai/issues/79)) ([2705ef6](https://github.com/entur/ai/commit/2705ef6b2752deb9553e8f2d3ea01a0b2d2c32a3))
+
+### Documentation
+
+* **alerting:** filter kube_* metrics on exported_namespace ([#86](https://github.com/entur/ai/issues/86)) ([bf5fdc3](https://github.com/entur/ai/commit/bf5fdc33e70dce1c0b113d677ebce9c2a1f74a46))
+
 ## [0.2.1](https://github.com/entur/ai/compare/v0.2.0...v0.2.1) (2026-09-09)
 
 ### Bug Fixes
