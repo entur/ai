@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/entur/ai/compare/v0.3.0...v0.3.1) (2026-09-21)
+
+
+### Bug Fixes
+
+* resolve all P1/P2 findings from comprehensive repository review ([#88](https://github.com/entur/ai/issues/88)) ([37a891e](https://github.com/entur/ai/commit/37a891e1786cc8285ab41dd521815b157da8477a))
+
 ## [0.3.0](https://github.com/entur/ai/compare/v0.2.1...v0.3.0) (2026-09-21)
 
 ### Features
