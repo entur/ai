@@ -229,6 +229,77 @@ func TestScenarioPassed_Normal_80Percent(t *testing.T) {
 	}
 }
 
+func TestParseScenarioZeroAssertions(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "empty-assertions.md")
+	content := "# Test\n\n## Prompt\nHello\n\n## Assertions\n```json\n{}\n```\n"
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := ParseScenario(path)
+	if err == nil {
+		t.Error("expected error for a scenario with zero assertions -- it would always pass without checking anything")
+	}
+}
+
+func TestParseScenarioUnknownAssertionKey(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "typo.md")
+	// "must_contains" (extra "s") is a common typo for "must_contain".
+	content := "# Test\n\n## Prompt\nHello\n\n## Assertions\n```json\n{\"must_contains\": [\"hi\"]}\n```\n"
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := ParseScenario(path)
+	if err == nil {
+		t.Error("expected error for an unknown assertion key -- a typo should not silently parse as an empty, always-passing assertion set")
+	}
+}
+
+func TestParseScenarioMalformedBudget(t *testing.T) {
+	cases := []struct {
+		name   string
+		budget string
+	}{
+		{"not a number", "not-a-number"},
+		{"negative", "-0.10"},
+		{"zero", "0"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			path := filepath.Join(dir, "bad-budget.md")
+			content := "# Test\n\n## Prompt\nHello\n\n## Assertions\n```json\n{\"must_contain\": [\"hi\"]}\n```\n\n## Budget\n" + tc.budget + "\n"
+			if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+				t.Fatal(err)
+			}
+
+			_, err := ParseScenario(path)
+			if err == nil {
+				t.Errorf("expected error for budget %q", tc.budget)
+			}
+		})
+	}
+}
+
+func TestParseScenarioInvalidRegex(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "bad-regex.md")
+	// Unbalanced parenthesis -- not a valid regex.
+	content := "# Test\n\n## Prompt\nHello\n\n## Assertions\n```json\n{\"must_match\": [\"shortname.*(myapp\"]}\n```\n"
+	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := ParseScenario(path)
+	if err == nil {
+		t.Error("expected error for an invalid must_match regex, caught at parse time rather than surfacing only when the scenario runs")
+	}
+}
+
 func containsStr(s, substr string) bool {
 	return len(s) > 0 && len(substr) > 0 && len(s) >= len(substr) &&
 		(s == substr || len(s) > len(substr) && findSubstr(s, substr))

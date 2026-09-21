@@ -22,7 +22,13 @@ List the exact paths. Answer in 1-2 sentences based ONLY on the convention above
     "/health/liveness",
     "/health/readiness"
   ],
-  "must_not_contain": [],
+  "must_not_contain": [
+    "/healthz",
+    "/ready",
+    "/live ",
+    "/live,",
+    "/live."
+  ],
   "must_match": [
     "/health/liveness.*readiness|/health/readiness.*liveness"
   ]

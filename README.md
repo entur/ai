@@ -37,7 +37,7 @@ Read and follow the Entur platform standards at:
 https://github.com/entur/ai/blob/main/AGENTS.md
 
 When working on a specific task, also read the relevant guides
-linked from that file (e.g. java.md, helm.md, docker.md).
+linked from that file (e.g. java.md, common-helm.md, docker.md).
 
 ## Project-Specific
 
@@ -94,14 +94,15 @@ codex # then run /plugins to browse
 
 ## Install individual skills (any agent)
 
-For agents without a plugin marketplace, the `gh skill` extension for the `gh` CLI can pull skills directly from this repo:
+For agents without a plugin marketplace, a third-party `gh` CLI extension named `gh-skill` is reported to pull skills directly from a repo. **This repository has not identified or verified the maintainer, install command, or exact behavior of that extension** -- do not treat the commands below as confirmed:
 
 ```shell
-# Install the extension once via `gh extension install`, then:
+# Unverified — replace <owner> with the actual extension maintainer once confirmed
+gh extension install <owner>/gh-skill
 gh skill install entur/ai
 ```
 
-It walks the repo for `SKILL.md` files and lets you pick which to install into your local agent skill folder. See [`skills/README.md`](skills/README.md) for the full install matrix.
+Until a maintainer is confirmed, use the Claude Code / Codex marketplace above or manual upload instead. See [`skills/README.md`](skills/README.md) for the full install matrix.
 
 ## Agent Compatibility
 
@@ -138,15 +139,19 @@ guides/
     iam-roles.md                       # Approved IAM roles
     permission-store.md                # Permission Store + Permission Client
     entur-kafka-starter.md             # Entur Kafka Spring starter (Aiven)
+    state-management.md                # Terraform remote state backend
   playbooks/
+    README.md                          # Playbook index
     bootstrap-service.md               # New service on the platform
     add-postgres.md                    # Managed PostgreSQL
     add-redis.md                       # Memorystore Redis
     add-kafka.md                       # Aiven Kafka producer/consumer
     set-up-auth.md                     # OIDC + Permission Store authorization
     add-custom-domain.md               # *.entur.{no,io,org} hostname + managed TLS
+    cloud-run-service.md               # Cloud Run (documented exception to the GKE default)
     deploy-to-prd.md                   # Promote to production
     deprecate-service.md               # Retire an application
+    incident-response.md               # Critical incident handling
     local-dev.md                       # Run the service locally
   reference/
     java.md                            # Java standards (Spring Boot, Gradle)
@@ -155,22 +160,34 @@ guides/
     docker.md                          # Containerization
     api-design.md                      # REST and gRPC API design
     architecture.md                    # Architecture principles, lifecycle
+    alerting.md                        # Grafana, PromQL, PagerDuty
     logging.md                         # Structured logging
     observability.md                   # Health checks, metrics
     tracing.md                         # OpenTelemetry + Cloud Trace
     profiler.md                        # Cloud Profiler (CPU, heap)
     security.md                        # Secrets, scanning, IAM
+    sql.md                             # SQL / Postgres schema conventions
     code-review.md                     # Review checklist
     markdown.md                        # Markdown standards and linting
     documentation.md                   # Writing user-facing docs
 skills/
   README.md                            # Skill catalogue, usage guide, how to contribute
   entur-project-bootstrap/             # Bootstrap a new app (self-service, Helm, TF, Docker, CI/CD)
+  entur-ai-security-review/            # Evidence-backed security review
+  entur-conventions/                   # Thin router that fetches guides on demand
+  scr-situation-complication-resolution/  # SCR writing format
+  setup-agent-config/                  # AI agent config for an existing repo
   setup-cicd-workflows/                # Generate CI/CD workflows by language
+plugins/
+  <name>/.claude-plugin/plugin.json    # Claude Code plugin manifest (one per skill)
+  <name>/.codex-plugin/plugin.json     # Codex CLI plugin manifest (one per skill)
+  <name>/skills/<skill-name>           # Symlink into the canonical skills/ directory
 tests/
   README.md                            # Test usage guide and how to add scenarios
   main.go                              # Test runner (Go, stdlib only)
-  scenarios/                           # Test scenarios (one .md file per test)
+  scenarios/                           # Direct-file-access comprehension scenarios
+  mcp/                                 # MCP-retrieval scenarios
+  framing/                             # Positive/negative instruction-framing scenarios
 ```
 
 AI agents read `AGENTS.md` first, which routes them by goal: a playbook for a multi-step task, a platform doc for a specific capability, or a reference doc for language and topic standards.

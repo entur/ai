@@ -142,11 +142,13 @@ A new `ent-<appid>-prd` project hosts a Cloud Run service deployed by GitHub Act
 
 7. **Add the CD workflow.** GitHub Actions builds the image, pushes it to the central GAR (`eu.gcr.io/entur-system-1287/<image>`), substitutes the tag into `cloudrun.yaml`, and hands the manifest to `deploy-cloudrun`. Terraform does **not** own the Cloud Run service itself — the workflow does.
 
+   `needs.ci.outputs.image_and_tag` is already the fully qualified image reference (`eu.gcr.io/entur-system-1287/<image>:<tag>`) — do not prepend the registry again:
+
    ```yaml
    # .github/workflows/cd.yml — deploy step
    - name: Set image in cloudrun.yaml
      env:
-       IMAGE: eu.gcr.io/entur-system-1287/${{ needs.ci.outputs.image_and_tag }}
+       IMAGE: ${{ needs.ci.outputs.image_and_tag }}
      run: sed -i "s|image: placeholder|image: ${IMAGE}|" cloudrun.yaml
 
    - name: Deploy to Cloud Run
@@ -159,9 +161,23 @@ A new `ent-<appid>-prd` project hosts a Cloud Run service deployed by GitHub Act
 
    The `metadata:` input triggers `gcloud run services replace`, which ignores the action's `image:` input — that is why the `sed` step is needed. See [gha-workflows.md](../platform/gha-workflows.md) for the surrounding workflow shape (image build via `entur/gha-docker`, workload-identity auth via `entur/gha-meta`).
 
-8. **Front the service with a global HTTPS load balancer.** team-plattform owns the `entur.{no,io,org}` DNS zones and only attaches A records to a stable IP, so the Cloud Run service must sit behind an LB that has one. Cloud Run's built-in `*.run.app` URL and `google_cloud_run_domain_mapping` are **not** valid paths — the latter requires Search Console domain ownership the platform does not grant.
+8. **Front the service with a global HTTPS load balancer and grant the public-invoker binding.** team-plattform owns the `entur.{no,io,org}` DNS zones and only attaches A records to a stable IP, so the Cloud Run service must sit behind an LB that has one. Cloud Run's built-in `*.run.app` URL and `google_cloud_run_domain_mapping` are **not** valid paths — the latter requires Search Console domain ownership the platform does not grant.
 
-   Provision the full chain in Terraform: a `google_compute_global_address` (the static IPv4 to share), a `google_compute_region_network_endpoint_group` of type `SERVERLESS` pointing at the Cloud Run service by name, a `google_compute_backend_service`, a `google_compute_url_map`, a `google_compute_managed_ssl_certificate` for the hostname, a `google_compute_target_https_proxy`, and a `google_compute_global_forwarding_rule` on port 443. Expose the IP via an output so team-plattform can read it:
+   Ingress and authorization are separate: `run.googleapis.com/ingress: all` (step 4) controls which *network paths* can reach the service, but every request is still authorized by IAM. For the LB's unauthenticated `curl`/browser traffic in **Verify** to succeed, the Cloud Run service itself needs `roles/run.invoker` granted to `allUsers`:
+
+   ```hcl
+   resource "google_cloud_run_service_iam_member" "public_invoker" {
+     project  = "ent-${var.app_id}-${var.environment}"
+     location = "europe-west1"
+     service  = "<repo-name>"
+     role     = "roles/run.invoker"
+     member   = "allUsers"
+   }
+   ```
+
+   This is the "public-invoker binding" referenced in step 9 — provision it alongside the LB chain, not the direct `*.run.app` URL, so anonymous access is scoped through the LB path your ingress/network policy expects.
+
+   Provision the full LB chain in Terraform: a `google_compute_global_address` (the static IPv4 to share), a `google_compute_region_network_endpoint_group` of type `SERVERLESS` pointing at the Cloud Run service by name, a `google_compute_backend_service`, a `google_compute_url_map`, a `google_compute_managed_ssl_certificate` for the hostname, a `google_compute_target_https_proxy`, and a `google_compute_global_forwarding_rule` on port 443. Expose the IP via an output so team-plattform can read it:
 
    ```hcl
    output "lb_ipv4" {

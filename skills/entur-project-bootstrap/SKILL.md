@@ -173,7 +173,7 @@ If secrets are needed (do NOT add `PGUSER`/`PGPASSWORD` here — those are alrea
     my-app-secrets: [MY_APP_API_KEY, EXTERNAL_SERVICE_KEY]
 ```
 
-### `helm/{repoName}/env/dev.yaml`
+### `helm/{repoName}/env/values-kub-ent-dev.yaml`
 
 ```yaml
 common:
@@ -184,7 +184,7 @@ common:
       SPRING_CLOUD_GCP_SECRETMANAGER_PROJECTID: "ent-{appId}-dev"
 ```
 
-Generate `tst.yaml` and `prd.yaml` with the same pattern, adjusting the environment and project ID.
+Generate one `env/values-kub-ent-{env}.yaml` file per environment selected in Step 1 — not unconditionally all three. `values-kub-ent-tst.yaml` and `values-kub-ent-prd.yaml` follow the same pattern, adjusting the environment and project ID. This exact filename is required: the CI/CD skill's `helm-lint` job and `cd.yml`'s deploy jobs request `values-kub-ent-${{ matrix.environment }}.yaml` — a differently named file will not be found.
 
 For prd, also set:
 
@@ -229,6 +229,8 @@ module "redis" {
 }
 ```
 
+If Kafka is needed, this skill does not generate Kafka scaffolding directly -- Aiven cluster access, topic naming, and Avro/Protobuf schema registration are not a simple Terraform module addition. Read `guides/playbooks/add-kafka.md` and `guides/platform/entur-kafka-starter.md` in the entur/ai repository and report Kafka setup as a required follow-up step in the Step 9 summary (do not silently drop the request).
+
 ### `terraform/variables.tf`
 
 ```hcl
@@ -259,7 +261,9 @@ terraform {
 }
 ```
 
-### `terraform/env/dev.tfvars`, `tst.tfvars`, `prd.tfvars`
+### `terraform/env/{env}.tfvars`
+
+Generate one `.tfvars` file per environment selected in Step 1 (e.g. `dev.tfvars`, `tst.tfvars`, `prd.tfvars` for the full set) — not unconditionally all three:
 
 ```hcl
 app_id      = "{appId}"
@@ -342,7 +346,8 @@ After generating all files, print:
 
 1. Files created (list with paths)
 2. The identity chain (repeated for reference)
-3. Next steps:
+3. If Kafka was requested: an explicit "Kafka setup not yet complete" line pointing to `guides/playbooks/add-kafka.md` and `guides/platform/entur-kafka-starter.md` -- do not let the request disappear silently.
+4. Next steps:
    - Run `helm dependency update helm/{repoName}/`
    - Commit self-service manifests, open PR, comment `entur apply`
    - After GCP projects are created: set up Terraform workspaces and apply

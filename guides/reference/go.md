@@ -109,7 +109,7 @@ Use environment variables for all configuration. Use `caarlos0/env` struct tags 
 
 ## Postgres (Cloud SQL)
 
-Entur uses **Google Cloud SQL for PostgreSQL**. Infrastructure via `terraform-google-sql-db` (see [terraform-modules.md](../platform/terraform-modules.md#cloud-sql-postgresql)). The app connects via the Cloud SQL Auth Proxy sidecar (configured in Helm, see [common-helm.md](../platform/common-helm.md#database-cloud-sql-proxy)) at `localhost:5432`. Credentials (`DB_NAME`, `PGUSER`, `PGPASSWORD`) inject from Kubernetes secrets.
+Entur uses **Google Cloud SQL for PostgreSQL**. Infrastructure via `terraform-google-sql-db` (see [terraform-modules.md](../platform/terraform-modules.md#cloud-sql-postgresql)). The app connects via the Cloud SQL Auth Proxy sidecar (configured in Helm, see [common-helm.md](../platform/common-helm.md#database-cloud-sql-proxy)) at `localhost:5432`. `PGUSER`/`PGPASSWORD` inject from Kubernetes secrets. `DB_NAME` is **not** auto-injected -- set it explicitly as an application-owned ConfigMap value matching one of the module's `databases` entries.
 
 For query design, indexing, transactions, migrations, and Cloud SQL operational patterns see [sql.md](sql.md). Go-specific notes below.
 
