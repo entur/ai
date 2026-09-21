@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies that the agent picks the **application's** per-env project (`ent-<app>-<env>`) for Cloud Profiler reads on a Kubernetes workload, **not** the cluster host project (`ent-kub-<env>`). Symmetric with scenario `17-trace-project-routing`: the profiler and trace agents both report under the workload's SA, but Cloud Logging routes k8s logs to the cluster host project. Agents commonly conflate the three.
+Verifies that the agent picks the **application's** per-env project (`ent-<app>-<env>`) for Cloud Profiler reads on a Kubernetes workload, **not** the cluster host project (`ent-kub-<env>`). This is **not** symmetric with scenario `17-trace-project-routing`: Cloud Profiler reports under the workload's own SA into the application project on every runtime, while Cloud Trace and Cloud Logging both route Kubernetes signals to the shared cluster host project instead. Agents commonly assume all three signals share one routing rule.
 
 ## Prompt
 

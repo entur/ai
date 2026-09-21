@@ -12,10 +12,10 @@ each sub-topic. Assertions are split into:
 
 - **Bootstrap + infra** (well-documented): self-service manifest, Entur
   Terraform modules, common Helm chart, Kafka starter.
-- **Domain setup** (thin coverage today): `common.ingress.host`,
-  `*.entur.io` pattern. There is no dedicated "set up a custom domain"
-  playbook in the indexed docs as of writing -- if this scenario flags a
-  gap there, that is the signal to create one.
+- **Domain setup** (documented in `guides/playbooks/add-custom-domain.md`):
+  `common.ingress.host`, the per-environment `dev`/`staging`/no-token
+  hostname pattern, Google-managed TLS, and that no platform-team ticket is
+  needed on the GKE golden path this scenario asks about.
 
 ## Prompt
 
@@ -48,7 +48,8 @@ Each `id` must be copied verbatim from the MCP responses (e.g. `guides_platform_
     "terraform-google-memorystore",
     "aiven",
     "common",
-    "ingress"
+    "ingress",
+    "staging"
   ],
   "must_not_contain": [
     "amazon rds",
@@ -57,7 +58,8 @@ Each `id` must be copied verbatim from the MCP responses (e.g. `guides_platform_
     "msk",
     "route53",
     "cloudflare",
-    "self-host the kafka cluster"
+    "self-host the kafka cluster",
+    "insufficient"
   ],
   "must_match": [
     "guides_platform_self-service_md|self-service",
@@ -65,8 +67,10 @@ Each `id` must be copied verbatim from the MCP responses (e.g. `guides_platform_
     "guides_playbooks_add-redis_md|add-redis|terraform-google-memorystore",
     "guides_playbooks_add-kafka_md|add-kafka|entur-kafka-(spring-boot-)?starter",
     "guides_platform_common-helm_md|common-helm|common helm chart",
+    "guides_playbooks_add-custom-domain_md|add-custom-domain",
     "common\\.ingress\\.host|ingress:\\s*\\n\\s*host:|ingress\\.host",
-    "entur\\.io|\\.entur\\.io"
+    "entur\\.io|\\.entur\\.io",
+    "no.*(ticket|platform-team action)|(ticket|platform-team action).*no(t|ne)? (needed|required)"
   ]
 }
 ```

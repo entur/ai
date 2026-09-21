@@ -2,10 +2,11 @@
 
 Automated tests that verify AI agents correctly understand Entur's platform documentation. Each test scenario sends a prompt to Claude, lets it read the docs, and validates the response against expected patterns.
 
-Two suites live here:
+Three suites live here:
 
 - `scenarios/` -- this suite. Claude reads the markdown files in this repo directly via `Read`/`Grep`/`Glob`. Measures whether the docs are precise enough for an agent with full file access.
 - [`mcp/`](mcp/README.md) -- companion suite. Claude can only call the `entur-kompass` MCP server. Measures retrieval quality + whether the surfaced doc actually contains the answer. Run with `./mcp/run.sh`.
+- `framing/` -- positive/negative instruction-framing suite. Claude is given only an inline convention excerpt (no repository file access) and answers under two different instruction framings per topic. Measures how much instruction wording alone affects correctness, independent of doc retrieval. Run with `./framing/compare.sh`.
 
 ## Quick Start
 
@@ -16,8 +17,9 @@ cd tests
 # Dry run -- validate scenarios parse correctly, no API calls
 go run . --dry-run
 
-# Run all tests (~$0.70, ~3-5 minutes)
-go run . --verbose
+# Run all tests (~$2.90, ~3-5 minutes) -- the default $1.00 budget cap is not
+# enough for the full suite and will skip scenarios; raise it explicitly.
+go run . --verbose --budget 3.00
 
 # Run a specific scenario
 go run . --scenario "05-*" --verbose
@@ -46,13 +48,18 @@ go run . --model sonnet
 | 14-cicd-go-variant | Go CI: setup-go, go test, no artifact upload, no test-reporter, gomod dependabot |
 | 15-cicd-no-helm | No Helm: ci.yml omits helm-lint, cd.yml omits deploy jobs |
 | 16-cicd-python-variant | Python CI: setup-python, pytest, no artifact upload, pip dependabot |
-| 17-trace-project-routing | Cloud Trace project routing: k8s workload traces land in `ent-<app>-<env>`, not `ent-kub-<env>` |
-| 18-profiler-project-routing | Cloud Profiler project routing: k8s workload profiles land in `ent-<app>-<env>`, not `ent-kub-<env>` |
+| 17-trace-project-routing | Cloud Trace project routing: k8s workload traces land in the shared host project `ent-kub-<env>`, same as k8s logs, not `ent-<app>-<env>` |
+| 18-profiler-project-routing | Cloud Profiler project routing: k8s workload profiles land in `ent-<app>-<env>`, not `ent-kub-<env>` -- the one signal that does not follow the shared-host-project rule |
 | 19-jvm-docker-golden-path | Java/Kotlin Docker runtime defaults to distroless, not Liberica |
 | 20-kotlin-codeql-version | Kotlin version follows Entur CodeQL support, not newest stable blindly |
 | 21-redis-not-default | Redis is not added without a concrete cache/lock/session/dedup use case |
 | 22-it-systems-saas-checklist | IT systems policy checks for SaaS: Entra ID, System Overview, System Owner, classification |
 | 23-it-systems-sso-and-licences | IT systems policy rejects local-user defaults and licence purchases before reuse checks |
+| 24-default-region-inference | Critical Rule 8: infers `europe-west1` as the default region when none is given |
+| 25-conventional-commits | Critical Rule 9: formats commit messages as Conventional Commits, not free text |
+| 26-dependency-failure-startup | Applications start gracefully when a dependency is unavailable, not a fatal crash |
+| 27-dependency-pinning-policy | Critical Rule 6: pinning across Terraform refs, Actions versions, and Docker tags together |
+| 28-disabled-test-tracking | A disabled/ignored test must link a tracking issue, not just go green silently |
 
 ## CLI Options
 
@@ -65,7 +72,8 @@ go run . [OPTIONS]      # run from inside the tests/ directory
   --junit FILE         Write JUnit XML report to FILE
   --verbose            Print full Claude responses for failed scenarios
   --dry-run            Parse scenarios, print commands, no API calls
-  --strict             Require 100% assertion pass rate (default: 80%)
+  --strict             Require 100% assertion pass rate (default: on)
+  --lenient            Opt into the legacy 80%-of-positive-assertions threshold instead
   --no-retry           Disable automatic retry on failure
   --dir PATH           Scenario directory (default: auto-detected)
 ```
@@ -80,8 +88,8 @@ go run . [OPTIONS]      # run from inside the tests/ directory
 
 ### Pass Criteria
 
-- **Normal mode** (default): all `must_not_contain` pass + 80% of positive assertions pass
-- **Strict mode** (`--strict`): 100% of all assertions must pass
+- **Strict mode** (default): 100% of all assertions must pass. These scenarios assert specific platform facts, not framing experiments -- partial credit hides a wrong answer.
+- **Lenient mode** (`--lenient`): all `must_not_contain` pass + 80% of positive assertions pass. Reserve this for experimenting with new scenario wording, not for judging whether the docs are correct.
 
 ## Adding a New Scenario
 
@@ -132,8 +140,7 @@ and ask specific, answerable questions.
 
 ## Cost
 
-Each scenario costs ~$0.03-0.08 with Haiku. Full suite of 16 scenarios: ~$1.00.
-With retries (worst case): ~$2.00. Increase budget cap with `--budget 2.50` if running all.
+Each scenario costs ~$0.03-0.10 with Haiku. Full suite of 28 scenarios: $2.87 (sum of declared `## Budget` values -- recompute with `python3 -c "..."` or similar after adding scenarios, don't guess). With retries (worst case, every scenario fails once): ~$5.75. The default `--budget 1.00` cap is **not** enough to run the full suite -- pass `--budget 3.00` (or higher, to cover retries) when running all scenarios, or the run will stop early and report which scenarios were skipped.
 
 ## Unit Tests
 

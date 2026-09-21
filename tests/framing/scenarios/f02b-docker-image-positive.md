@@ -22,7 +22,11 @@ Recommend the specific image with full path and tag. Answer in 1-2 sentences bas
     "distroless",
     "nonroot"
   ],
-  "must_not_contain": [],
+  "must_not_contain": [
+    "alpine",
+    "ubuntu",
+    "debian:"
+  ],
   "must_match": [
     "gcr\\.io/distroless/static"
   ]
