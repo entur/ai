@@ -1,7 +1,8 @@
 # Application Security Review
 
-Use this baseline for every security review. Select checks from the deployed
-attack surface and trace high-risk code paths end to end; do not report keyword
+Use this as a general-purpose checklist, not a fixed script. Pick the checks
+that match your deployed attack surface, trace high-risk code paths end to end,
+and skip sections that don't apply to your service. Don't report keyword
 matches without evidence.
 
 ## Security claims and deployment reality
