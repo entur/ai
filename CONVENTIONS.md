@@ -58,7 +58,7 @@ my-application/
   doc/
     adr/                        # Architecture Decision Records (optional)
       0001-my-decision.adoc
-  docs/                         # Documentation (published via gha-docs)
+  docs/                         # Documentation (publishing workflow not yet standardized -- see gha-workflows.md)
   helm/
     <repo-name>/
       Chart.yaml                # Helm chart, depends on entur/common
@@ -376,5 +376,5 @@ Fixes <JIRA ticket number>.
 - `README.md` at repository root: what the project does, how to run it locally, how to deploy
 - `AGENTS.md` at repository root: AI agent instructions (reference `entur/ai` plus project-specific overrides)
 - `CLAUDE.md` always a symlink to `AGENTS.md`
-- `docs/` directory: detailed documentation, published via `gha-docs`
+- `docs/` directory: detailed documentation. Publishing workflow is not yet standardized -- see [gha-workflows.md](guides/platform/gha-workflows.md#documentation-publishing) before adding a publishing job
 - API documentation: OpenAPI/Swagger for REST APIs, protobuf definitions for gRPC

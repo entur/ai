@@ -20,7 +20,7 @@ name: my-application
 version: 0.1.0
 dependencies:
   - name: common
-    version: "1.22.0"
+    version: "1.22.0"     # Example only, not verified against entur/helm-charts as current. Pin to whatever `helm search repo entur/common` reports as current -- do not copy this number without checking.
     repository: "https://entur.github.io/helm-charts"
     alias: common
 ```
@@ -36,9 +36,9 @@ helm/
     Chart.lock
     values.yaml           # Default values
     env/
-      dev.yaml            # Dev overrides
-      tst.yaml            # Test overrides
-      prd.yaml            # Production overrides
+      values-kub-ent-dev.yaml     # Dev overrides
+      values-kub-ent-tst.yaml     # Test overrides
+      values-kub-ent-prd.yaml     # Production overrides
     tests/                # Helm unit tests (optional)
       deployment_test.yaml
 ```
@@ -60,13 +60,13 @@ common:
 > **`shortname` must match your self-service `metadata.id`**. The platform creates GCP projects as `ent-{shortname}-{env}`. This is used for Secret Manager project references and other GCP resource lookups. See [self-service.md](self-service.md#gcp-project-naming).
 
 ```yaml
-# env/dev.yaml
+# env/values-kub-ent-dev.yaml
 common:
   env: dev
 ```
 
 ```yaml
-# env/prd.yaml
+# env/values-kub-ent-prd.yaml
 common:
   env: prd
 ```
@@ -225,7 +225,17 @@ common:
     enabled: true
 ```
 
-Injects a Cloud SQL proxy sidecar. Application connects to `localhost:5432`. Credentials provided as env vars from K8s secrets (created by `terraform-google-sql-db` module): `PGUSER`, `PGPASSWORD`. Database name configured via application config. Do NOT add `PGUSER`/`PGPASSWORD` to ExternalSecrets — they are already injected automatically.
+Injects a Cloud SQL proxy sidecar. Application connects to `localhost:5432`. Credentials provided as env vars from K8s secrets (created by `terraform-google-sql-db` module): `PGUSER`, `PGPASSWORD`. Do NOT add `PGUSER`/`PGPASSWORD` to ExternalSecrets — they are already injected automatically.
+
+The database name is **not** injected automatically — the module creates the database(s) named in its own `databases` list (see [terraform-modules.md](terraform-modules.md)), and the application must be told which one to use explicitly:
+
+```yaml
+common:
+  configmap:
+    enabled: true
+    data:
+      DB_NAME: my-app   # must match one of the names in module.postgresql.databases
+```
 
 ## Secrets (ExternalSecrets)
 
@@ -299,10 +309,10 @@ Use VPA recommendations (enabled on all clusters) to tune over time. See [observ
 
 ```bash
 # Lint (check for errors):
-helm lint helm/my-application/ -f helm/my-application/env/dev.yaml
+helm lint helm/my-application/ -f helm/my-application/env/values-kub-ent-dev.yaml
 
 # Template (render K8s YAML locally):
-helm template my-application helm/my-application/ -f helm/my-application/env/dev.yaml
+helm template my-application helm/my-application/ -f helm/my-application/env/values-kub-ent-dev.yaml
 ```
 
 ```yaml
@@ -311,7 +321,7 @@ common:
   configmap:
     enabled: true
 
-# env/dev.yaml -- "ent-myapp-dev" = ent-{metadata.id}-{env}
+# env/values-kub-ent-dev.yaml -- "ent-myapp-dev" = ent-{metadata.id}-{env}
 common:
   configmap:
     data:
@@ -365,12 +375,10 @@ common:
   team: produkt
   ingress:
     trafficType: api
-  service:
-    internalPort: 8086
   configmap:
     enabled: true
   container:
-    image: <+artifacts.primary.image>
+    image: products-api   # Docker image name only, no registry or tag -- CI/CD substitutes the built reference at deploy time
     cpu: 0.5
     memory: 1000
     memoryLimit: 1000
