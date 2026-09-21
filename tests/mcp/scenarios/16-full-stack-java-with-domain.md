@@ -27,7 +27,7 @@ Q: I am setting up a brand-new Java Spring Boot service at Entur that will run o
 2. Which Entur Terraform modules provision Postgres and Redis.
 3. How Kafka is provided and what Spring Boot dependency to add.
 4. Which Helm chart to use to deploy the service.
-5. How to expose the service on a custom domain (Helm value to set, hostname pattern, and any platform-team action required).
+5. How to expose the service on a custom domain (Helm value to set, the per-environment hostname pattern for dev/tst/prd, and any platform-team action required).
 
 Then output EXACTLY this format and nothing else:
 

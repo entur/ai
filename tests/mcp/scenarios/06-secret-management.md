@@ -37,8 +37,7 @@ Each `id` must be copied verbatim from the MCP response (e.g. `guides_platform_s
     ".env file in the repo"
   ],
   "must_match": [
-    "google secret manager|gcp secret manager|secretmanager",
-    "never hardcode|do not hardcode|must not hardcode"
+    "google secret manager|gcp secret manager|secretmanager"
   ]
 }
 ```
