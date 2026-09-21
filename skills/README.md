@@ -19,9 +19,9 @@ Agent Skills are folders of instructions, scripts, and resources that AI agents 
 We document skills in a SKILL.md file following a structure:
 
 ```text
--
+---
 name: your-skill
-description: [...]
+description: One or two sentences describing what the skill does and when to activate it.
 ---
 # Your Skill Name
 # Instructions
@@ -72,13 +72,17 @@ codex plugin marketplace add entur/ai
 codex # then run /plugins to browse
 ```
 
-### Option 3 — `gh skill install` (any agent)
+### Option 3 — `gh skill install` (any agent, unverified)
 
-`gh skill` is a third-party `gh` CLI extension. Install the extension once via `gh extension install <owner>/gh-skill` (see `gh extension --help`), then the command below walks the repo for `SKILL.md` files recursively and lets you pick which to install.
+A third-party `gh` CLI extension named `gh-skill` is reported to walk a repository for `SKILL.md` files and let you pick which to install. **This repository has not identified or verified the maintainer, install command, or exact behavior of that extension.** Do not treat the commands below as confirmed:
 
 ```shell
+# Unverified — replace <owner> with the actual extension maintainer once confirmed
+gh extension install <owner>/gh-skill
 gh skill install entur/ai
 ```
+
+Until a maintainer is confirmed, prefer Option 1, Option 2, or Option 4.
 
 ### Option 4 — Manual upload (Claude Code UI)
 
@@ -94,6 +98,7 @@ gh skill install entur/ai
 | [entur-ai-security-review](entur-ai-security-review/) | Review Entur codebases for evidence-backed application, platform, OAuth, MCP/LLM, and data-ingestion security findings |
 | [setup-agent-config](setup-agent-config/) | Set up AI agent config for an existing repo: AGENTS.md, permissions, hooks, skill recommendations |
 | [setup-cicd-workflows](setup-cicd-workflows/) | Generate CI/CD GitHub Actions workflows using Entur reusable workflows |
+| [entur-conventions](entur-conventions/) | Thin router that fetches the matching Entur platform guide on demand (installed via the `guides` plugin) |
 | [scr-situation-complication-resolution](scr-situation-complication-resolution/) | Structure problems and decisions in SCR format for leadership |
 | [entur-linje](https://github.com/entur/design-system/tree/main/skills) | Entur Linje design system: `@entur/*` components, design tokens, brand identity, universell utforming, package upgrades. Lives in `entur/design-system`; install via the `entur-linje` plugin |
 | [entur-uniformen](https://github.com/entur/uniformen/tree/main/skills) | Uniformen: Entur's shared header and footer for B2B and partner-facing portals — `@entur/uniformen` integration and language contracts, and the CSP the rendered chrome needs. Lives in `entur/uniformen`; install via the `entur-uniformen` plugin |
