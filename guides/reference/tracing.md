@@ -20,28 +20,25 @@ The OpenTelemetry Java Agent instruments Spring Boot services at startup without
 The agent is a JAR attached to the JVM at startup through the `-javaagent` flag. A multi-stage build is the recommended approach — it keeps the final image clean by using a temporary Alpine stage to download the JARs before copying them into the distroless runtime. If your team does not use multi-stage builds, you can download the JARs another way and copy them in, but the Dockerfile below shows the recommended pattern.
 
 ```dockerfile
-# Dockerfile
+# Dockerfile - UPDATE TO LATEST VERSIONS
 # temporary stage - only used to download JARs, never shipped
 FROM alpine:3.24 AS otel
 RUN mkdir /otel && \
     wget -q -O /otel/opentelemetry-javaagent.jar \
-      https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.29.0/opentelemetry-javaagent.jar && \
+      https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.31.1/opentelemetry-javaagent.jar && \
     wget -q -O /otel/gcp-auth-extension.jar \
       https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-gcp-auth-extension/1.58.0-alpha/opentelemetry-gcp-auth-extension-1.58.0-alpha-shadow.jar
+```
 
-# final image - no shell, no package manager, minimal attack surface
-FROM gcr.io/distroless/java25-debian13:nonroot
-WORKDIR /app
-
-# only the JARs are carried over from the Alpine stage
+```dockerfile
+# final image
 COPY --from=otel /otel /otel
-COPY build/libs/app.jar app.jar
-
-# ENTRYPOINT in distroless is ["java"] - CMD entries are the arguments passed to that java process
-CMD ["-javaagent:/otel/opentelemetry-javaagent.jar", \
-     "-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar", \
-     "-Dotel.javaagent.logging=application", \
-     "-jar", "/app/app.jar"]
+ENTRYPOINT ["java", \
+    "-javaagent:/otel/opentelemetry-javaagent.jar", \
+    "-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar", \
+    "-Dotel.javaagent.logging=application", \
+    "-XX:MaxRAMPercentage=75.0", \
+    "org.springframework.boot.loader.launch.JarLauncher"]
 ```
 
 Check the [opentelemetry-java-instrumentation releases](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases) for the latest versions.
@@ -57,12 +54,10 @@ If you are also using the Google Cloud Profiler, see [profiler.md](profiler.md).
 
 For manual instrumentation look at OpenTelemetry’s documentation [Java] (https://opentelemetry.io/docs/languages/java/)
 
-## 2. Sampling
+## 2. Filter and Sample
+Use [entur/otel-noise-filter](https://github.com/entur/otel-noise-filter) to exclude health probes and other noisy endpoints from tracing. Version 0.1.0 is available from Maven Central and drops `/actuator/**` spans by default. Add the JAR alongside the GCP authentication extension using `-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar,/otel/otel-noise-filter.jar`. The extension requires OpenTelemetry Java agent 2.31.1 or newer; see the project README for download and more configuration details.
 
-Sampling must be set explicitly per environment, do not rely on the default everywhere.
-
-Our recommendation for Kubernetes:
-
+Sampling must be set explicitly per environment, do not rely on the default everywhere. Our recommendation for Kubernetes:
 ```yaml
 # values-kub-ent-dev.yaml
 OTEL_TRACES_SAMPLER: "parentbased_always_on" # sample everything, easiest for debugging.
