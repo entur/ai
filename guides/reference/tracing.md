@@ -55,9 +55,11 @@ If you are also using the Google Cloud Profiler, see [profiler.md](profiler.md).
 For manual instrumentation look at OpenTelemetry’s documentation [Java] (https://opentelemetry.io/docs/languages/java/)
 
 ## 2. Filter and Sample
+
 Use [entur/otel-noise-filter](https://github.com/entur/otel-noise-filter) to exclude health probes and other noisy endpoints from tracing. Version 0.1.0 is available from Maven Central and drops `/actuator/**` spans by default. Add the JAR alongside the GCP authentication extension using `-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar,/otel/otel-noise-filter.jar`. The extension requires OpenTelemetry Java agent 2.31.1 or newer; see the project README for download and more configuration details.
 
 Sampling must be set explicitly per environment, do not rely on the default everywhere. Our recommendation for Kubernetes:
+
 ```yaml
 # values-kub-ent-dev.yaml
 OTEL_TRACES_SAMPLER: "parentbased_always_on" # sample everything, easiest for debugging.
