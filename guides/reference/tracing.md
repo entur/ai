@@ -17,22 +17,47 @@ For Java services, the Java Agent is the Golden Path. Instrument Java manually o
 
 The OpenTelemetry Java Agent instruments Spring Boot services at startup without code changes. It uses bytecode injection to capture inbound requests, outbound HTTP calls, and database calls automatically.
 
-The agent is a JAR attached to the JVM at startup through the `-javaagent` flag. A multi-stage build is the recommended approach — it keeps the final image clean by using a temporary Alpine stage to download the JARs before copying them into the distroless runtime. If your team does not use multi-stage builds, you can download the JARs another way and copy them in, but the Dockerfile below shows the recommended pattern.
+The agent is a JAR attached to the JVM at startup through the `-javaagent` flag. Both JARs are ordinary Maven/Gradle artifacts - resolve them as build dependencies rather than downloading them by URL in the Dockerfile. This gets the agent and its extensions Dependabot version-bump PRs and dependency-graph CVE scanning, the same as every other library dependency, and keeps the version pin out of a Dockerfile string.
 
-```dockerfile
-# Dockerfile - UPDATE TO LATEST VERSIONS
-# temporary stage - only used to download JARs, never shipped
-FROM alpine:3.24 AS otel
-RUN mkdir /otel && \
-    wget -q -O /otel/opentelemetry-javaagent.jar \
-      https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.31.1/opentelemetry-javaagent.jar && \
-    wget -q -O /otel/gcp-auth-extension.jar \
-      https://repo1.maven.org/maven2/io/opentelemetry/contrib/opentelemetry-gcp-auth-extension/1.58.0-alpha/opentelemetry-gcp-auth-extension-1.58.0-alpha-shadow.jar
+Add the two artifacts to your version catalog like any other dependency:
+
+```toml
+# gradle/libs.versions.toml
+[libraries]
+otel-javaagent = { module = "io.opentelemetry.javaagent:opentelemetry-javaagent", version.ref = "otel-javaagent" }
+otel-gcp-auth-extension = { module = "io.opentelemetry.contrib:opentelemetry-gcp-auth-extension", version.ref = "otel-gcp-auth-extension" }
+```
+
+Resolve them into their own configurations and copy them out during the build. Use `isTransitive = false` - both JARs are shaded/shadow artifacts whose POMs still list the OTel SDK/API as dependencies, and without it Gradle would resolve and copy those too:
+
+```kotlin
+// build.gradle.kts
+val otelAgent by configurations.creating { isTransitive = false }
+val otelExtensions by configurations.creating { isTransitive = false }
+
+dependencies {
+    otelAgent(libs.otel.javaagent)
+    otelExtensions(libs.otel.gcp.auth.extension) { artifact { classifier = "shadow" } }
+    // add entur/otel-noise-filter here too if you're using it -- see Section 2
+}
+
+// Nested under build/libs (not a sibling build/otel) so it travels inside the same
+// CI build artifact as app.jar, with no extra upload/download path needed.
+val copyOtel = tasks.register<Copy>("copyOtel") {
+    into(layout.buildDirectory.dir("libs/otel"))
+    from(otelAgent) { rename(".*", "opentelemetry-javaagent.jar") }
+    from(otelExtensions) { rename("opentelemetry-gcp-auth-extension-.*", "gcp-auth-extension.jar") }
+}
+
+tasks.named<BootJar>("bootJar") { dependsOn(copyOtel) }
 ```
 
 ```dockerfile
-# final image
-COPY --from=otel /otel /otel
+# Dockerfile
+FROM gcr.io/distroless/java25-debian13:nonroot
+WORKDIR /app
+COPY build/libs/otel /otel
+COPY build/libs/app.jar app.jar
 ENTRYPOINT ["java", \
     "-javaagent:/otel/opentelemetry-javaagent.jar", \
     "-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar", \
@@ -40,8 +65,6 @@ ENTRYPOINT ["java", \
     "-XX:MaxRAMPercentage=75.0", \
     "org.springframework.boot.loader.launch.JarLauncher"]
 ```
-
-Check the [opentelemetry-java-instrumentation releases](https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases) for the latest versions.
 
 The two JARs serve different purposes and must both be present:
 
@@ -56,7 +79,40 @@ For manual instrumentation look at OpenTelemetry’s documentation [Java] (https
 
 ## 2. Filter and Sample
 
-Use [entur/otel-noise-filter](https://github.com/entur/otel-noise-filter) to exclude health probes and other noisy endpoints from tracing. Version 0.1.0 is available from Maven Central and drops `/actuator/**` spans by default. Add the JAR alongside the GCP authentication extension using `-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar,/otel/otel-noise-filter.jar`. The extension requires OpenTelemetry Java agent 2.31.1 or newer; see the project README for download and more configuration details.
+Use [entur/otel-noise-filter](https://github.com/entur/otel-noise-filter) to exclude health probes and other noisy endpoints from tracing. Version 0.2.0 is available from Maven Central as `org.entur:otel-noise-filter` and drops `/actuator/**` spans by default. It requires OpenTelemetry Java agent 2.31.1 or newer.
+
+Add it to the `otelExtensions` configuration from Section 1.1, and give it a fixed file name in `copyOtel`:
+
+```toml
+# gradle/libs.versions.toml
+[libraries]
+otel-noise-filter = { module = "org.entur:otel-noise-filter", version.ref = "otel-noise-filter" }
+```
+
+```kotlin
+// build.gradle.kts
+dependencies {
+    otelExtensions(libs.otel.noise.filter)
+}
+
+val copyOtel = tasks.register<Copy>("copyOtel") {
+    // ...as in Section 1.1, plus:
+    from(otelExtensions) { rename("otel-noise-filter-.*", "otel-noise-filter.jar") }
+}
+```
+
+Then list it alongside the GCP authentication extension: `-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar,/otel/otel-noise-filter.jar`.
+
+The filter works on inbound server spans by path, and can also drop or sample consumer spans (messages being received or processed) by messaging destination, such as a Kafka topic:
+
+```yaml
+# values-kub-ent-*.yaml
+OTEL_NOISE_FILTER_IGNORE: "/internal/**" # server spans to drop, in addition to /actuator/**
+OTEL_NOISE_FILTER_MESSAGING_IGNORE: "heartbeat" # consumer spans to drop, by destination
+OTEL_NOISE_FILTER_MESSAGING_SAMPLE: "vehicle-positions*=0.01" # consumer spans to sample at their own ratio
+```
+
+See the [project README](https://github.com/entur/otel-noise-filter) for all configuration options and how the rules interact with the parent's sampling decision.
 
 Sampling must be set explicitly per environment, do not rely on the default everywhere. Our recommendation for Kubernetes:
 
