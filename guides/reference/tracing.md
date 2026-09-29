@@ -79,7 +79,7 @@ For manual instrumentation look at OpenTelemetry’s documentation [Java] (https
 
 ## 2. Filter and Sample
 
-Use [entur/otel-noise-filter](https://github.com/entur/otel-noise-filter) to exclude health probes and other noisy endpoints from tracing. Version 0.2.0 is available from Maven Central as `org.entur:otel-noise-filter` and drops `/actuator/**` spans by default. It requires OpenTelemetry Java agent 2.31.1 or newer.
+Use [entur/otel-noise-filter](https://github.com/entur/otel-noise-filter) to exclude health probes and other noisy endpoints from tracing. Use the newest version, available from Maven Central as `org.entur:otel-noise-filter`. It drops `/actuator/**` spans by default. Keep the OpenTelemetry Java agent on its newest version too, since the extension requires a recent agent - see the project README for the minimum.
 
 Add it to the `otelExtensions` configuration from Section 1.1, and give it a fixed file name in `copyOtel`:
 
@@ -144,7 +144,7 @@ Each log entry must also include the required fields `timestamp` (ISO 8601), `se
 
 For more details, see [logging.md](logging.md).
 
-**For Java and Kotlin Spring Boot services, no manual work is needed**. If [entur/cloud-logging](https://github.com/entur/cloud-logging) (v7.1.0) together with `spring-boot-starter-gcp-web` is set up, those two handle all of this automatically.
+**For Java and Kotlin Spring Boot services, no manual work is needed**. If the newest version of [entur/cloud-logging](https://github.com/entur/cloud-logging) together with `spring-boot-starter-gcp-web` is set up, those two handle all of this automatically.
 
 **For Go services, start by installing [entur/go-logging](https://github.com/entur/go-logging)**: `go get github.com/entur/go-logging`. Use `entur/go-logging` and extract the span context from the request context at the start of each handler. Pass the trace and spanId fields on every log call inside that handler:
 
