@@ -103,16 +103,7 @@ val copyOtel = tasks.register<Copy>("copyOtel") {
 
 Then list it alongside the GCP authentication extension: `-Dotel.javaagent.extensions=/otel/gcp-auth-extension.jar,/otel/otel-noise-filter.jar`.
 
-The filter works on inbound server spans by path, and can also drop or sample consumer spans (messages being received or processed) by messaging destination, such as a Kafka topic:
-
-```yaml
-# values-kub-ent-*.yaml
-OTEL_NOISE_FILTER_IGNORE: "/internal/**" # server spans to drop, in addition to /actuator/**
-OTEL_NOISE_FILTER_MESSAGING_IGNORE: "heartbeat" # consumer spans to drop, by destination
-OTEL_NOISE_FILTER_MESSAGING_SAMPLE: "vehicle-positions*=0.01" # consumer spans to sample at their own ratio
-```
-
-See the [project README](https://github.com/entur/otel-noise-filter) for all configuration options and how the rules interact with the parent's sampling decision.
+The filter works on inbound server spans by path, and can also drop or sample consumer spans (messages being received or processed) by messaging destination, such as a Kafka topic. See the [project README](https://github.com/entur/otel-noise-filter) for all configuration options and how the rules interact with the parent's sampling decision.
 
 Sampling must be set explicitly per environment, do not rely on the default everywhere. Our recommendation for Kubernetes:
 
