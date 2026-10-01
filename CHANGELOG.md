@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/entur/ai/compare/v0.3.1...v0.3.2) (2026-09-29)
+
+### Documentation
+
+* info about  noise filter extension ([#90](https://github.com/entur/ai/issues/90)) ([3d0fca4](https://github.com/entur/ai/commit/3d0fca4bd7171398bd4fd2f50306942978cc39e9))
+* tracing gradle otel agent ([#92](https://github.com/entur/ai/issues/92)) ([e95bce6](https://github.com/entur/ai/commit/e95bce676b2b46a703961889e7e7761db3ab4e73))
+
 ## [0.3.1](https://github.com/entur/ai/compare/v0.3.0...v0.3.1) (2026-09-21)
 
 ### Bug Fixes
