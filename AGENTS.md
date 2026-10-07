@@ -65,7 +65,7 @@ See https://github.com/entur/ai for Entur-wide standards.
 
 - **[`guides/platform/`](guides/platform/)** -- what the platform provides (self-service orchestrator, common Helm chart, reusable Actions workflows, Terraform modules, Permission Store, Kafka starter).
 - **[`guides/playbooks/`](guides/playbooks/)** -- end-to-end tasks (bootstrap, add a database, deploy to prd, etc). Prefer these as your entry point for multi-step work.
-- **[`guides/reference/`](guides/reference/)** -- language and topic standards (Java, Kotlin, Go, Docker, observability, logging, tracing, profiler, security, code review, docs).
+- **[`guides/reference/`](guides/reference/)** -- language and topic standards (Java, Kotlin, Go, Docker, observability, logging, tracing, profiler, security, privacy, code review, docs).
 
 Use [Agent Reading Order](#agent-reading-order) first, then use the tables below to find the task-specific document.
 
@@ -78,6 +78,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | Set up CI/CD workflows | Load skill: [`skills/setup-cicd-workflows/SKILL.md`](skills/setup-cicd-workflows/SKILL.md) |
 | Set up AI agent config for an existing repo | Load skill: [`skills/setup-agent-config/SKILL.md`](skills/setup-agent-config/SKILL.md) |
 | Introduce or recommend IT systems and software | [it-systems-policy.md](it-systems-policy.md) |
+| Process personal data on the basis of legitimate interest (GDPR art. 6 (1) f) | [reference/legitimate-interests.md](guides/reference/legitimate-interests.md) |
 | Provision Postgres | [playbooks/add-postgres.md](guides/playbooks/add-postgres.md) |
 | Add Redis (caching, locks, dedup) | [playbooks/add-redis.md](guides/playbooks/add-redis.md) |
 | Produce or consume Kafka events | [playbooks/add-kafka.md](guides/playbooks/add-kafka.md) |
@@ -120,6 +121,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | Cloud Profiler (CPU, heap) | [reference/profiler.md](guides/reference/profiler.md) |
 | Alerting (Grafana, PromQL, PagerDuty) | [reference/alerting.md](guides/reference/alerting.md) |
 | Security | [reference/security.md](guides/reference/security.md) |
+| Privacy: legitimate interests assessment (GDPR art. 6 (1) f) | [reference/legitimate-interests.md](guides/reference/legitimate-interests.md) |
 | Code review | [reference/code-review.md](guides/reference/code-review.md) |
 | Markdown format | [reference/markdown.md](guides/reference/markdown.md) |
 | Writing documentation | [reference/documentation.md](guides/reference/documentation.md) |
