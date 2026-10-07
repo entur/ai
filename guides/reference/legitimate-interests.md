@@ -19,6 +19,7 @@ These rules apply to all Entur repositories:
 
 - **MUST** document a legitimate interests assessment before processing personal data on the basis of article 6 (1) (f). This includes new services, new data fields, new recipients, new purposes, AI and LLM usage, analytics, logging beyond operational need, and test or experimentation with real data.
 - **MUST** update the assessment when purpose, data categories, data subjects, recipients, retention, or third-country transfer changes. A changed scope is a new assessment, not an implied extension of the old one.
+- **MUST** obtain explicit approval of the drafted assessment from one or more human reviewers in the pull request before merging it into the repository. AI agents must not approve their own drafts or merge an assessment without recorded human approval.
 - **MUST** keep missing evidence visible. Write "ikke dokumentert" or "ikke avklart" rather than inventing facts, and never let a gap become a positive conclusion.
 - **MUST NOT** claim that a safeguard is in place, that a DPIA is done, or that the processing is approved unless the repository, the user, or an authoritative Entur source confirms it. Mark proposed safeguards as proposed.
 - **MUST NOT** rely on legitimate interest alone for special categories of personal data (article 9) or data on criminal convictions (article 10). These require a separate exception; ask Personvernleder.
@@ -81,9 +82,7 @@ Choosing article 6 (1) (f) triggers obligations that the assessment should point
 
 ## Where to Store the Assessment
 
-Store the assessment as Markdown in the owning repository at `docs/privacy/legitimate-interests/<processing-id>.md` (default) for every Entur service, application, integration, batch job, or analytics pipeline. This keeps it next to what it documents, versioned and reviewed in a pull request. The merged file is the adopted assessment; the PR is the draft.
-
-**MUST** create an issue in `entur/ai-registry` describing the AI processing if the activity uses AI to process the information.
+Store the assessment as Markdown in the owning repository at `docs/privacy/legitimate-interests/<processing-id>.md` (default) for every Entur service, application, integration, batch job, or analytics pipeline. This keeps it next to what it documents, versioned and reviewed in a pull request. The PR contains the draft assessment. One or more human reviewers must explicitly approve the assessment in the PR before it is merged. The approved, merged file is the adopted assessment.
 
 Use one file per processing. Use a short kebab-case `<processing-id>` that names the processing, not the technology: `refund-fraud-detection`, not `kafka-consumer`.
 
@@ -109,8 +108,9 @@ Copy the template below into the file location above and replace every `<...>` p
 *Vurdering av lovlig grunnlag for behandling av personopplysninger etter personvernforordningen (GDPR) artikkel 6 (1) bokstav f («berettiget interesse»).*
 
 Denne filen dokumenterer vurderingen ut fra kildene som er oppgitt nederst. Konklusjonen angir
-om berettiget interesse er dokumentert for det beskrevne omfanget. PR-reviewerne kontrollerer
-og endrer vurderingen før merge; den mergede filen er den vedtatte vurderingen.
+om berettiget interesse er dokumentert for det beskrevne omfanget. Én eller flere personer må
+gjennomgå og uttrykkelig godkjenne vurderingen i PR-en før den merges til kodelageret.
+KI-agenter kan ikke godkjenne egne utkast. Den godkjente, mergede filen er den vedtatte vurderingen.
 
 - Behandling: <tjeneste, applikasjon eller integrasjon som behandler personopplysningene>
 - Personopplysninger: <ja — kort beskrivelse av hvilke>
@@ -224,6 +224,7 @@ When an AI agent writes or changes code that processes personal data, it must:
 - If the basis is legitimate interest, check for an existing assessment in the owning repository at `docs/privacy/legitimate-interests/`.
 - If the change widens the scope (new fields, purposes, recipients, retention, or transfers), update the assessment in the same PR or flag that it must be updated.
 - When drafting an assessment, fill only what the sources confirm, mark everything else as not documented, and set the status accordingly.
+- Submit the draft assessment in a PR and obtain explicit approval from one or more human reviewers before merging it into the repository. Do not approve your own draft or merge without recorded human approval.
 - Never state that Personvernleder, Datatilsynet, or any reviewer has approved the processing unless the user or a document confirms it.
 
 ## Further Reading
