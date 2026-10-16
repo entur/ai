@@ -142,6 +142,27 @@
       "homepage": "https://uniformen.entur.no",
       "repository": "https://github.com/entur/uniformen",
       "license": "EUPL-1.2"
+    },
+    {
+      "name": "asd-ste100",
+      "source": {
+        "source": "github",
+        "repo": "danyuchn/asd-ste100-skill",
+        "sha": "3944283c183eea13fe5bd902b572da3b4de8bf44"
+      },
+      "strict": false,
+      "skills": [
+        "./"
+      ],
+      "description": "Rewrite agent-facing English (tool descriptions, error messages, system prompts, inter-agent instructions) into ASD-STE100 Simplified Technical English: one meaning per word, active voice, one instruction per sentence. Third-party skill, pinned to a commit.",
+      "category": "writing",
+      "keywords": ["writing", "ste100", "simplified-technical-english", "prompts", "tool-descriptions", "clarity"],
+      "author": {
+        "name": "Dustin Yuchen Teng"
+      },
+      "homepage": "https://github.com/danyuchn/asd-ste100-skill",
+      "repository": "https://github.com/danyuchn/asd-ste100-skill",
+      "license": "MIT"
     }
   ]
 }
