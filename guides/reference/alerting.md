@@ -34,8 +34,8 @@ Each team owns a **Grafana folder** for their alert rules. Create one if it does
 5. Set the **condition** (threshold, math expression, or reduce function).
 6. Set the **evaluation interval** and `for` duration. There is no hard rule, but reasonable defaults are 1m evaluation with 5m pending for warnings and 3m pending for critical alerts.
 7. Add **labels** -- these drive notification routing:
-   - `severity`: `critical` or `warning`
-   - `service_name`: the application name (Kubernetes namespace)
+   - `severity`: `critical` (-> High urgency) or `warning` (-> Low urgency)
+   - `service_name`: the **PagerDuty service name**, matched verbatim (see [Labels That Drive Routing](#labels-that-drive-routing)). This is *not* automatically the Kubernetes namespace.
    - `env`: the environment (`dev`, `tst`, `prd`)
 8. Add **annotations** for context in the alert notification:
    - `summary`: one-line description of the problem
@@ -44,7 +44,12 @@ Each team owns a **Grafana folder** for their alert rules. Create one if it does
 
 ### Labels That Drive Routing
 
-The labels `service_name` and `env` are sent as `custom_details` to PagerDuty and determine routing and escalation. Set them on every alert rule. Use `severity` to control urgency.
+The labels `service_name` and `env` are sent as `custom_details` to PagerDuty; Global Event Orchestration uses them to route the incident to the right team's PagerDuty service. Set them on every alert rule. Use `severity` to control urgency (`critical` -> High, `warning` -> Low).
+
+- **`service_name` must equal the PagerDuty service's display name exactly** -- same spelling, casing, and spacing as the service's `spec.name` in its [Service manifest](https://github.com/entur/so-incident-management/blob/main/docs/SERVICE.md). Event Orchestration matches on this exact string; any mismatch (typo, wrong case, extra space) means the alert is **not routed** and falls through. It is *not* automatically the Kubernetes namespace, and the display name (e.g. `My Service`) is usually different from the kebab-case namespace (`my-service`) you use in PromQL selectors.
+- **`env`** scopes routing to the environment: `dev`, `tst`, or `prd`.
+
+> **The PagerDuty service must already exist.** Teams, services, escalation policies, and Slack connections are provisioned declaratively from manifests in `entur/so-incident-management` -- not created by hand in the PagerDuty UI. If no service exists yet for your app, add a [Service manifest](https://github.com/entur/so-incident-management/blob/main/docs/SERVICE.md) (open a PR, `entur apply`, merge) before pointing `service_name` at it. See the [PagerDuty Integration](#pagerduty-integration) section below.
 
 ## PromQL for Alerting
 
@@ -69,7 +74,7 @@ These labels are available on most metrics from Kubernetes workloads:
 | Label | Description | Example |
 |-------|-------------|---------|
 | `app` | Application name | `my-service` |
-| `kubernetes_namespace` | Namespace the pod runs in | `my-service` |
+| `kubernetes_namespace` | Namespace of the scraped pod -- your namespace on application metrics only (see [Pick the Namespace Label by Metric Source](#pick-the-namespace-label-by-metric-source)) | `my-service` |
 | `cluster_environment` | Environment | `dev`, `tst`, `prd` |
 | `prometheus_group` | Cluster identifier | `kub-ent-prd-001` |
 
@@ -87,9 +92,23 @@ These labels are available on most metrics from Kubernetes workloads:
 | Logging (logback) | `logback_` | Log details |
 | Custom application metrics | Varies | Business-specific counters, gauges, histograms |
 
+### Pick the Namespace Label by Metric Source
+
+Filter each metric on the label that holds **your** namespace. The label depends on the metric source:
+
+| Metric source | Prefix / pattern | Filter on |
+|---------------|------------------|-----------|
+| Your application (scraped from your pods) | `http_*`, `jvm_*`, custom metrics | `kubernetes_namespace="my-service"` |
+| kube-state-metrics | `kube_*` | `exported_namespace="my-service"` |
+| cAdvisor / kubelet | `container_*` | `namespace="my-service"` |
+
+Do **not** filter `kube_*` metrics on `namespace` or `kubernetes_namespace`. Prometheus scrapes kube-state-metrics like any other pod, so on `kube_*` series both labels hold `prometheus` -- the namespace kube-state-metrics runs in -- and your namespace is in `exported_namespace`. A wrong label raises no error: the query returns no data and the alert never fires. An alert that combines sources, such as memory usage against the memory limit, uses a different label on each side.
+
+Before saving an alert rule, run its query in Grafana Explore against the `prometheus-thanos` data source and confirm it returns data.
+
 ### PromQL Examples for Common Alerts
 
-All examples below target production. Adjust `prometheus_group`, `kubernetes_namespace`, and thresholds for your service.
+All examples below target production. Adjust `prometheus_group`, the namespace value (on the label for each metric source -- see [Pick the Namespace Label by Metric Source](#pick-the-namespace-label-by-metric-source)), and thresholds for your service.
 
 #### High 5xx Error Rate
 
@@ -128,7 +147,7 @@ Fires when a container restarts more than 3 times in 15 minutes:
 ```promql
 increase(kube_pod_container_status_restarts_total{
   prometheus_group="kub-ent-prd-001",
-  namespace="my-service"
+  exported_namespace="my-service"
 }[15m]) > 3
 ```
 
@@ -146,7 +165,7 @@ Fires when container memory usage exceeds 85% of its limit:
 /
   sum by (pod) (kube_pod_container_resource_limits{
     prometheus_group="kub-ent-prd-001",
-    namespace="my-service",
+    exported_namespace="my-service",
     resource="memory"
   })
 ) > 0.85
@@ -179,7 +198,7 @@ Fires when a pod is not ready for 3 minutes:
 ```promql
 kube_pod_status_ready{
   prometheus_group="kub-ent-prd-001",
-  namespace="my-service",
+  exported_namespace="my-service",
   condition="true"
 } == 0
 ```
@@ -201,18 +220,24 @@ Entur uses a shared PagerDuty Global Event Orchestration. All alerts flow throug
 
 1. A Grafana alert fires and sends a notification to the **`entur-pagerduty`** contact point.
 2. PagerDuty receives the event with `service_name` and `env` as custom details.
-3. PagerDuty's Global Event Orchestration routes the event to the correct team's PagerDuty service based on these fields.
-4. PagerDuty handles on-call scheduling and escalation.
+3. PagerDuty's Global Event Orchestration routes the event to the correct team's PagerDuty service based on these fields (no per-service integration key needed).
+4. PagerDuty handles on-call scheduling and escalation for that service.
 
-Teams do not need to configure PagerDuty directly. Set the correct `service_name` and `env` labels on every alert rule and PagerDuty takes care of routing and escalation.
+You do not wire up PagerDuty from Grafana beyond the `entur-pagerduty` contact point. But the team's PagerDuty resources -- the **service**, on-call schedule, **escalation policy**, and Slack connections -- are managed declaratively through the Incident Management Sub-Orchestrator, **not** by clicking around in the PagerDuty UI (manual changes are reverted on the next apply). Provision them from manifests in [`entur/so-incident-management`](https://github.com/entur/so-incident-management):
+
+- [Service manifest](https://github.com/entur/so-incident-management/blob/main/docs/SERVICE.md) -- the service your `service_name` must match, plus its escalation-policy assignment.
+- [Team manifest](https://github.com/entur/so-incident-management/blob/main/docs/TEAM.md) -- team members, on-call schedule, escalation policy, and the team's Slack channel.
 
 ### Escalation Model
 
-- During work hours: the owning team's on-call responds.
-- Outside work hours: escalation to **utviklervakt** (developer on-call).
-- Further escalation: **incident manager**.
+Escalation is driven by **urgency**, which the alert's `severity` sets, and the recipient chain comes from the team's escalation policy (provisioned from the [Team manifest](https://github.com/entur/so-incident-management/blob/main/docs/TEAM.md), integrated with the [Entur incident-management process](https://entur.atlassian.net/wiki/spaces/EKH/pages/5488541894/Varslingsrutine+for+Kritiske+hendelser)):
 
-PagerDuty manages the schedule and escalation chain. The team's responsibility is to create alerts that fire on real, actionable problems.
+| Urgency | `severity` | Recipient |
+|---------|-----------|-----------|
+| **High** | `critical` | On-call responder paged via SMS / automated phone call, 24/7. |
+| **Low** | `warning` | On-call responder notified by e-mail and/or Slack only. |
+
+Change escalation via the Team manifest (or override per service with `spec.escalationPolicy`) -- not in the PagerDuty UI. The team's responsibility on the alerting side is to create alerts that fire on real, actionable problems and carry the right `severity`.
 
 ## Grafana Notification Policies
 
@@ -222,7 +247,9 @@ For most teams, the setup is:
 
 - A notification policy that matches on `service_name` (or `team` if the team uses a team-level label) and routes to the **`entur-pagerduty`** contact point.
 - `severity=critical` alerts should have shorter group wait/interval to reach on-call faster.
-- `severity=warning` alerts can use longer intervals or route to a less urgent channel (e.g. a Slack contact point) depending on the team's preference.
+- `severity=warning` alerts can use longer intervals.
+
+> **Slack routing is handled by PagerDuty, not Grafana.** Once an incident reaches PagerDuty it is posted to Slack via the team's orchestrator-managed Slack connections (the team channel from the [Team manifest](https://github.com/entur/so-incident-management/blob/main/docs/TEAM.md), plus a shared platform channel). Prefer this over adding a separate Grafana Slack contact point, so on-call notifications and Slack posts stay consistent and don't drift from PagerDuty's view of the incident.
 
 ## SLO-Based Alerting
 
@@ -250,6 +277,8 @@ Adjust thresholds to your service's traffic profile and SLO targets. These are s
 
 ## Further Reading
 
+- [Service manifest](https://github.com/entur/so-incident-management/blob/main/docs/SERVICE.md) / [Team manifest](https://github.com/entur/so-incident-management/blob/main/docs/TEAM.md) -- the authority for provisioning PagerDuty services, escalation policies, and Slack connections. Your `service_name` label must match a service's `spec.name` here.
+- [Sub-Orchestrators overview](https://entur.atlassian.net/wiki/spaces/ESP/pages/5421170741/Sub-Orchestrators) -- how incident-management resources are applied.
 - [observability.md](observability.md) -- health probes, Prometheus metrics setup, Grafana dashboards.
 - [tracing.md](tracing.md) -- distributed tracing for correlating alerts with request traces.
 - [logging.md](logging.md) -- structured logging for investigating fired alerts.
