@@ -36,7 +36,7 @@ Each `id` must be copied verbatim from the MCP response (e.g. `guides_platform_s
   ],
   "must_match": [
     "guides_reference_go_md|reference/go",
-    "gcr\\.io/distroless|distroless/static",
+    "distroless.*nonroot|nonroot.*distroless",
     "structured (logging|logs)|json log|slog"
   ]
 }

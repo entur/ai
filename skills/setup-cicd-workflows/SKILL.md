@@ -7,7 +7,9 @@ description: >
   terraform.yml, terraform-drift-detection.yml, and dependabot.yml.
   Use this skill when the user says "set up CI/CD", "create pipelines",
   "add GitHub Actions", "configure deployment", or needs CI/CD workflows for a new
-  or existing Entur project. Always uses Entur reusable workflows -- never custom steps.
+  or existing Entur project. Prefers Entur reusable workflows; inline steps are
+  used only where the canonical templates themselves require them (language
+  test/build steps, image-tag resolution, drift issue creation).
 ---
 
 # CI/CD Workflow Setup
@@ -164,10 +166,13 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
 
 **Python:**
 
-> Use this block verbatim. Do NOT add `dorny/test-reporter`, `upload-artifact`, `--junit-xml`, or any Java/Kotlin steps. Those belong only in the Kotlin/Java variant above. Python is intentionally a simple `pip install && pytest`.
+> Do NOT add `dorny/test-reporter`, `upload-artifact`, `--junit-xml`, or any Java/Kotlin steps. Those belong only in the Kotlin/Java variant above. Python is intentionally a simple test step, but the exact commands depend on what the project actually has — check before generating:
+>
+> - **Python version**: use `python-version-file: '.python-version'` only if `.python-version` exists in the repo. Otherwise omit `python-version-file` and set an explicit `python-version` (ask the user, or default to the latest stable Python 3.x).
+> - **Dependency manager**: use `requirements.txt` only if that file exists. If the project has `pyproject.toml` with no `requirements.txt`, use `pip install .` (or `poetry install` / `pip install poetry && poetry install` if `poetry.lock` is present) instead — do not assume `requirements.txt`.
 
 ```yaml
-  # --- Build and Test ---
+  # --- Build and Test (requirements.txt + .python-version present) ---
 
   test:
     if: github.actor != 'dependabot[bot]'
@@ -181,6 +186,23 @@ Replace `{module}` with the Gradle subproject name (e.g. `app`). For root-level 
         with:
           python-version-file: '.python-version'
       - run: pip install -r requirements.txt && pytest
+```
+
+```yaml
+  # --- Build and Test (pyproject.toml only, no requirements.txt) ---
+
+  test:
+    if: github.actor != 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'   # or the project's pinned version
+      - run: pip install . && pytest
 ```
 
 ### Add Docker build, scan, and push jobs:
@@ -371,9 +393,12 @@ jobs:
             exit 1
           fi
 
-          # Get the PR branch name and apply the same sanitisation as gha-docker:
-          # lowercase, replace /.- with -, truncate to 43 chars, strip trailing -
+          # Get the PR branch name and the exact merged head commit. Apply the
+          # same branch sanitisation as gha-docker: lowercase, replace /.- with -,
+          # truncate to 43 chars, strip trailing -.
           BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
+          HEAD_SHA=$(gh pr view "$PR_NUMBER" --json headRefOid --jq '.headRefOid')
+          SHORT_SHA="${HEAD_SHA:0:7}"
           BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | tr -d 'ÆØÅæøå')
           BRANCH=${BRANCH//\//-}
           BRANCH=${BRANCH//./-}
@@ -381,11 +406,14 @@ jobs:
           BRANCH=${BRANCH:0:43}
           BRANCH=${BRANCH%-}
 
-          # Find the most recent git tag for this branch (created by the docker push workflow).
+          # Only accept a tag built from the PR's actual merged head commit --
+          # never fall back to "newest tag for this branch name", which can be an
+          # older or unrelated build if the branch name was reused or a later
+          # push to the same branch never triggered a build.
           # Tags follow the pattern: {branch}.{YYYYMMDD}-SHA{short_sha}
-          IMAGE_TAG=$(git tag -l "${BRANCH}.*" --sort=-creatordate | head -1)
+          IMAGE_TAG=$(git tag -l "${BRANCH}.*-SHA${SHORT_SHA}*" --sort=-creatordate | head -1)
           if [ -z "$IMAGE_TAG" ]; then
-            echo "::warning::No git tag matching '${BRANCH}.*' (PR #${PR_NUMBER}) -- no image was built for this PR, skipping deploy"
+            echo "::warning::No git tag matching '${BRANCH}.*-SHA${SHORT_SHA}*' for merged head ${HEAD_SHA} (PR #${PR_NUMBER}) -- either no image was built for this exact revision, or the only matching tags belong to a different revision and were correctly rejected. Skipping deploy rather than deploying an unverified image."
             echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -414,7 +442,7 @@ jobs:
 > Do NOT generate `deploy-dev`, `deploy-tst`, `deploy-prd`, `helm-lint`,
 > `gha-helm` references, or `values-kub-ent-*` paths in that case.
 
-Generate deploy jobs for all environments. This example shows the standard three-environment setup:
+Generate one deploy job per environment selected in the self-service manifest (Step 1) — do not generate `deploy-tst`/`deploy-prd` if the manifest only selects `dev`. This example shows the standard three-environment setup; scale the chain (each job's `needs` on the previous environment) up or down to match the selected set:
 
 ```yaml
   deploy-dev:
@@ -597,6 +625,10 @@ Dependabot PRs do not receive repository secrets by default. This workflow adds 
 # Dependabot PRs do not receive repository secrets by default.
 # This workflow adds an approval gate so secrets are only exposed after
 # a human has reviewed and approved the PR.
+#
+# A reusable workflow cannot grant itself more permissions than its caller
+# provides. ci.yml's test job requests checks: write (for dorny/test-reporter),
+# so this caller must grant it too, or that job fails with startup_failure.
 
 name: on-pull_request_review-submitted
 
@@ -606,6 +638,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 jobs:
   ci:
@@ -616,11 +649,10 @@ jobs:
 
 ## Step 8: Generate `.github/workflows/terraform.yml` (if `terraform/` exists)
 
-Manages Terraform infrastructure changes across all environments. On PR: lint, plan all environments, apply dev. On merge: lint, plan tst+prd, apply tst, apply prd.
+Manages Terraform infrastructure changes across the environments selected in the self-service manifest (Step 1). The rest of this section assumes `[dev, tst, prd]` — generate only the jobs for the environments actually selected; do not emit `tf-plan-*`/`tf-apply-*` jobs, `needs` edges, or summary text for an environment the manifest does not include.
 
-> **Required job names** (use these exact identifiers):
-> `terraform-lint`, `tf-plan-dev`, `tf-plan-tst`, `tf-plan-prd`,
-> `tf-apply-dev`, `tf-apply-tst`, `tf-apply-prd`.
+> **Required job names** (use these exact identifiers, one pair per selected environment):
+> `terraform-lint`, `tf-plan-{env}` for each selected environment, `tf-apply-{env}` for each selected environment. With the full `[dev, tst, prd]` set that is `tf-plan-dev`, `tf-plan-tst`, `tf-plan-prd`, `tf-apply-dev`, `tf-apply-tst`, `tf-apply-prd`.
 >
 > **Required conditional**: `tf-plan-dev` MUST be gated with `if: github.event_name != 'push'`
 > (it is PR/dispatch only). `tf-apply-dev` runs on PR/dispatch; `tf-apply-tst` and
@@ -793,7 +825,7 @@ jobs:
 > workflows, ALWAYS generate BOTH `terraform.yml` (Step 8) AND
 > `terraform-drift-detection.yml` (Step 9).
 >
-> **Required job names**: `tf-plan-dev`, `tf-plan-tst`, `tf-plan-prd`, `drift-check`.
+> **Required job names**: `tf-plan-{env}` for each environment selected in Step 1 (e.g. `tf-plan-dev`, `tf-plan-tst`, `tf-plan-prd` for the full set), plus `drift-check`.
 >
 > **Required schedule**: `cron: '0 10 * * 4'` (Thursdays at 10:00 UTC).
 >

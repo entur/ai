@@ -407,7 +407,15 @@ Redis (Memorystore) is commonly paired with Kafka consumers for deduplication, s
 
 ### Idempotent Consumer (Deduplication)
 
-Kafka provides at-least-once delivery. Use Redis `SET NX EX` to deduplicate. In the `@KafkaListener`, extract the event ID from a header, build a dedup key (`myapp:dedup:{eventId}`), and use `redis.opsForValue().setIfAbsent(key, "1", ttl)`. Skip processing if the key already exists.
+Kafka provides at-least-once delivery. **Mark the dedup key only after processing succeeds, never before.** Marking-then-processing means a crash or exception between the mark and the business effect makes redelivery silently skip an event whose business effect never happened -- there is no way to distinguish "already handled" from "handling started but failed" once the same key covers both.
+
+In the `@KafkaListener`, extract the event ID from a header and build a dedup key (`myapp:dedup:{eventId}`):
+
+1. `redis.opsForValue().get(key)` -- if present, skip processing (already handled).
+2. Process the message.
+3. Only after processing completes successfully, `redis.opsForValue().set(key, "1", ttl)` to mark it done.
+
+This is still **best-effort**: a duplicate delivery that lands in the narrow window between step 2 completing and step 3's `SET` can reprocess the same event. Design the business effect to be idempotent (e.g. an upsert keyed by event ID, or a unique constraint) so a rare reprocess is safe -- do not rely on the Redis key alone as the only safeguard against duplicate effects. When the business mutation is already written to Postgres, prefer a transactional inbox instead: store the processed event ID in the same database transaction as the mutation (a unique constraint on event ID), and acknowledge the Kafka offset only after that transaction commits. That closes the crash window Redis-only dedup cannot.
 
 **TTL guidance**: Set dedup key TTL to at least the max expected redelivery window. 24h is a safe default; if retry/DLT retries for at most 2h, 4h TTL suffices.
 

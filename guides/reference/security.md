@@ -12,7 +12,7 @@ Security conventions for all Entur services. Entur uses OWASP ASVS three-tier mo
 
 ## Secret Management
 
-**Never hardcode secrets** in source code, config files, Dockerfiles, or CI workflows. **Never commit secrets** to Git -- not even in "test" configurations. All secrets (passwords, API keys, tokens) live in **Google Secret Manager** and reach the running pod via **ExternalSecrets** referenced from the Helm values. The Entur Terraform modules create the Secret Manager entries automatically for most managed services, so application code only sees the resulting environment variables.
+**Never hardcode secrets** in source code, config files, Dockerfiles, or CI workflows. **Never commit secrets** to Git -- not even in "test" configurations. All secrets (passwords, API keys, tokens) live in **Google Secret Manager**. Application code sees them as resulting environment variables synced via **ExternalSecrets** from the Helm values -- this is the default path and covers most managed services, where the Entur Terraform modules create the Secret Manager entries automatically. The one documented exception is the Entur OIDC client library's own `${sm@SECRET_NAME}` placeholder (see [permission-store.md](../platform/permission-store.md#2-configure-applicationyml)), which the library resolves directly from Secret Manager at startup instead of going through ExternalSecrets -- use it only for that library's own configuration keys, not as a general alternative to ExternalSecrets.
 
 ### Rules
 
@@ -27,7 +27,9 @@ Entur Terraform modules create secrets automatically (e.g. `terraform-google-sql
 
 ```hcl
 resource "google_secret_manager_secret" "api_key" {
-  secret_id = "${module.init.app.id}-API_KEY"
+  secret_id = "API_KEY"    # Consumed by name below -- do not add an app-id prefix here;
+                            # the project is already scoped to this app, so the prefix
+                            # would only create a mismatch with the Helm secrets list.
   project   = module.init.app.project_id
 
   replication {
@@ -40,12 +42,14 @@ resource "google_secret_manager_secret" "api_key" {
 
 ### Consuming Secrets (Helm)
 
+The name listed under `common.secrets` must exactly match the `secret_id` created in Terraform above -- there is no prefix-stripping or renaming step in between:
+
 ```yaml
-# helm/<app>/env/dev.yaml
+# helm/<app>/env/values-kub-ent-dev.yaml
 common:
   secrets:
     my-secret:               # ExternalSecret name -> creates K8s Secret
-      - API_KEY              # Secret Manager secret name -> mounted as env var
+      - API_KEY              # Must equal the Terraform secret_id exactly -> mounted as env var of the same name
       - EXTERNAL_SERVICE_KEY
 ```
 

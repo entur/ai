@@ -1,0 +1,36 @@
+{
+  "name": "security-review",
+  "version": "0.1.0",
+  "description": "Review Entur codebases for exploitable security issues, false security claims, and AI-assisted implementation drift.",
+  "author": {
+    "name": "Team KI Effekt",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "security",
+    "security-review",
+    "owasp",
+    "ai-assisted",
+    "gdpr",
+    "oauth",
+    "mcp",
+    "gcp"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Entur AI Security Review",
+    "shortDescription": "Review Entur codebases for exploitable security issues.",
+    "longDescription": "Performs reachability-aware security triage across application code, GCP configuration, OAuth, MCP and LLM tools, and classified-data ingestion. Findings require evidence and an independent refutation pass when useful.",
+    "developerName": "Team KI Effekt",
+    "category": "Security",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://github.com/entur/ai",
+    "defaultPrompt": "Use the Entur AI Security Review skill to review this repository and report evidence-backed findings."
+  }
+}

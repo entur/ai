@@ -19,7 +19,7 @@ A managed PostgreSQL instance, accessed via Cloud SQL proxy sidecar, with creden
 
 3. **Configure the application datasource.** Spring Boot: set `spring.datasource.url`, `username`, `password` from the injected env vars. See [java.md](../reference/java.md#cloud-sql-connectivity). Go: use `database/sql` with the `pgx` driver and read the same env vars.
 
-4. **Add Flyway migrations.** Place SQL files under `src/main/resources/db/migration/` (Spring Boot) or your Go migration directory. Name as `V1__create_route_table.sql`. Migrations are immutable once applied. See [architecture.md](../reference/architecture.md#database-design) for naming conventions and rolling-deploy rules.
+4. **Add Flyway migrations.** Place SQL files under `src/main/resources/db/migration/` (Spring Boot) or your Go migration directory. Name as `V1__create_route_table.sql`. Migrations are immutable once applied. See [sql.md](../reference/sql.md) for table/column naming conventions and [architecture.md](../reference/architecture.md#database-design) for rolling-deploy rules.
 
 5. **Size the connection pool.** Total connections = `pods × max_pool_size`. Verify against Cloud SQL `max_connections` (minus 3 reserved) at peak HPA pod count. See [java.md](../reference/java.md#connection-pool-sizing).
 

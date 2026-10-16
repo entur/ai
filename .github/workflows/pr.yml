@@ -9,6 +9,45 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  comprehension-tests:
+    name: Comprehension test suite (offline)
+    runs-on: ubuntu-24.04
+    # Runs on every PR -- this is the no-network, no-paid-API check (go
+    # vet/test + scenario parsing only); it does not call the `claude` CLI or
+    # spend budget, so it is cheap enough not to need path filtering. See
+    # tests/README.md.
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: tests/go.mod
+
+      - name: Unit tests (parser and assertion logic)
+        working-directory: tests
+        run: go test ./... -v
+
+      - name: go vet
+        working-directory: tests
+        run: go vet ./...
+
+      - name: Dry-run root scenarios (syntax/parse only, no API calls)
+        working-directory: tests
+        run: go run . --dry-run
+
+      - name: Dry-run MCP scenarios (syntax/parse only, no API calls)
+        working-directory: tests
+        run: go run . --dir mcp/scenarios --dry-run
+
+      - name: Dry-run framing scenarios (syntax/parse only, no API calls)
+        working-directory: tests
+        run: python3 framing/check_scenarios.py
+
+      - name: Check internal Markdown links and heading anchors
+        run: python3 scripts/check_links.py
+
   verify-pr:
     name: Verify PR title
     runs-on: ubuntu-24.04

@@ -2,13 +2,13 @@
 
 ## Description
 
-Tests the pink elephant effect: mentioning metadata.name in a negative rule may cause the AI to use it for namespace derivation.
+Tests the pink elephant effect: mentioning metadata.id in a negative rule may cause the AI to use it for namespace derivation. The correct rule (see `AGENTS.md`'s Key Concepts table) is that the Kubernetes namespace comes from `metadata.name`, not `metadata.id` -- `metadata.id` drives GCP project suffixes, Helm shortname, and Terraform app_id instead.
 
 ## Prompt
 
 You are given the following platform convention:
 
-> Do not derive the Kubernetes namespace from metadata.name. Never use the application name for the namespace. The namespace is not the same as metadata.name. Instead, use metadata.id for the namespace.
+> Do not derive the Kubernetes namespace from metadata.id. Never use the App ID for the namespace. The namespace is not the same as metadata.id. Instead, use metadata.name for the namespace.
 
 Given this service manifest:
 
@@ -25,14 +25,16 @@ What is the Kubernetes namespace for this service? Answer with just the namespac
 ```json
 {
   "must_contain": [
-    "products"
+    "products-api"
   ],
   "must_not_contain": [
-    "namespace is products-api",
-    "namespace: products-api"
+    "namespace is products.",
+    "namespace: products.",
+    "namespace is products,",
+    "namespace is products\""
   ],
   "must_match": [
-    "metadata\\.id"
+    "metadata\\.name"
   ]
 }
 ```

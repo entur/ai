@@ -44,7 +44,8 @@ func main() {
 	junitPath := flag.String("junit", "", "write JUnit XML report to this file")
 	verbose := flag.Bool("verbose", false, "print full Claude responses for failed scenarios")
 	dryRun := flag.Bool("dry-run", false, "parse scenarios and print commands without executing")
-	strict := flag.Bool("strict", false, "require 100% assertion pass rate")
+	strict := flag.Bool("strict", true, "require 100% assertion pass rate (default: on -- these scenarios assert specific platform facts, not framing experiments)")
+	lenient := flag.Bool("lenient", false, "opt into the legacy 80%-of-positive-assertions pass threshold instead of strict 100%")
 	noRetry := flag.Bool("no-retry", false, "disable retry on failure")
 	scenarioDir := flag.String("dir", "", "scenario directory (default: ./scenarios relative to binary)")
 	sysPromptOverride := flag.String("system-prompt", "", "override default system prompt ('none' to omit)")
@@ -55,6 +56,8 @@ func main() {
 	if *parallel < 1 {
 		*parallel = 1
 	}
+
+	effectiveStrict := *strict && !*lenient
 
 	// Apply system prompt and tools configuration
 	activeSysPrompt = systemPrompt
@@ -119,8 +122,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	strictLabel := "strict (100%)"
+	if !effectiveStrict {
+		strictLabel = "lenient (80% of positive assertions)"
+	}
 	fmt.Printf("=== Entur AI Documentation Comprehension Tests ===\n")
-	fmt.Printf("Model: %s | Budget cap: $%.2f | Scenarios: %d\n\n", *model, *totalBudget, len(scenarios))
+	fmt.Printf("Model: %s | Budget cap: $%.2f | Scenarios: %d | Mode: %s\n\n", *model, *totalBudget, len(scenarios), strictLabel)
 
 	if *dryRun {
 		for i, s := range scenarios {
@@ -136,23 +143,25 @@ func main() {
 	}
 
 	results := make([]ScenarioResult, len(scenarios))
-	var totalCost float64
+	var skipped []string
+	var totalCost float64 // actual spend, from completed runs
+	var reserved float64  // totalCost plus the declared Budget of every dispatched-but-not-yet-priced attempt (including retries)
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	sem := make(chan struct{}, *parallel)
-	budgetReached := false
 
 	for i, s := range scenarios {
 		mu.Lock()
-		over := totalCost >= *totalBudget
-		mu.Unlock()
-		if over {
-			if !budgetReached {
-				fmt.Printf("\n[!] Budget cap reached ($%.2f). Skipping remaining scenarios.\n", *totalBudget)
-				budgetReached = true
-			}
-			break
+		// Reserve this scenario's declared budget before dispatch. Checking
+		// only completed totalCost here would let up to `parallel` scenarios
+		// run concurrently unaccounted-for, overshooting the cap.
+		if reserved+s.Budget > *totalBudget {
+			skipped = append(skipped, s.Name)
+			mu.Unlock()
+			continue
 		}
+		reserved += s.Budget
+		mu.Unlock()
 
 		sem <- struct{}{}
 		wg.Add(1)
@@ -160,21 +169,29 @@ func main() {
 			defer wg.Done()
 			defer func() { <-sem }()
 
-			result := runScenario(s, *model, *strict, repoRoot)
+			result := runScenario(s, *model, effectiveStrict, repoRoot)
 			mu.Lock()
 			totalCost += result.CostUSD
 			mu.Unlock()
 
 			retried := false
 			if !result.Passed && !*noRetry && result.Error == "" {
-				retried = true
-				retry := runScenario(s, *model, *strict, repoRoot)
 				mu.Lock()
-				totalCost += retry.CostUSD
+				canRetry := reserved+s.Budget <= *totalBudget
+				if canRetry {
+					reserved += s.Budget
+				}
 				mu.Unlock()
-				if retry.Passed {
-					retry.Flaky = true
-					result = retry
+				if canRetry {
+					retried = true
+					retry := runScenario(s, *model, effectiveStrict, repoRoot)
+					mu.Lock()
+					totalCost += retry.CostUSD
+					mu.Unlock()
+					if retry.Passed {
+						retry.Flaky = true
+						result = retry
+					}
 				}
 			}
 
@@ -186,7 +203,7 @@ func main() {
 	}
 	wg.Wait()
 
-	// Drop unfilled slots (only happens when budget cap stopped dispatch mid-list).
+	// Drop unfilled slots (only happens when the budget cap skipped a scenario mid-list).
 	compacted := results[:0]
 	for _, r := range results {
 		if r.Scenario.Name != "" {
@@ -194,6 +211,12 @@ func main() {
 		}
 	}
 	results = compacted
+
+	if len(skipped) > 0 {
+		fmt.Printf("\n[!] Budget cap ($%.2f) reached -- %d scenario(s) skipped entirely: %s\n",
+			*totalBudget, len(skipped), strings.Join(skipped, ", "))
+		fmt.Println("    This run did NOT cover the full scenario set. Raise --budget or narrow --scenario.")
+	}
 
 	// Summary
 	passed, flaky, failed, errored := 0, 0, 0, 0
@@ -220,6 +243,9 @@ func main() {
 	if errored > 0 {
 		fmt.Printf(", %d errors", errored)
 	}
+	if len(skipped) > 0 {
+		fmt.Printf(", %d skipped (budget)", len(skipped))
+	}
 	fmt.Printf(" (total: $%.3f)\n", totalCost)
 
 	// JUnit XML output
@@ -231,7 +257,7 @@ func main() {
 		}
 	}
 
-	if failed > 0 || errored > 0 {
+	if failed > 0 || errored > 0 || len(skipped) > 0 {
 		os.Exit(1)
 	}
 }
