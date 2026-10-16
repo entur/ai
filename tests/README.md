@@ -48,7 +48,6 @@ go run . --model sonnet
 | 14-cicd-go-variant | Go CI: setup-go, go test, no artifact upload, no test-reporter, gomod dependabot |
 | 15-cicd-no-helm | No Helm: ci.yml omits helm-lint, cd.yml omits deploy jobs |
 | 16-cicd-python-variant | Python CI: setup-python, pytest, no artifact upload, pip dependabot |
-| 17-trace-project-routing | Cloud Trace project routing: k8s workload traces land in the shared host project `ent-kub-<env>`, same as k8s logs, not `ent-<app>-<env>` |
 | 18-profiler-project-routing | Cloud Profiler project routing: k8s workload profiles land in `ent-<app>-<env>`, not `ent-kub-<env>` -- the one signal that does not follow the shared-host-project rule |
 | 19-jvm-docker-golden-path | Java/Kotlin Docker runtime defaults to distroless, not Liberica |
 | 20-kotlin-codeql-version | Kotlin version follows Entur CodeQL support, not newest stable blindly |
@@ -60,6 +59,7 @@ go run . --model sonnet
 | 26-dependency-failure-startup | Applications start gracefully when a dependency is unavailable, not a fatal crash |
 | 27-dependency-pinning-policy | Critical Rule 6: pinning across Terraform refs, Actions versions, and Docker tags together |
 | 28-disabled-test-tracking | A disabled/ignored test must link a tracking issue, not just go green silently |
+| 30-tracing-dockerfile-single-entrypoint | Tracing and profiler JVM flags share the existing Dockerfile ENTRYPOINT |
 
 ## CLI Options
 
@@ -140,7 +140,7 @@ and ask specific, answerable questions.
 
 ## Cost
 
-Each scenario costs ~$0.03-0.10 with Haiku. Full suite of 28 scenarios: $2.87 (sum of declared `## Budget` values -- recompute with `python3 -c "..."` or similar after adding scenarios, don't guess). With retries (worst case, every scenario fails once): ~$5.75. The default `--budget 1.00` cap is **not** enough to run the full suite -- pass `--budget 3.00` (or higher, to cover retries) when running all scenarios, or the run will stop early and report which scenarios were skipped.
+Each scenario costs ~$0.03-0.10 with Haiku. Full suite of 28 scenarios: $2.85 (sum of declared `## Budget` values -- recompute with `python3 -c "..."` or similar after adding scenarios, don't guess). With retries (worst case, every scenario fails once): ~$5.70. The default `--budget 1.00` cap is **not** enough to run the full suite -- pass `--budget 3.00` (or higher, to cover retries) when running all scenarios, or the run will stop early and report which scenarios were skipped.
 
 ## Unit Tests
 

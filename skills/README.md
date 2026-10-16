@@ -100,6 +100,7 @@ Until a maintainer is confirmed, prefer Option 1, Option 2, or Option 4.
 | [setup-cicd-workflows](setup-cicd-workflows/) | Generate CI/CD GitHub Actions workflows using Entur reusable workflows |
 | [entur-conventions](entur-conventions/) | Thin router that fetches the matching Entur platform guide on demand (installed via the `guides` plugin) |
 | [scr-situation-complication-resolution](scr-situation-complication-resolution/) | Structure problems and decisions in SCR format for leadership |
+| [setup-tracing-java](setup-tracing-java/) | Instrument a Kotlin/Java (Spring Boot) service with the OpenTelemetry Java Agent and ship traces to Google Cloud Trace |
 | [entur-linje](https://github.com/entur/design-system/tree/main/skills) | Entur Linje design system: `@entur/*` components, design tokens, brand identity, universell utforming, package upgrades. Lives in `entur/design-system`; install via the `entur-linje` plugin |
 | [entur-uniformen](https://github.com/entur/uniformen/tree/main/skills) | Uniformen: Entur's shared header and footer for B2B and partner-facing portals — `@entur/uniformen` integration and language contracts, and the CSP the rendered chrome needs. Lives in `entur/uniformen`; install via the `entur-uniformen` plugin |
 | [asd-ste100](https://github.com/danyuchn/asd-ste100-skill) | Rewrite agent-facing English (tool descriptions, error messages, system prompts) into ASD-STE100 Simplified Technical English. Third-party skill by Dustin Yuchen Teng (MIT), pinned to a commit; install via the `asd-ste100` plugin |

@@ -5,6 +5,18 @@
   },
   "plugins": [
     {
+      "name": "setup-tracing-java",
+      "source": {
+        "source": "local",
+        "path": "./plugins/setup-tracing-java"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "DevOps"
+    },
+    {
       "name": "bootstrap",
       "source": {
         "source": "local",
