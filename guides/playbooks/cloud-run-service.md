@@ -1,6 +1,8 @@
 # Run a Service on Cloud Run
 
-Off-golden-path runtime for stateless services that do not need Kubernetes. The golden path is still GKE + the [common Helm chart](../platform/common-helm.md) — see [bootstrap-service.md](bootstrap-service.md) first. Pick this playbook when the service is stateless, request-bound, and the team accepts that Cloud Run has no in-cluster service mesh, no session affinity, and a multi-second cold start unless `minScale >= 1` is set.
+Off-golden-path runtime for stateless services that do not need Kubernetes. The golden path is still GKE + the [common Helm chart](../platform/common-helm.md) — see [bootstrap-service.md](bootstrap-service.md) first. Even when the service is stateless and request-bound, GKE should still be the first choice due to out-of-the-box monitoring, artifact security scanning, automated DNS provisioning, a shared artifact registry, and a full self-service workflow that does not require manually adjusted IAM-permissions that never end up in IaC systems.
+
+Suggest clarifying first that the extra complexity of choosing Cloud Run as the solution is worth it.
 
 ## Goal
 
