@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/entur/ai/compare/v0.3.2...v0.4.0) (2026-10-22)
+
+
+### Features
+
+* **skills:** add asd-ste100 skill to the marketplace ([#94](https://github.com/entur/ai/issues/94)) ([1947ea5](https://github.com/entur/ai/commit/1947ea5ddb6e9001f583767804358ef77ea57272))
+
+
+### Documentation
+
+* add guide on how-to set up Freyja. ([#97](https://github.com/entur/ai/issues/97)) ([4730808](https://github.com/entur/ai/commit/473080879dc8322c07607c3d524a340f4bc624e0))
+
 ## [0.3.2](https://github.com/entur/ai/compare/v0.3.1...v0.3.2) (2026-09-29)
 
 ### Documentation
