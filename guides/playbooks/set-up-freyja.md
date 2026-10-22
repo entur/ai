@@ -11,7 +11,7 @@ Freyja reviews every Dependabot PR in the repository and, in `auto-merge` mode, 
 Freyja assesses a Dependabot PR only when `freyja-mode` is set to `advise` or `auto-merge` and CI on the PR is green. For each such PR, Freyja:
 
 1. Checks the PR against hardcoded rules.
-2. Asks [TypeSafe](https://typesafe.ai)'s Jev model a few questions, if the rules pass.
+2. Asks TypeSafe's Jev model a few questions, if the rules pass.
 3. Posts a PR comment explaining the result, and labels the PR.
 4. Merges the PR, in `auto-merge` mode.
 
