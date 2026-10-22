@@ -17,9 +17,9 @@ cd tests
 # Dry run -- validate scenarios parse correctly, no API calls
 go run . --dry-run
 
-# Run all tests (~$2.90, ~3-5 minutes) -- the default $1.00 budget cap is not
+# Run all tests (~$3.10, ~3-5 minutes) -- the default $1.00 budget cap is not
 # enough for the full suite and will skip scenarios; raise it explicitly.
-go run . --verbose --budget 3.00
+go run . --verbose --budget 3.50
 
 # Run a specific scenario
 go run . --scenario "05-*" --verbose
@@ -60,6 +60,8 @@ go run . --model sonnet
 | 26-dependency-failure-startup | Applications start gracefully when a dependency is unavailable, not a fatal crash |
 | 27-dependency-pinning-policy | Critical Rule 6: pinning across Terraform refs, Actions versions, and Docker tags together |
 | 28-disabled-test-tracking | A disabled/ignored test must link a tracking issue, not just go green silently |
+| 29-freyja-how-to-set-up | Freyja is set up through the `freyja-mode` custom property, starting in `advise`, not a repo config file |
+| 30-freyja-enable-in-repo | Agent does not enable Freyja itself: gives the manual Settings → Custom properties steps |
 
 ## CLI Options
 
@@ -140,7 +142,7 @@ and ask specific, answerable questions.
 
 ## Cost
 
-Each scenario costs ~$0.03-0.10 with Haiku. Full suite of 28 scenarios: $2.87 (sum of declared `## Budget` values -- recompute with `python3 -c "..."` or similar after adding scenarios, don't guess). With retries (worst case, every scenario fails once): ~$5.75. The default `--budget 1.00` cap is **not** enough to run the full suite -- pass `--budget 3.00` (or higher, to cover retries) when running all scenarios, or the run will stop early and report which scenarios were skipped.
+Each scenario costs ~$0.03-0.10 with Haiku. Full suite of 30 scenarios: $3.07 (sum of declared `## Budget` values -- recompute with `python3 -c "..."` or similar after adding scenarios, don't guess). With retries (worst case, every scenario fails once): ~$6.14. The default `--budget 1.00` cap is **not** enough to run the full suite -- pass `--budget 3.50` (or higher, to cover retries) when running all scenarios, or the run will stop early and report which scenarios were skipped.
 
 ## Unit Tests
 
