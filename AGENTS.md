@@ -87,6 +87,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | Deprecate or delete a service | [playbooks/deprecate-service.md](guides/playbooks/deprecate-service.md) |
 | Handle a critical incident | [playbooks/incident-response.md](guides/playbooks/incident-response.md) |
 | Run the service locally | [playbooks/local-dev.md](guides/playbooks/local-dev.md) |
+| Let Freyja review and merge Dependabot PRs | [playbooks/set-up-freyja.md](guides/playbooks/set-up-freyja.md) |
 | Run on Cloud Run instead of GKE (off golden path) | [playbooks/cloud-run-service.md](guides/playbooks/cloud-run-service.md) |
 
 ### Platform capabilities (what the platform provides)
