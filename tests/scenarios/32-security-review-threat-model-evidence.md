@@ -2,11 +2,11 @@
 
 ## Description
 
-Verifies that the `entur-ai-security-review` skill keeps its evidence gates when it models data flows or assesses privacy. Reachable, conditionally reachable, latent, and unverified flows stay distinct; unknown personal data stays unknown; a course payment provider is not invented; and dev evidence does not prove production. Ordinary processing can confirm an evidenced technical retention mismatch, while unknown purpose and unknown rights channels need validation. Effective deletion or upstream authorisation defeats the respective allegation. Personal data does not raise severity automatically, latent code is not currently exploitable, no GDPR conclusion is drawn, and refutation runs locally without unauthorised delegation. An ordinary-processing privacy candidate loads the privacy rules while the full view stays off.
+Verifies that the `entur-ai-security-review` skill keeps its evidence gates when it models data flows or assesses privacy. Reachable, conditionally reachable, latent, and unverified flows stay distinct; unknown personal data stays unknown; a course payment provider is not invented; and dev evidence does not prove production. Ordinary processing can confirm an evidenced technical retention mismatch, while unknown purpose and unknown rights channels need validation. Effective deletion or upstream authorisation defeats the respective allegation. Personal data does not raise severity automatically, latent code is not currently exploitable, no GDPR conclusion is drawn, and refutation runs locally without unauthorised delegation. SKILL.md's loading rule requires the threat-model reference for an ordinary-processing privacy candidate but not for tagging an established, straightforward finding, and the full view stays off in the ordinary review.
 
 ## Prompt
 
-You are applying the Entur security-review skill. Read `skills/entur-ai-security-review/SKILL.md`, then `skills/entur-ai-security-review/references/evidence-severity-reporting.md` and `skills/entur-ai-security-review/references/threat-modeling-output.md`. Use only those rules.
+You are applying the Entur security-review skill. Read `skills/entur-ai-security-review/SKILL.md`, then `skills/entur-ai-security-review/references/evidence-severity-reporting.md` and `skills/entur-ai-security-review/references/threat-modeling-output.md`. Use only those rules. Answer the `reference_required_*` keys from SKILL.md's loading rule, not from what this prompt told you to read.
 
 The facts below are SUPPLIED EVIDENCE for this exercise. They are not files in this repository. Treat them as complete for what they state, and as unknown for anything they omit.
 
@@ -20,13 +20,14 @@ Part 1, a requested DFD of one service:
 
 Part 2, an ordinary change-focused review with no STRIDE, LINDDUN, or DFD request. Delegation to sub-agents has not been authorised.
 
-- Candidate A: a supplied privacy policy states 30 days. `config/retention.yaml:3` keeps identifiable traveller events for 365 days, and no purge job exists in the traced path.
+- Candidate A: a supplied privacy policy states that identifiable traveller trip events are kept for 30 days, and it applies to these events. The effective production configuration, `config/retention.yaml:3`, keeps them for 365 days, and no other purge exists at any traced sink. Affected scope: the trip events of all app users, about 400,000 travellers, which gives a bounded and concrete impact. Refutation checked access limits and pseudonymisation; neither defeats the mismatch.
 - Candidate B: `analytics/Join.kt:20` joins encrypted trip records across purposes on a stable identifier; the permitted purpose and population are unknown.
 - Candidate C: the reviewed diff has no delete endpoint; nothing is known about other rights channels.
 - Candidate D: a suspected retention defect, but a supplied effective deletion trace shows the records are purged on schedule.
 - Candidate E: an alleged IDOR on `GET /orders/{id}`, but `gateway/Policy.kt:44` enforces object ownership upstream on that route.
-- Candidate F: an unregistered admin handler that would be High severity if activated.
+- Candidate F: an unregistered admin handler that would be High severity if activated; a supplied release plan wires it next sprint.
 - Candidate G: a handler returns traveller names, but its registration and access enforcement cannot be verified in scope.
+- Candidate H: a confirmed, straightforward IDOR. `GET /tickets/{id}` is registered and reachable, and no ownership check exists anywhere on the traced path. It only needs its light threat-category tag.
 
 Output exactly these lines, as plain text, with no bullets, markdown, or code fences. Pick one value from each list:
 
@@ -50,8 +51,9 @@ g_auto_high: <yes|no>
 g_outcome: <confirmed|needs validation|rejected>
 legal_conclusion: <none|GDPR breach>
 refutation: <local separate pass|delegated|skipped>
-privacy_rules_loaded: <yes|no>
-full_view: <on|off>
+part2_full_view: <on|off>
+reference_required_for_candidate_a: <yes|no>
+reference_required_for_candidate_h_tag: <yes|no>
 
 ## Assertions
 
@@ -62,7 +64,41 @@ full_view: <on|off>
     "course_psp_in_model: yes",
     "f1_production_proven: yes",
     "legal_conclusion: GDPR breach",
-    "a_actor: attacker"
+    "a_actor: attacker",
+    "f1_status: conditionally reachable",
+    "f1_status: latent",
+    "f1_status: unverified",
+    "f2_status: reachable",
+    "f2_status: latent",
+    "f2_status: unverified",
+    "f3_status: reachable",
+    "f3_status: conditionally reachable",
+    "f3_status: unverified",
+    "f4_status: reachable",
+    "f4_status: conditionally reachable",
+    "f4_status: latent",
+    "f4_personal_data: yes",
+    "a_outcome: needs validation",
+    "a_outcome: rejected",
+    "a_claim: unlawful processing",
+    "b_outcome: confirmed",
+    "b_outcome: rejected",
+    "c_outcome: confirmed",
+    "c_outcome: rejected",
+    "d_outcome: confirmed",
+    "d_outcome: needs validation",
+    "e_outcome: confirmed",
+    "e_outcome: needs validation",
+    "f_label: reachable",
+    "f_currently_exploitable: yes",
+    "g_auto_high: yes",
+    "g_outcome: confirmed",
+    "g_outcome: rejected",
+    "refutation: delegated",
+    "refutation: skipped",
+    "part2_full_view: on",
+    "reference_required_for_candidate_a: no",
+    "reference_required_for_candidate_h_tag: yes"
   ],
   "must_match": [
     "(?m)^f1_status: reachable$",
@@ -85,8 +121,9 @@ full_view: <on|off>
     "(?m)^g_outcome: needs validation$",
     "(?m)^legal_conclusion: none$",
     "(?m)^refutation: local separate pass$",
-    "(?m)^privacy_rules_loaded: yes$",
-    "(?m)^full_view: off$"
+    "(?m)^part2_full_view: off$",
+    "(?m)^reference_required_for_candidate_a: yes$",
+    "(?m)^reference_required_for_candidate_h_tag: no$"
   ]
 }
 ```

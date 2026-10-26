@@ -63,7 +63,7 @@ go run . --model sonnet
 | 29-freyja-how-to-set-up | Freyja is set up through the `freyja-mode` custom property, starting in `advise`, not a repo config file |
 | 30-freyja-enable-in-repo | Agent does not enable Freyja itself: gives the manual Settings → Custom properties steps |
 | 31-security-review-threat-model-activation | Security review: light STRIDE/LINDDUN tags in ordinary reviews (`not assessed` stays distinct from `none justified`), full view only on triage or explicit request, scoped STRIDE-only and DFD-only output, one dual-tagged disclosure finding, traceability/privacy tension |
-| 32-security-review-threat-model-evidence | Security review: four DFD flow statuses, unknown personal data stays unknown, no invented course flows, ordinary-processing privacy gate, privacy rules loaded without enabling the full view, no legal conclusion |
+| 32-security-review-threat-model-evidence | Security review: four DFD flow statuses, unknown personal data stays unknown, no invented course flows, ordinary-processing privacy gate, SKILL.md loading rule requires the reference for an ordinary privacy candidate but not for tagging a straightforward finding, no legal conclusion |
 | 33-security-review-threat-model-handoff | Security review: Critical kept beside the High course band, numeric matrix only when supplied, pending team decisions, honest `C1`/`V1`/`ok`/`n/a`/`?` coverage cells split by path |
 
 ## CLI Options
