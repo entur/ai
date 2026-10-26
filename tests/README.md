@@ -17,9 +17,9 @@ cd tests
 # Dry run -- validate scenarios parse correctly, no API calls
 go run . --dry-run
 
-# Run all tests (~$3.40, ~3-5 minutes) -- the default $1.00 budget cap is not
+# Run all tests (~$3.70, ~3-5 minutes) -- the default $1.00 budget cap is not
 # enough for the full suite and will skip scenarios; raise it explicitly.
-go run . --verbose --budget 3.50
+go run . --verbose --budget 4.00
 
 # Run a specific scenario
 go run . --scenario "05-*" --verbose
@@ -145,7 +145,7 @@ and ask specific, answerable questions.
 
 ## Cost
 
-Each scenario costs ~$0.03-0.10 with Haiku. Full suite of 33 scenarios: $3.37 (sum of declared `## Budget` values -- recompute with `python3 -c "..."` or similar after adding scenarios, don't guess). With retries (worst case, every scenario fails once): ~$6.74. The default `--budget 1.00` cap is **not** enough to run the full suite -- pass `--budget 3.50` (or higher, to cover retries) when running all scenarios, or the run will stop early and report which scenarios were skipped.
+Each scenario costs ~$0.03-0.10 with Haiku. Full suite of 33 scenarios: $3.67 (sum of declared `## Budget` values -- recompute with `python3 -c "..."` or similar after adding scenarios, don't guess). With retries (worst case, every scenario fails once): ~$7.34. The default `--budget 1.00` cap is **not** enough to run the full suite -- pass `--budget 4.00` (or higher, to cover retries) when running all scenarios, or the run will stop early and report which scenarios were skipped.
 
 ## Unit Tests
 

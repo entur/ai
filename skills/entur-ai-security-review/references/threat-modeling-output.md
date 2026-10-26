@@ -38,11 +38,11 @@ Write the element table first; it is authoritative. Use its IDs throughout:
 | `F1` | Directed flow | Source and destination IDs, data classes, purpose evidence, crossed `TB` IDs, personal data `yes`, `no`, or `unknown` with evidence |
 | `TB1` | Trust boundary | Authority or protection that changes, domains on each side, crossing flows |
 
-Each row also records environment, `file:line` evidence of existence and of
-wiring, missing evidence, and a status: `reachable`, `conditionally reachable`
-(behind an identified condition), `latent` (unwired, credible shipping path), or
+Each row records environment, `file:line` evidence of existence and wiring,
+missing evidence, and a status: `reachable`, `conditionally reachable` (behind
+an identified condition), `latent` (unwired, credible shipping path), or
 `unverified` (registration or deployment unresolved). Number IDs in source
-order; reuse IDs from a supplied earlier model without renumbering.
+order; keep supplied earlier IDs.
 
 - Each flow has its own status and environment. Reachable endpoints do not
   prove the edge runs, dev does not prove production, and an SDK name is no flow.
@@ -54,11 +54,10 @@ order; reuse IDs from a supplied earlier model without renumbering.
 
 Include a Mermaid `flowchart LR` view of the same rows unless asked for "no
 diagrams" or 2 or fewer nodes are evidenced. Draw one `subgraph` per evidenced
-trust domain, labelled with its `TB` ID; never invent a domain. Write each
-status or condition in the edge label, and in the node label when no edge
-carries it, such as an isolated latent process; styling cannot carry status.
-Above 15 elements, use subviews and list omitted areas. Findings cite model IDs
-beside source locations.
+trust domain, labelled with its `TB` ID; never invent a domain. Put status or
+conditions on edge labels, and on the node label when no edge carries them, such
+as an isolated latent process; styling cannot carry status. Above 15 elements,
+use subviews and list omitted areas. Cite model IDs beside source locations.
 
 ## Map findings to STRIDE and LINDDUN
 
@@ -93,14 +92,14 @@ mapping is for discussion only, never a Basis or a conclusion:
 
 ## Confirm ordinary-processing privacy findings
 
-Normal processing by Entur, partners, or third parties can harm people, so an
-attacker is optional; evidence is not. Confirm only when the review shows all
-five conditions; otherwise reject, downgrade, or use `Needs validation`:
+Harm from normal processing by Entur, partners, or third parties needs no
+attacker, but it needs evidence. Confirm only when all five hold. Reject when
+evidence defeats the claim, downgrade when scope is narrower, and use `Needs
+validation` when facts are missing:
 
 1. An effective source-to-recipient or store path, with status and locations.
 2. Data classes, affected people, the processing actor, and a concrete effect.
-3. An applicable invariant, purpose, contract, or policy; a policy is not proof
-   of runtime behaviour.
+3. An applicable invariant, purpose, contract, or policy (an expectation only).
 4. Refuted controls: access, pseudonymisation, retention at every sink,
    deletion propagation, recipients, other rights channels, and upstream checks.
 5. Scope and impact that support severity at Medium confidence or better.
@@ -115,17 +114,19 @@ five conditions; otherwise reject, downgrade, or use `Needs validation`:
 | Unawareness & unintervenability (`U`) | A reachable notice, choice, or deletion control misrepresents or fails across the end-to-end path | No delete endpoint in the reviewed diff; another portal or channel may exist |
 | Non-compliance (`N-comp`) | Effective retention or deletion contradicts an applicable supplied policy or contract, such as a traced 365-day lifecycle against a 30-day policy; label it "technical concern; privacy/legal assessment required" | A claim that processing lacks a lawful basis; illegality inferred from a schema |
 
-A validation entry `V1` lists model IDs, proposed category, observed fact,
-missing fact, safe validation step, and team role to consult; it is unscored.
+Report a confirmed Non-compliance or retention mismatch only as "technical
+concern; privacy/legal assessment required", never as a breach or as unlawful. A
+validation entry `V1` lists model IDs, proposed category, observed fact, missing
+fact, safe validation step, and team role to consult; it is unscored.
 
 ## Show coverage without manufacturing assurance
 
 Place matrices under **Coverage and residual risk**. STRIDE rows cover `E`, `P`,
 `DS`, and `F` IDs. LINDDUN rows cover `yes` and `unknown` flows under `L`, `I`,
-`N-rep`, `D-detect`, `D-data`, `U`, `N-comp`, with the full-name legend above.
-A cell holds a finding (`C1`), an investigated concern needing validation
-(`V1`), `ok` (positively checked in the row's scope, not "search found
-nothing"), `n/a` (reason in the ledger), or `?` (not checked or not reviewed).
+`N-rep`, `D-detect`, `D-data`, `U`, `N-comp`, as in the legend above. A cell
+holds a finding (`C1`), an investigated concern needing validation (`V1`), `ok`
+(positively checked in the row's scope, not "search found nothing"), `n/a`
+(reason in the ledger), or `?` (not checked or reviewed).
 
 For each element/flow row, identify the reviewed routes, environment and
 conditions. Group categories only when the stated evidence and result support
@@ -139,9 +140,8 @@ percentages. A zero-finding review with honest `?` cells is valid.
 
 ## Prepare the team hand-off
 
-Add **Team hand-off — pending team decisions** under Recommended next actions,
-one row per `C` or `V` ID, each with an indented `Privacy question` line or
-`none`. Nothing is decided, created, or sent:
+Add **Team hand-off — pending team decisions** under Recommended next actions:
+a row and an indented `Privacy question` per `C` or `V` ID, undecided and unsent:
 
 ```text
 ID | Severity; status | Course band | Proposed action | Verify | Decision | Owner | Backlog; deadline | Next review
@@ -186,5 +186,5 @@ workshop High; a calibrated Critical stays Critical.
 
 Agenda: validate the DFD and personal-data marks; run STRIDE, then LINDDUN;
 merge and prioritise; record decisions, owners, and backlog; agree the next
-review. Update the model on a new integration, data type or purpose, a changed
-trust boundary or public API, a security incident, or a privacy breach.
+review. Update the model after new integrations, data types or purposes, changed
+trust boundaries or APIs, security incidents, or privacy breaches.
