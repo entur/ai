@@ -23,7 +23,7 @@ Report 1 is a repository triage, so the full view is on. No matrix was requested
 
 Report 2 is a later session for the same C1. The team requests the course matrix and supplies likelihood 3 and impact 3.
 
-Output exactly these lines, as plain text, with no bullets, markdown, or code fences. Pick one value from each list. `course_band` is C1's value in the team hand-off's `Course band (severity roll-up)` column:
+Output exactly these lines, as plain text, with no bullets, markdown, or code fences. Pick one value from each list. `course_band` is C1's value in the team hand-off's `Course band (severity roll-up)` column. `zero_finding_valid` asks whether a review that finds nothing, with honest `?` cells, is a valid result under the skill:
 
 primary_severity: <Critical|High>
 course_band: <Critical|High|Medium|Low>

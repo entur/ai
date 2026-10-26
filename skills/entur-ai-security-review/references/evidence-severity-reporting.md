@@ -40,7 +40,7 @@ Tag each confirmed or downgraded finding, unless the user asks for no tags:
 |---|---|
 | Full names | STRIDE: Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege. LINDDUN: Linking, Identifying, Non-repudiation, Detecting, Data disclosure, Unawareness & unintervenability, Non-compliance |
 | `none justified` | This finding's mapping was considered against the evidence; not a framework pass |
-| `not assessed` | The dimension was not evaluated; never fill the line with a guess |
+| `not assessed` | The dimension was not evaluated (e.g. a DoS finding whose logs were not checked for personal data); never fill the line with a guess |
 | `n/a: evidenced non-personal` | Data-class evidence shows no personal data; unknown data is not non-personal |
 
 Repudiation tags missing accountability; Non-repudiation tags excessive proof of

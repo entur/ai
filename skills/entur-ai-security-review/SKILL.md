@@ -101,8 +101,8 @@ The main reviewer must read each reference selected for the review:
 - Read the [threat-model output reference](references/threat-modeling-output.md)
   when the full view or a requested model/lens is enabled, when evaluating an
   ordinary-processing privacy candidate, or when a proposed category mapping
-  needs its guidance. Reading the reference alone does not enable a DFD,
-  coverage matrix, or wider review.
+  needs its guidance (routine tags on an established finding do not). Reading
+  the reference alone does not enable a DFD, coverage matrix, or wider review.
 - Read [evidence, severity, and reporting](references/evidence-severity-reporting.md)
   before finalising findings.
 
