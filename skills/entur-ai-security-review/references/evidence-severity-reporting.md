@@ -15,8 +15,8 @@ Record the following for every candidate before refutation:
 - **Actor and prerequisites:** anonymous, authenticated, tenant member,
   contributor, operator, compromised dependency, another realistic actor, or
   `ordinary processing; no attacker required` with the processing conditions.
-- **Status:** reachable, conditionally reachable, latent, or unverified, with
-  wiring and deployment evidence.
+- **Status:** reachable, conditionally reachable, latent, or unverified, from
+  wiring and configuration evidence; state live deployment separately.
 - **Impact:** affected confidentiality, integrity, availability, subjects,
   systems, data volume, and recoverability.
 - **Mitigations checked:** validation, authorisation, framework defaults,
@@ -91,9 +91,10 @@ has a credible path to shipping or the misleading claim is independently harmful
 ## Confidence calibration
 
 - **High:** the reviewer traced the complete path and verified deployment or
-  effective configuration.
-- **Medium:** code evidence is strong, but a runtime, platform, or deployment fact
-  remains unverified.
+  effective configuration. In a static review, committed production
+  configuration counts as effective; state live deployment as unverified.
+- **Medium:** code evidence is strong, but a runtime, platform, or configuration
+  fact on the path remains unverified.
 - **Low:** the concern is a hypothesis or depends on unavailable evidence; place
   it under `Needs validation`, not confirmed findings.
 
@@ -120,7 +121,7 @@ Use findings first. Omit empty sections except the summary and coverage boundary
 # AI-Assisted Security Review: <service>
 
 Date: YYYY-MM-DD
-Scope: <commit, diff, components, or repository>
+Scope: <commit, diff, components, or repository; live deployment verified or not>
 Profile: <change-focused, targeted, or repository triage>
 Method: <manual traces, static searches, delegated surfaces, refutation, enabled view>
 Threat-category tags classify reported findings; they do not establish STRIDE/LINDDUN coverage.

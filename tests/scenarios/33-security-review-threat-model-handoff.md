@@ -6,13 +6,15 @@ Verifies that the `entur-ai-security-review` skill keeps primary severity, team 
 
 Changed expectation: the earlier design expected `default_matrix: omitted`. The numeric matrix is still omitted by default, but the full view now shows the default severity roll-up.
 
+Changed expectation: Report 1 was a repository triage. Triage no longer enables the full view, so Report 1 is now an explicit threat-modelling (support) request.
+
 ## Prompt
 
 You are applying the Entur security-review skill. Read `skills/entur-ai-security-review/SKILL.md`, then `skills/entur-ai-security-review/references/evidence-severity-reporting.md` and `skills/entur-ai-security-review/references/threat-modeling-output.md`. Use only those rules.
 
 The facts below are SUPPLIED EVIDENCE for this exercise. They are not files in this repository. Treat them as already verified.
 
-Report 1 is a repository triage, so the full view is on. No matrix was requested, and no owners, decisions, tickets, or dates were supplied.
+Report 1 answers an explicit request for threat-modelling support, so the full view is on. No matrix was requested, and no owners, decisions, tickets, or dates were supplied.
 
 - Finding C1 is a confirmed attack that meets the Critical calibration.
 - Validation entry V1 is an investigated privacy concern with no likelihood or population evidence.

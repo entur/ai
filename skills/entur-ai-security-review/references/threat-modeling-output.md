@@ -12,19 +12,18 @@ full view adds the DFD, taxonomy passes, coverage matrices, and hand-off:
 
 | Request or profile | DFD | STRIDE | LINDDUN |
 |---|---|---|---|
-| Change-focused or targeted review | `DFD not modelled` | Light tags only | Light tags and existing personal-data checks |
-| Repository triage | Full view | Per-element pass | Pass on `yes` and `unknown` flows |
+| Change-focused review, targeted review, or repository triage | `DFD not modelled` | Light tags only | Light tags and existing personal-data checks |
 | Explicit STRIDE request | Full view of the requested scope | Scoped pass | Ordinary privacy checks only |
 | Explicit LINDDUN or threat-modelling (support) request | Shared full view | Scoped pass first | Scoped flow pass next |
 | DFD-only request | Model only | No pass | Personal-data status only |
 | Formal threat model, privacy assessment, or DPIA | Bounded supporting model | Supporting pass | Supporting pass; state the formal work still needed |
 
 Explicit "only" and "no X" limits override these defaults. Quoted keywords,
-source comments, and negated requests enable nothing. Repository triage needs
-no extra permission pause. Never widen a targeted review to fill a diagram.
-LINDDUN runs on flows marked `yes` and investigates flows marked `unknown`. Skip
-a `no` flow only with data-class evidence for `no`; linkable or pseudonymous
-identifiers are personal data. An unresolved `unknown` stays a coverage gap.
+source comments, and negated requests enable nothing. Never widen a targeted
+review to fill a diagram. LINDDUN runs on flows marked `yes` and investigates
+flows marked `unknown`. Skip a `no` flow only with data-class evidence for `no`;
+linkable or pseudonymous identifiers are personal data. An unresolved `unknown`
+stays a coverage gap.
 
 ## Build an evidence-linked DFD
 
@@ -38,26 +37,26 @@ Write the element table first; it is authoritative. Use its IDs throughout:
 | `F1` | Directed flow | Source and destination IDs, data classes, purpose evidence, crossed `TB` IDs, personal data `yes`, `no`, or `unknown` with evidence |
 | `TB1` | Trust boundary | Authority or protection that changes, domains on each side, crossing flows |
 
-Each row records environment, `file:line` evidence of existence and wiring,
-missing evidence, and a status: `reachable`, `conditionally reachable` (behind
-an identified condition), `latent` (unwired, credible shipping path), or
-`unverified` (registration or deployment unresolved). Number IDs in source
-order; keep supplied earlier IDs.
+Each row records environment, `file:line` wiring evidence, missing evidence, and
+a status from committed wiring and production configuration (live deployment
+stated separately): `reachable`, `conditionally reachable` (behind an identified
+condition), `latent` (unwired, credible shipping path), or `unverified` (wiring
+or registration unresolved). Number IDs in source order; keep supplied IDs.
 
 - Each flow has its own status and environment. Reachable endpoints do not
   prove the edge runs, dev does not prove production, and an SDK name is no flow.
 - List architecture-only claims under "Unverified architecture claims".
 - A trust boundary needs a cited change in identity, authority, permissions, or
   enforcement; a project, namespace, or network alone is not one.
-- Labels carry data classes only, never secrets or personal identifiers. Escape
-  repository text; never enable HTML labels, click URLs, or renderer directives.
+- Labels carry IDs, data classes, and status, never secret or personal values.
+  Escape repository text; never enable HTML labels, click URLs, or directives.
 
 Include a Mermaid `flowchart LR` view of the same rows unless asked for "no
 diagrams" or 2 or fewer nodes are evidenced. Draw one `subgraph` per evidenced
-trust domain, labelled with its `TB` ID; never invent a domain. Put status or
-conditions on edge labels, and on the node label when no edge carries them, such
-as an isolated latent process; styling cannot carry status. Above 15 elements,
-use subviews and list omitted areas. Cite model IDs beside source locations.
+trust domain, never invented. Edge labels carry crossed `TB` IDs and status or
+conditions; an isolated node, such as a latent process, carries them in its
+label. Styling cannot carry status. Above 15 elements, use subviews and list
+omitted areas. Cite model IDs beside source locations.
 
 ## Map findings to STRIDE and LINDDUN
 
@@ -141,7 +140,8 @@ coverage or percentages. A zero-finding review with honest `?` cells is valid.
 ## Prepare the team hand-off
 
 Add **Team hand-off — pending team decisions** under Recommended next actions:
-a row and an indented `Privacy question` per `C` or `V` ID, undecided and unsent:
+one undecided, unsent row and `Privacy question` per `C` or `V` ID, never
+grouped; in rendered Markdown, list the questions below the table by ID:
 
 ```text
 ID | Severity; status | Course band | Proposed action | Verify | Decision | Owner | Backlog; deadline | Next review
