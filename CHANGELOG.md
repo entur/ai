@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.3.2](https://github.com/entur/ai/compare/v0.3.1...v0.3.2) (2026-09-29)
+
+### Documentation
+
+* info about  noise filter extension ([#90](https://github.com/entur/ai/issues/90)) ([3d0fca4](https://github.com/entur/ai/commit/3d0fca4bd7171398bd4fd2f50306942978cc39e9))
+* tracing gradle otel agent ([#92](https://github.com/entur/ai/issues/92)) ([e95bce6](https://github.com/entur/ai/commit/e95bce676b2b46a703961889e7e7761db3ab4e73))
+
+## [0.3.1](https://github.com/entur/ai/compare/v0.3.0...v0.3.1) (2026-09-21)
+
+### Bug Fixes
+
+* resolve all P1/P2 findings from comprehensive repository review ([#88](https://github.com/entur/ai/issues/88)) ([37a891e](https://github.com/entur/ai/commit/37a891e1786cc8285ab41dd521815b157da8477a))
+
+## [0.3.0](https://github.com/entur/ai/compare/v0.2.1...v0.3.0) (2026-09-21)
+
+### Features
+
+* **skills:** add AI security review ([#85](https://github.com/entur/ai/issues/85)) ([1d3cdf0](https://github.com/entur/ai/commit/1d3cdf027ad5628d8564b9af4f8f2b05107de71d))
+* **skills:** add uniformen skill to the marketplace ([#82](https://github.com/entur/ai/issues/82)) ([15e16ca](https://github.com/entur/ai/commit/15e16ca7a873beb89e83a97191341375cd505fca))
+* update logging.md and tracing.md to align with newest guidelines. ([#79](https://github.com/entur/ai/issues/79)) ([2705ef6](https://github.com/entur/ai/commit/2705ef6b2752deb9553e8f2d3ea01a0b2d2c32a3))
+
+### Documentation
+
+* **alerting:** filter kube_* metrics on exported_namespace ([#86](https://github.com/entur/ai/issues/86)) ([bf5fdc3](https://github.com/entur/ai/commit/bf5fdc33e70dce1c0b113d677ebce9c2a1f74a46))
+
+## [0.2.1](https://github.com/entur/ai/compare/v0.2.0...v0.2.1) (2026-09-09)
+
+### Bug Fixes
+
+* Update api guidelines related stuff ([#80](https://github.com/entur/ai/issues/80)) ([d86f550](https://github.com/entur/ai/commit/d86f5501a67c47c4db1c63b20175d65424731f9e))
+
+### Documentation
+
+* **alerting:** align PagerDuty routing with so-incident-management ([#84](https://github.com/entur/ai/issues/84)) ([80a53d6](https://github.com/entur/ai/commit/80a53d68b4d13bd2b57033433e58601787f4569b))
+
 ## [0.2.0](https://github.com/entur/ai/compare/v0.1.2...v0.2.0) (2026-08-07)
 
 ### Features

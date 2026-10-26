@@ -1,23 +1,23 @@
 # Entur Reusable GitHub Actions Workflows
 
-Always use Entur reusable workflows instead of custom pipeline steps.
+Always use Entur reusable workflows instead of custom pipeline steps. The documented exceptions (custom steps not covered by a reusable workflow, auth combined with custom commands, or building a new reusable workflow) are in [gha-actions.md](gha-actions.md#when-to-use-directly).
 
 > **Setting up CI/CD for a project?** Generate project workflow files with the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill. This guide is a reference index for reusable workflows and illustrative snippets only; the skill is the source of truth for file names and complete templates.
 
 ## Available Workflows
 
-| Repository | Purpose | Version |
-|-----------|---------|---------|
-| [gha-docker](https://github.com/entur/gha-docker) | Docker lint, build, push | `@v1` |
-| [gha-helm](https://github.com/entur/gha-helm) | Helm lint, unit test, deploy | `@v1` |
-| [gha-terraform](https://github.com/entur/gha-terraform) | Terraform lint, plan, apply | `@v2` |
-| [gha-security](https://github.com/entur/gha-security) | Code scan (CodeQL), Docker scan (Grype) | `@v2` |
-| [gha-meta](https://github.com/entur/gha-meta) | Releases, PR verification, auth actions | `@v1` |
-| [gha-firebase](https://github.com/entur/gha-firebase) | Firebase Hosting preview and deploy | `@v1` |
-| [gha-docs](https://github.com/entur/gha-docs) | Documentation publishing | `@v1` |
-| [gha-slack](https://github.com/entur/gha-slack) | Slack notifications | `@v3` |
-| [gha-artifactory](https://github.com/entur/gha-artifactory) | Artifactory publishing (Maven/Gradle) | `@v1` |
-| [gha-api](https://github.com/entur/gha-api) | API spec lint, validate, publish (Redocly) | `@v6` |
+| Repository | Purpose |
+|-----------|---------|
+| [gha-docker](https://github.com/entur/gha-docker) | Docker lint, build, push |
+| [gha-helm](https://github.com/entur/gha-helm) | Helm lint, unit test, deploy |
+| [gha-terraform](https://github.com/entur/gha-terraform) | Terraform lint, plan, apply |
+| [gha-security](https://github.com/entur/gha-security) | Code scan (CodeQL), Docker scan (Grype) |
+| [gha-meta](https://github.com/entur/gha-meta) | Releases, PR verification, auth actions |
+| [gha-firebase](https://github.com/entur/gha-firebase) | Firebase Hosting preview and deploy |
+| [gha-docs](https://github.com/entur/gha-docs) | Documentation publishing (deprecated, DONT USE) |
+| [gha-slack](https://github.com/entur/gha-slack) | Slack notifications |
+| [gha-artifactory](https://github.com/entur/gha-artifactory) | Artifactory publishing (Maven/Gradle) |
+| [gha-api](https://github.com/entur/gha-api) | API spec lint, validate, publish |
 
 ## Pipeline Architecture
 
@@ -172,15 +172,7 @@ jobs:
 
 ## Documentation Publishing
 
-```yaml
-jobs:
-  publish-docs:
-    uses: entur/gha-docs/.github/workflows/publish.yml@v1
-    secrets: inherit
-    with:
-      project: my-application     # Default: repo name
-      directory: docs             # Default: docs
-```
+`gha-docs` is deprecated -- do not use it. There is no confirmed replacement workflow in this repository yet. If your project needs to publish `docs/`, ask in `#talk-utviklerplattform` for the current recommended path before adding a publishing job.
 
 ## Slack Notifications
 
@@ -200,16 +192,18 @@ jobs:
 
 Requires `gradle.properties` at repo root with a `version` field in semver format.
 
+`entur/gha-artifactory` ships composite actions, not reusable workflows -- invoke them from `steps:` inside a job, not with job-level `uses:`:
+
 ```yaml
 jobs:
-  update-version:
+  publish:
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
-    uses: entur/gha-artifactory/.github/actions/update-version@v1
-
-  maven-publish:
-    needs: [update-version]
-    uses: entur/gha-artifactory/.github/actions/maven-publish@v1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: entur/gha-artifactory/.github/actions/update-version@v1
+      - uses: entur/gha-artifactory/.github/actions/maven-publish@v1
 ```
 
 ## Workflow Details
@@ -431,6 +425,8 @@ jobs:
 
 Dependabot PRs do not receive repository secrets by default. This workflow runs CI only after a human has approved the PR:
 
+A reusable workflow cannot grant itself more permissions than its caller provides -- since `ci.yml`'s `test` job requests `checks: write` (for `dorny/test-reporter`), the caller must grant it too, or that job fails with `startup_failure`:
+
 ```yaml
 name: on-pull_request_review-submitted
 on:
@@ -438,6 +434,7 @@ on:
     types: [submitted]
 permissions:
   contents: read
+  checks: write
 
 jobs:
   ci:
@@ -522,22 +519,6 @@ jobs:
   deploy-prd:
     needs: [build, resolve-image, deploy-tst]
     # ... same pattern, depends on deploy-tst
-```
-
-### lint-api.yml (API Spec Linting)
-
-```yaml
-name: lint-api
-on:
-  pull_request:
-    paths: ['specs/**']
-jobs:
-  api-lint:
-    uses: entur/gha-api/.github/workflows/lint.yml@v6
-    if: github.actor != 'dependabot[bot]'
-    secrets: inherit
-    with:
-      path: specs/openapi.yaml
 ```
 
 `path` does not accept globs. Use a matrix strategy when the repository has

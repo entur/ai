@@ -55,11 +55,13 @@ Centralize all dependency versions. Use bundles for related dependencies. Do not
 [versions]
 kotlin = "2.4.10"
 spring-boot = "4.1.0"
+spring-dependency-management = "1.1.7"
 exposed = "1.3.1"
 flyway = "13.0.0"
 entur-cloud-logging = "7.0.0"
 entur-auth-server = "3.0.2"
 kotest = "6.2.3"
+spring-mockk = "4.0.2"
 testcontainers = "2.0.5"
 openapi-generator = "7.24.0"
 
@@ -70,6 +72,21 @@ flyway-core           = { group = "org.flywaydb", name = "flyway-core", version.
 flyway-postgres       = { group = "org.flywaydb", name = "flyway-database-postgresql", version.ref = "flyway" }
 kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
 spring-mockk          = { group = "com.ninja-squad", name = "springmockk", version.ref = "spring-mockk" }
+# Spring Boot starters below have no version -- they're resolved against the
+# Spring Boot BOM imported by the spring-dependency-mgmt plugin.
+spring-boot-actuator   = { group = "org.springframework.boot", name = "spring-boot-starter-actuator" }
+spring-boot-validation = { group = "org.springframework.boot", name = "spring-boot-starter-validation" }
+spring-boot-web        = { group = "org.springframework.boot", name = "spring-boot-starter-web" }
+spring-boot-test       = { group = "org.springframework.boot", name = "spring-boot-starter-test" }
+spring-boot-tc         = { group = "org.springframework.boot", name = "spring-boot-testcontainers" }
+testcontainers-junit   = { group = "org.testcontainers", name = "junit-jupiter", version.ref = "testcontainers" }
+testcontainers-pg      = { group = "org.testcontainers", name = "postgresql", version.ref = "testcontainers" }
+# Entur cloud-logging: import the BOM as a platform, then add each starter
+# without its own version (pinned by the BOM). See logging.md.
+entur-cloud-logging-bom = { group = "no.entur.logging.cloud", name = "bom", version.ref = "entur-cloud-logging" }
+entur-logging-spring   = { group = "no.entur.logging.cloud", name = "spring-boot-starter-gcp-web" }
+entur-logging-req-res  = { group = "no.entur.logging.cloud", name = "request-response-spring-boot-starter-gcp-web" }
+entur-logging-ondemand = { group = "no.entur.logging.cloud", name = "on-demand-spring-boot-starter-gcp-web" }
 
 [bundles]
 exposed = ['exposed-java-time', 'exposed-spring-boot']
@@ -81,10 +98,13 @@ entur-cloud-logging = ['entur-logging-spring', 'entur-logging-req-res', 'entur-l
 
 [plugins]
 kotlin-jvm             = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-spring          = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
+kotlin-spring           = { id = "org.jetbrains.kotlin.plugin.spring", version.ref = "kotlin" }
 openapi-generator      = { id = "org.openapi.generator", version.ref = "openapi-generator" }
 spring-boot            = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-mgmt = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
 ```
+
+Every alias used by `build.gradle.kts` above (`libs.plugins.spring.dependency.mgmt`, `libs.bundles.spring.boot`, `libs.bundles.spring.boot.test`, `libs.bundles.testcontainers`, `libs.bundles.entur.cloud.logging`, `libs.entur.cloud.logging.bom`) resolves against an entry in this catalog. If you add a new dependency, add both the `[libraries]` (or `[plugins]`) entry and any `[bundles]` member in the same change -- an alias with no matching entry fails Gradle configuration before compilation starts.
 
 ### Layered Boot JAR
 

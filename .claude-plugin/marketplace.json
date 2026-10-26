@@ -80,6 +80,20 @@
       "license": "EUPL-1.2"
     },
     {
+      "name": "security-review",
+      "source": "./plugins/security-review",
+      "description": "Review Entur codebases for exploitable security issues, false security claims, and AI-assisted implementation drift.",
+      "category": "security",
+      "keywords": ["entur", "security", "security-review", "owasp", "ai-assisted", "gdpr", "oauth", "mcp", "gcp"],
+      "author": {
+        "name": "Team KI Effekt",
+        "email": "support@entur.org"
+      },
+      "homepage": "https://github.com/entur/ai",
+      "repository": "https://github.com/entur/ai",
+      "license": "EUPL-1.2"
+    },
+    {
       "name": "entur-linje",
       "source": {
         "source": "git-subdir",
@@ -105,6 +119,50 @@
       "homepage": "https://linje.entur.no",
       "repository": "https://github.com/entur/design-system",
       "license": "EUPL-1.2"
+    },
+    {
+      "name": "entur-uniformen",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/entur/uniformen.git",
+        "path": "skills",
+        "ref": "main"
+      },
+      "strict": false,
+      "skills": [
+        "./entur-uniformen"
+      ],
+      "description": "Uniformen: Entur's shared header and footer for B2B and partner-facing portals. Integrating @entur/uniformen server-side and language contracts, and the CSP the rendered chrome needs. Sourced directly from entur/uniformen so there is no vendored copy to drift.",
+      "category": "frontend",
+      "keywords": ["entur", "uniformen", "header", "footer", "micro-frontend", "portal", "ssr"],
+      "author": {
+        "name": "Team Portal",
+        "email": "support@entur.org"
+      },
+      "homepage": "https://uniformen.entur.no",
+      "repository": "https://github.com/entur/uniformen",
+      "license": "EUPL-1.2"
+    },
+    {
+      "name": "asd-ste100",
+      "source": {
+        "source": "github",
+        "repo": "danyuchn/asd-ste100-skill",
+        "sha": "3944283c183eea13fe5bd902b572da3b4de8bf44"
+      },
+      "strict": false,
+      "skills": [
+        "./"
+      ],
+      "description": "Rewrite agent-facing English (tool descriptions, error messages, system prompts, inter-agent instructions) into ASD-STE100 Simplified Technical English: one meaning per word, active voice, one instruction per sentence. Third-party skill, pinned to a commit.",
+      "category": "writing",
+      "keywords": ["writing", "ste100", "simplified-technical-english", "prompts", "tool-descriptions", "clarity"],
+      "author": {
+        "name": "Dustin Yuchen Teng"
+      },
+      "homepage": "https://github.com/danyuchn/asd-ste100-skill",
+      "repository": "https://github.com/danyuchn/asd-ste100-skill",
+      "license": "MIT"
     }
   ]
 }

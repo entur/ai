@@ -19,6 +19,7 @@ Use these as the agent's entry point for any non-trivial task. They exist precis
 | [deprecate-service.md](deprecate-service.md) | Retiring an application gracefully |
 | [incident-response.md](incident-response.md) | Handling a critical incident from detection through post mortem |
 | [local-dev.md](local-dev.md) | Running the application locally with the right tooling |
+| [set-up-freyja.md](set-up-freyja.md) | Letting Freyja review and merge Dependabot PRs |
 
 ## How a playbook is structured
 

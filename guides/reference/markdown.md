@@ -39,7 +39,7 @@ This runs `markdownlint-cli2 --fix` over all markdown files matched by the confi
 
 ### Running in CI
 
-`.github/workflows/pr.yml` runs the same `--fix` invocation on every PR and then fails the build if any file changed. The job error message points the contributor at `npm run lint:md`. Non-fixable rule violations (e.g. MD040 missing code-block language) fail the lint step directly.
+`.github/workflows/pr.yml` runs the same `--fix` invocation on every PR. For a same-repository PR, the workflow commits and pushes the auto-fixed result back to the PR branch itself -- you don't need to run the fixer locally first, though doing so avoids the extra commit. Fork PRs get a read-only token and cannot be auto-committed to, so the job fails there if any file would still change, with an error pointing the contributor at `npm run lint:md`. Non-fixable rule violations (e.g. MD040 missing code-block language) fail the lint step directly in both cases.
 
 ## Rules Summary
 

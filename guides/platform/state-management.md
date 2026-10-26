@@ -51,11 +51,14 @@ locals {
   is_production = terraform.workspace == "prd"
 }
 
-resource "google_sql_database_instance" "main" {
-  settings {
-    tier              = local.is_production ? "db-custom-2-7680" : "db-f1-micro"
-    availability_type = local.is_production ? "REGIONAL" : "ZONAL"
-  }
+# ALWAYS use the Entur Terraform module for Cloud SQL, never a raw
+# google_sql_database_instance resource -- see terraform-modules.md.
+module "postgresql" {
+  source    = "github.com/entur/terraform-google-sql-db//modules/postgresql?ref=v1"
+  init      = module.init
+  databases = ["mydb"]
+
+  machine_size = local.is_production ? { cpu = 2, memory = 7680 } : { cpu = 1, memory = 3840 }
 }
 ```
 
