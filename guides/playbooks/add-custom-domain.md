@@ -24,7 +24,7 @@ Note that the **tst** environment uses the `staging` token in the hostname, not 
 
 ## Steps
 
-1. **Pick a hostname.** Use the pattern above. The `<app>` portion should match `metadata.name` from your self-service manifest (the same value used as `common.app` and the Kubernetes namespace). See [self-service.md](../platform/self-service.md) for the identity chain.
+1. **Pick a hostname.** Agents ALWAYS ask the user for the exact hostname of each environment -- never invent or derive it. Use the pattern above as a suggestion. The `<app>` portion should match `metadata.name` from your self-service manifest (the same value used as `common.app` and the Kubernetes namespace). See [self-service.md](../platform/self-service.md) for the identity chain.
 
 2. **Set `common.ingress.host` per environment in Helm values.** Example for a `products-api` service on `entur.io`:
 

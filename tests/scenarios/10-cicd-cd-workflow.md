@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies cd.yml implements the image promotion model: resolve-image job looks up the PR's git tag instead of rebuilding, deploy jobs chain through dev -> tst -> prd with correct concurrency (cancel-in-progress: false), and workflow_dispatch supports manual deployment with optional pre-built image.
+Verifies cd.yml implements the image promotion model: resolve-image job uses the gha-docker resolve-image action to look up the PR's git tag instead of rebuilding or hand-rolling the lookup in a run block, deploy jobs chain through dev -> tst -> prd with correct concurrency (cancel-in-progress: false), and workflow_dispatch supports manual deployment with optional pre-built image.
 
 ## Prompt
 
@@ -32,10 +32,13 @@ Generate the complete `.github/workflows/cd.yml` file. Output ONLY the YAML cont
     "entur/gha-helm/.github/workflows/deploy.yml@v1",
     "fetch-depth: 0",
     "fetch-tags: true",
-    "gh pr list",
-    "git tag -l",
+    "entur/gha-docker/.github/actions/resolve-image@v1",
     "paths-ignore:",
     "'terraform/**'"
+  ],
+  "must_not_contain": [
+    "gh pr list",
+    "git tag -l"
   ],
   "must_match": [
     "resolve-image\\.outputs\\.image.*inputs\\.image.*build\\.outputs\\.image_and_tag",
@@ -46,7 +49,6 @@ Generate the complete `.github/workflows/cd.yml` file. Output ONLY the YAML cont
     "cd-deploy-tst",
     "cd-deploy-prd",
     "needs.*build.*resolve-image",
-    "BRANCH.*tr.*upper.*lower",
     "cd-\\$\\{\\{.*github\\.ref"
   ]
 }

@@ -14,7 +14,7 @@ A new `ent-<appid>-prd` project hosts a Cloud Run service deployed by GitHub Act
 
 ## Steps
 
-1. **Provision the GCP project with Kubernetes disabled.** Add `.entur/github-<repo-name>.yaml` (`GitHubActions`) and `.entur/app-<appid>.yaml` (`GoogleCloudApplication`). Set `spec.kubernetes.enabled: false` and `spec.terraform.createBackend: true`. The Platform Orchestrator creates `ent-<appid>-prd`, the runtime service-account placeholder, and the Terraform state bucket `ent-gcs-tfa-<appid>`. See [self-service.md](../platform/self-service.md) for the manifest fields and the apply flow.
+1. **Provision the GCP project with Kubernetes disabled.** Add `.entur/github-<repo-name>.yaml` (`GitHubActions`) and `.entur/app-<appid>.yaml` (`GoogleCloudApplication`). Set `spec.kubernetes.enabled: false` (the Terraform state bucket is created by default). The Platform Orchestrator creates `ent-<appid>-prd`, the runtime service-account placeholder, and the Terraform state bucket `ent-gcs-tfa-<appid>`. See [self-service.md](../platform/self-service.md) for the manifest fields and the apply flow.
 
    ```yaml
    # .entur/app-<appid>.yaml
@@ -30,8 +30,6 @@ A new `ent-<appid>-prd` project hosts a Cloud Run service deployed by GitHub Act
      repositories: [<repo-name>]
      kubernetes:
        enabled: false
-     terraform:
-       createBackend: true
    ```
 
 2. **Pin the Terraform provider to the new project.** Without an explicit `project`, plans default to the operator's gcloud ADC quota project and PR plans fail on IAM reads. In `terraform/providers.tf`:

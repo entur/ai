@@ -24,6 +24,8 @@ Ask the user for the following. If not provided, suggest sensible defaults:
 | **Team** | yes | must start with `team-` | -- |
 | **Language** | yes | `kotlin`, `java`, `go`, `python` | `kotlin` |
 | **Environments** | no | subset of `dev`, `tst`, `prd` | `[dev, tst, prd]` |
+| **Needs ingress** | no | boolean | `true` |
+| **Ingress host per environment** | yes, unless ingress is disabled | under `entur.no`, `entur.io`, or `entur.org`, e.g. `myapp.dev.entur.io` | -- ALWAYS ask, never derive |
 | **Needs database** | no | boolean | `false` |
 | **Needs Redis** | no | boolean | `false` |
 | **Needs Kafka** | no | boolean | `false` |
@@ -39,6 +41,7 @@ Before proceeding, validate:
 - `metadata.id` ALWAYS uses base identifiers (the platform adds environment suffixes)
 - Repository name is valid kebab-case
 - Team starts with `team-`
+- Unless ingress is disabled (`ingress.enabled: false`), an ingress host is given for every environment. ALWAYS ask the user for each `ingress.host` -- NEVER invent one or derive it from the repo name. You may show the pattern from `guides/playbooks/add-custom-domain.md` as a suggestion, but wait for the user to confirm the exact value. When ingress is disabled, do not ask for a host and do not write `ingress.host`
 
 ## Step 2: Print the Identity Chain
 
@@ -55,13 +58,37 @@ Identity Chain:
   TF state bucket:    ent-gcs-tfa-{appId}
   Docker image:       {repoName}
   Secret Manager:     ent-{appId}-{env}
+  Ingress hosts:      dev={devHost}, tst={tstHost}, prd={prdHost}   (or "disabled")
 ```
 
 Ask the user to confirm before generating files.
 
+After the user confirms, ALWAYS create a new branch before writing any file -- this skill writes to `.entur/`, `helm/`, `terraform/`, and `.github/`. Never generate these files on `main`.
+
+The skill runs in two phases, each on its own branch:
+
+1. **Phase 1 -- self-service manifests (Step 3).** Branch `feat/self-service-manifests` from `origin/main`. This branch contains **only** `.entur/` files.
+2. **Phase 2 -- everything else (Steps 4--8).** Starts only after the Phase 1 PR is applied and merged, and `.entur/` exists on `main`. Branch `feat/bootstrap-{repoName}` from the updated `origin/main`.
+
+Create each branch with `git fetch origin && git switch -c <branch> origin/main`.
+
+**Why:** the GitHub Actions pipelines in `.github/` authenticate through the Workload Identity and GitHub environments that the `.entur/` manifests provision. Workflows pushed before the manifests are applied and merged fail.
+
 ## Step 3: Generate Self-Service Manifests
 
 If `.entur/` already contains manifests, edit them in place -- never rename an existing manifest to match the filenames below.
+
+If an existing manifest has a different `metadata.id` or `metadata.name` than the user's input, do NOT change it. Stop and show this message word for word:
+
+> ⚠️ **Warning:** Do not perform these actions without consulting the Platform team first. They can have serious consequences, including the deletion of critical application resources such as service accounts and databases.
+>
+> Please contact the Platform team in **#talk-utviklingsplattform** before proceeding.
+
+Continue with the existing values unless the user confirms they have talked to the Platform team.
+
+ALWAYS open a pull request for the `.entur/` manifests: commit on the Phase 1 branch, push, and run `gh pr create`. Never commit them directly to `main`. Ask the user whether you may apply. Only when they explicitly allow it, show them the orchestrator's plan on the PR and run `gh pr comment <pr> --body "entur apply"`. Otherwise link the PR and tell the user to review the plan and comment `entur apply`.
+
+Never write fields set to their platform default (for example `terraform.createBackend: true`, `secretManager.enabled: true`, `kubernetes.enabled: true`, `auth0.internal.type: m2m`). See the **Default** column in `guides/platform/self-service.md`.
 
 ### `.entur/github-{repoName}.yaml`
 
@@ -70,9 +97,9 @@ apiVersion: orchestrator.entur.io/github/v1
 kind: GitHubActions
 metadata:
   id: {repoName}
-spec:
-  environments: [{environments}]
 ```
+
+Add `spec.environments: [{environments}]` only when the environments are not `[dev, tst, prd]`.
 
 ### `.entur/app-{appId}.yaml`
 
@@ -88,12 +115,9 @@ metadata:
 spec:
   environments: [{environments}]
   repositories: [{repoName}]
-  terraform:
-    createBackend: true
-  secretManager:
-    enabled: true
-    serviceAccount: application
 ```
+
+The Terraform state bucket and Secret Manager are enabled by default -- do not add `terraform` or `secretManager` blocks.
 
 If `auth0 M2M` is needed, add under `spec`:
 
@@ -101,10 +125,15 @@ If `auth0 M2M` is needed, add under `spec`:
   auth0:
     internal:
       enabled: true
-      type: m2m
 ```
 
+### Wait for the manifests to reach `main`
+
+When `.entur/` does not exist on `main` (a new repository), STOP after opening the Phase 1 PR. Do not create `.github/` -- or any Phase 2 file -- until the PR is applied and merged. Tell the user to come back once it is merged, then confirm that `git fetch origin && git ls-tree -d --name-only origin/main .entur` prints `.entur` before starting Phase 2.
+
 ## Step 4: Generate Helm Chart
+
+Steps 4--8 are Phase 2: run them on a new branch from the updated `origin/main` (see Step 2).
 
 Read `guides/platform/common-helm.md` in the entur/ai repository for the full common chart reference.
 
@@ -133,22 +162,21 @@ common:
     cpu: {cpuByLanguage}
     memory: {memoryByLanguage}
     memoryLimit: {memoryByLanguage}
-    probes:
+    probes:                          # Go/Python only -- omit for Kotlin/Java
       liveness:
         path: {livenessByLanguage}
       readiness:
         path: {readinessByLanguage}
     prometheus:
       enabled: true
-      path: {metricsByLanguage}
-  service:
-    internalPort: 8080
+      path: {metricsByLanguage}      # Go/Python only -- omit for Kotlin/Java
   ingress:
-    enabled: true
-    trafficType: api
+    trafficType: api   # when ingress is disabled, replace with `enabled: false`
   configmap:
     enabled: true
 ```
+
+Never write values equal to the `common` chart default (for example `ingress.enabled: true`, `service.internalPort: 8080`, the Spring Boot probe and metrics paths, `pdb.minAvailable: 50%`).
 
 **Language defaults:**
 
@@ -180,13 +208,15 @@ If secrets are needed (do NOT add `PGUSER`/`PGPASSWORD` here — those are alrea
 ```yaml
 common:
   env: dev
+  ingress:
+    host: {devHost}   # value given by the user; omit the block when ingress is disabled
   configmap:
     data:
       SPRING_PROFILES_ACTIVE: "dev"
       SPRING_CLOUD_GCP_SECRETMANAGER_PROJECTID: "ent-{appId}-dev"
 ```
 
-Generate `tst.yaml` and `prd.yaml` with the same pattern, adjusting the environment and project ID.
+Generate `tst.yaml` and `prd.yaml` with the same pattern, adjusting the environment, project ID, and the user-provided `ingress.host` (when ingress is enabled).
 
 For prd, also set:
 
@@ -194,8 +224,6 @@ For prd, also set:
   hpa:
     spec:
       maxReplicas: 5
-  pdb:
-    minAvailable: 50%
 ```
 
 ## Step 5: Generate Terraform Scaffolding
@@ -346,9 +374,10 @@ After generating all files, print:
 2. The identity chain (repeated for reference)
 3. Next steps:
    - Run `helm dependency update helm/{repoName}/`
-   - Commit self-service manifests, open PR, comment `entur apply`
+   - After Phase 1: link the pull request opened for the `.entur/` manifests. The user reviews the plan and comments `entur apply` (or allows you to comment it), then merges. Phase 2 starts only after the merge
    - After GCP projects are created: set up Terraform workspaces and apply
    - Configure Helm deploy via CI/CD
+   - Turn on **Deployment protection rules** for each GitHub environment. Ask whether to add a team (`entur/<team-name>`, e.g. `entur/team-plattform`) as required reviewers, following Step 13 of the setup-cicd-workflows skill
 
 ## Critical Rules
 
@@ -358,3 +387,5 @@ After generating all files, print:
 - **Always** use Entur reusable GitHub Actions workflows
 - **Pin all dependencies** -- Terraform `?ref=TAG`, Actions `@vN`, Docker image tags
 - **metadata.id is immutable** -- changing it deletes and recreates GCP projects
+- **Always open a pull request** for changes in `.entur/` -- never commit them directly to `main`
+- **In a new repository, `.entur/` is merged before `.github/` is created** -- the pipelines fail until the manifests are provisioned

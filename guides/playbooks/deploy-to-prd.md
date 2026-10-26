@@ -16,12 +16,12 @@ The same Docker image that was built and tested in `dev` is deployed to `tst` an
 
 1. **Verify the production environment is provisioned.** Confirm `ent-{appid}-prd` exists in GCP and the Terraform state bucket has a `prd` workspace.
 
-2. **Set production Helm values.** In `helm/<app>/env/values-kub-ent-prd.yaml`: production hostname, larger HPA `maxReplicas`, `pdb.minAvailable: 50%` (or higher), production log level, production Spring profile. See [common-helm.md](../platform/common-helm.md#multi-namespace-deployments).
+2. **Set production Helm values.** In `helm/<app>/env/values-kub-ent-prd.yaml`: production hostname (unless `ingress.enabled: false`, ALWAYS ask the user for the exact `ingress.host`), larger HPA `maxReplicas`, `pdb.minAvailable` only if you need more than the `50%` default, production log level, production Spring profile. See [common-helm.md](../platform/common-helm.md#multi-namespace-deployments).
 
 3. **Confirm production hardening.** See [architecture.md](../reference/architecture.md#production-hardening) for the full table; the common chart enforces most of it automatically:
    - `replicas > 1` (multi-pod for availability)
    - HPA scales on CPU 80% (auto-enabled when replicas > 1)
-   - PDB `minAvailable: 50%` (watch the percentage-rounding gotcha)
+   - PDB `minAvailable` at `50%` or higher -- `50%` is the chart default, so leave it unset unless raising it (watch the percentage-rounding gotcha)
    - Pod and zone anti-affinity for distribution across nodes/AZs
    - CPU request set, **no CPU limit** (compressible -- allow bursting)
    - Memory request **equal to** memory limit (incompressible -- OOM kill protection)

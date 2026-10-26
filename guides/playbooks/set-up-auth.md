@@ -13,7 +13,7 @@ The service accepts JWT tokens from configured tenants, evaluates permissions ag
 
 ## Steps
 
-1. **Enable Auth0 internal M2M in the self-service manifest.** Add `spec.auth0.internal.enabled: true` and `spec.auth0.internal.type: m2m` to your `GoogleCloudApplication` manifest, then `entur apply`. See [self-service.md](../platform/self-service.md).
+1. **Enable Auth0 internal M2M in the self-service manifest.** Add `spec.auth0.internal.enabled: true` (`type` defaults to `m2m`) to your `GoogleCloudApplication` manifest, then `entur apply`. See [self-service.md](../platform/self-service.md).
 
 2. **Add the dependencies.** `permission-client`, `oidc-rs-spring-boot-web-config`, `oidc-client-spring-boot`. See [permission-store.md](../platform/permission-store.md#1-add-dependencies).
 

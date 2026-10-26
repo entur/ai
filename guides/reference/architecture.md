@@ -76,7 +76,7 @@ The common Helm chart handles most of this automatically. See [common-helm.md](.
 |---------|-------------|
 | Replicas | Production must run >1 pod |
 | HPA | Auto-configured; scales on CPU (80%); favor horizontal scaling |
-| PDB | `minAvailable: 50%` in prd; `0` in dev/tst with single pod |
+| PDB | `minAvailable` `50%` in prd (chart default -- leave unset); `0` in dev/tst with single pod |
 | Pod anti-affinity | Distributes across nodes (auto-configured) |
 | Zone anti-affinity | Distributes across AZs for critical services |
 | VPA | Enabled by default for resource recommendations |

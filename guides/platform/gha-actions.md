@@ -12,6 +12,8 @@ Composite actions for authentication and common tasks. Used internally by reusab
 | `entur/gha-meta/.github/actions/k8s-auth` | Authenticate with GKE |
 | `entur/gha-meta/.github/actions/docker-auth` | Authenticate with Google Artifact Registry |
 | `entur/gha-meta/.github/actions/posthog` | Send workflow analytics event to PostHog |
+| `entur/gha-docker/.github/actions/resolve-image` | Resolve the image built during a merged PR, from its git tag |
+| `entur/gha-docker/.github/actions/sanitize-ref` | Sanitise a git ref into a Docker-tag-safe string |
 
 ## Cloud Authentication
 
@@ -83,6 +85,45 @@ jobs:
           workflow_name: deploy
           workflow_inputs: ${{ toJSON(inputs) }}
 ```
+
+## Resolve Image
+
+Resolves the Docker image that was built during a PR, so `cd.yml` deploys that exact image instead of rebuilding. Used by the `resolve-image` job in [gha-workflows.md](gha-workflows.md).
+
+```yaml
+jobs:
+  resolve-image:
+    name: Resolve Image
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      image: ${{ steps.resolve-image.outputs.image }}
+      pr_number: ${{ steps.resolve-image.outputs.pr_number }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Resolve Docker Image
+        uses: entur/gha-docker/.github/actions/resolve-image@v1
+        id: resolve-image
+```
+
+| Input | Required | Description |
+|-------|----------|-------------|
+| `image_name` | No | Image name to resolve. Defaults to the repository name. |
+
+| Output | Description |
+|--------|-------------|
+| `image` | `image_name:image_tag`, empty when no image was built for the PR |
+| `image_tag` | The resolved tag alone, empty when no image was built for the PR |
+| `pr_number` | The PR number merged at the current commit |
+
+ALWAYS use this action rather than reimplementing the lookup in a `run:` block. It reuses `sanitize-ref` internally, so the branch-to-tag sanitisation cannot drift from the tag `gha-docker` actually created. The checkout ALWAYS needs `fetch-depth: 0` and `fetch-tags: true`, or no tags are present to match. When no image was built for the PR, the action warns and leaves `image` empty instead of failing -- deploy jobs ALWAYS gate on `needs.resolve-image.outputs.image != ''`.
 
 ## When to Use Directly
 

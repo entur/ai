@@ -95,9 +95,10 @@ common:
     replicas: 2              # Desired replicas (set to 1 for Recreate strategy)
 
   deployment:
-    maxReplicas: 10          # HPA maximum (default: 10)
-    minAvailable: "50%"      # PDB minimum available (default: 50%)
+    maxReplicas: 20          # HPA maximum (default: 10 -- omit unless changing)
 ```
+
+`minAvailable` defaults to `50%` -- set it only to change the PDB threshold.
 
 - In `prd`, HPA and PDB are enabled automatically when replicas > 1
 - `replicas: 1` uses Recreate strategy (no PDB, no HPA)
@@ -107,18 +108,7 @@ common:
 
 ### Health Probes
 
-Default paths (Spring Boot):
-
-```yaml
-common:
-  container:
-    probes:
-      enabled: true
-      liveness:
-        path: /actuator/health/liveness
-      readiness:
-        path: /actuator/health/readiness
-```
+Probes are enabled by default with the Spring Boot paths `/actuator/health/liveness` and `/actuator/health/readiness`. Spring Boot apps do not need a `probes` block.
 
 **Probe rules:**
 
@@ -165,17 +155,17 @@ common:
   container:
     prometheus:
       enabled: true
-      path: /actuator/prometheus    # Spring Boot
-      # path: /metrics              # Go / Python
+      # path: /metrics    # Go / Python only -- Spring Boot uses the default /actuator/prometheus
 ```
 
 ### Ports
 
+The container port defaults to `8080` (`service.internalPort`) and the service port to `80` (`service.externalPort`). Set them only when your app listens elsewhere:
+
 ```yaml
 common:
   service:
-    internalPort: 8080    # Container port (default)
-    externalPort: 80      # Service port (default)
+    internalPort: 8086
 ```
 
 ## Networking
@@ -185,7 +175,6 @@ common:
 ```yaml
 common:
   ingress:
-    enabled: true                    # Default: true
     trafficType: api                 # Required: "api", "public", or "http2"
     host: products-api.dev.entur.io  # Per-env override; see hostname pattern below
 ```
@@ -195,6 +184,8 @@ common:
 | `api` | Internal API traffic (default for backend services) |
 | `public` | Public-facing traffic (internet-accessible) |
 | `http2` | gRPC / HTTP/2 traffic |
+
+When ingress is enabled (`ingress.enabled` is not `false`), ALWAYS ask the user for the `ingress.host` value of each environment before writing it -- NEVER invent a hostname or derive it from the app name. The pattern below is a suggestion to show the user, not a value to fill in yourself. When `ingress.enabled: false`, do not ask for or set `host`.
 
 The platform serves hostnames only under `entur.no`, `entur.io`, and `entur.org`. The `host` value is environment-specific and typically lives in `env/values-kub-ent-<env>.yaml`:
 
@@ -408,8 +399,6 @@ common:
   hpa:
     spec:
       maxReplicas: 5
-  pdb:
-    minAvailable: 50%
   env: prd
   configmap:
     data:
@@ -438,10 +427,7 @@ common:
     prometheus:
       enabled: true
       path: /metrics
-  service:
-    internalPort: 8080
   ingress:
-    enabled: true
     trafficType: api
 ```
 

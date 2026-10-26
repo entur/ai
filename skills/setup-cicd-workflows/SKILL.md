@@ -30,6 +30,10 @@ Generate the complete set of GitHub Actions workflows for an Entur project using
   dependabot.yml                 ← Dependabot dependency update config
 ```
 
+Before anything else, check that the self-service manifests are on `main`: `git fetch origin && git ls-tree -d --name-only origin/main .entur` prints `.entur`. If it does not, STOP -- do not create `.github/`. The workflows authenticate through the Workload Identity and GitHub environments that `.entur/` provisions, so they fail until the manifests are applied and merged. Create the manifests first (the **entur-project-bootstrap** skill, Phase 1), open a PR, apply, merge, and then run this skill.
+
+Before writing any file, ALWAYS create a new branch from the latest default branch: `git fetch origin && git switch -c <type>/<short-description> origin/main` (for example `ci/setup-workflows`). This skill writes to `.github/` -- never generate these files on `main`.
+
 ## Step 1: Detect Project Configuration
 
 Determine from the project files or ask the user:
@@ -294,10 +298,11 @@ Continuous deployment using image promotion. On merge to main, resolves the imag
 # Image promotion:
 #   The PR workflow builds and pushes a Docker image tagged with
 #   {branch}.{date}-SHA{short_sha}. The docker push workflow also creates a git
-#   tag with that same value. On merge, the resolve-image job looks up the merged
-#   PR's branch name, finds the most recent matching git tag, and outputs the
-#   image reference -- so all environments deploy the exact same image that was
-#   built during the PR.
+#   tag with that same value. On merge, the resolve-image job runs the
+#   entur/gha-docker resolve-image action, which looks up the merged PR's branch
+#   name, finds the most recent matching git tag, and outputs the image
+#   reference -- so all environments deploy the exact same image that was built
+#   during the PR.
 
 name: Deploy
 
@@ -342,57 +347,32 @@ jobs:
   # After a PR is merged, find the image that was built during the PR by looking
   # up the PR branch name and finding the most recent git tag created by the
   # docker push workflow for that branch/pr.
+  #
+  # ALWAYS use the entur/gha-docker resolve-image composite action for this --
+  # never hand-roll the lookup in a `run:` block. The action reuses gha-docker's
+  # own sanitize-ref logic, so the branch-to-tag sanitisation cannot drift from
+  # the tag the push workflow actually created. It requires the checkout to use
+  # fetch-depth: 0 and fetch-tags: true so the tags are available.
 
   resolve-image:
+    name: Resolve Image
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: read
     outputs:
-      image: ${{ steps.resolve.outputs.image }}
-      pr_number: ${{ steps.resolve.outputs.pr_number }}
+      image: ${{ steps.resolve-image.outputs.image }}
+      pr_number: ${{ steps.resolve-image.outputs.pr_number }}
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout Repository
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
-      - name: Resolve image from merged PR git tag
-        id: resolve
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          REPO_NAME="${GITHUB_REPOSITORY#*/}"
-
-          # Find the PR that was merged at this commit
-          PR_NUMBER=$(gh pr list --search "$GITHUB_SHA" --state merged --json number --jq '.[0].number')
-          if [ -z "$PR_NUMBER" ]; then
-            echo "::error::Could not find merged PR for commit $GITHUB_SHA"
-            exit 1
-          fi
-
-          # Get the PR branch name and apply the same sanitisation as gha-docker:
-          # lowercase, replace /.- with -, truncate to 43 chars, strip trailing -
-          BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName --jq '.headRefName')
-          BRANCH=$(echo "$BRANCH" | tr '[:upper:]' '[:lower:]' | tr -d 'ÆØÅæøå')
-          BRANCH=${BRANCH//\//-}
-          BRANCH=${BRANCH//./-}
-          BRANCH=${BRANCH//!/-}
-          BRANCH=${BRANCH:0:43}
-          BRANCH=${BRANCH%-}
-
-          # Find the most recent git tag for this branch (created by the docker push workflow).
-          # Tags follow the pattern: {branch}.{YYYYMMDD}-SHA{short_sha}
-          IMAGE_TAG=$(git tag -l "${BRANCH}.*" --sort=-creatordate | head -1)
-          if [ -z "$IMAGE_TAG" ]; then
-            echo "::warning::No git tag matching '${BRANCH}.*' (PR #${PR_NUMBER}) -- no image was built for this PR, skipping deploy"
-            echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          echo "Resolved image: ${REPO_NAME}:${IMAGE_TAG} (from PR #${PR_NUMBER})"
-          echo "image=${REPO_NAME}:${IMAGE_TAG}" >> "$GITHUB_OUTPUT"
-          echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+      - name: Resolve Docker Image
+        uses: entur/gha-docker/.github/actions/resolve-image@v1
+        id: resolve-image
 
   # ============================================================================
   # DEPLOY
@@ -1002,14 +982,49 @@ Generated CI/CD workflows:
   .github/dependabot.yml                           - Automated dependency updates
 ```
 
+## Step 13: Suggest Deployment Protection Rules
+
+After the summary, ALWAYS suggest that the user turns on **Deployment protection rules** (required reviewers) for each GitHub environment the pipeline deploys to (`dev`, `tst`, `prd` -- the environments in the `GitHubActions` manifest). Then ask whether the skill should add a whole team as required reviewers.
+
+1. Ask which team to add, in the format `entur/<team-name>` (for example `entur/team-plattform`). Suggest `entur/<metadata.owner>` from the application manifest, but wait for the user to confirm.
+2. Ask which environments to protect. Suggest all of them.
+3. Only when the user says yes, apply the rule with `gh`. Show the commands before running them -- this changes live repository settings.
+
+```bash
+# Team slug is the part after "entur/", e.g. entur/team-plattform -> team-plattform
+TEAM_ID=$(gh api orgs/entur/teams/{team-slug} --jq .id)
+
+# Read the current settings first -- PUT replaces them, so keep existing
+# reviewers, wait_timer, prevent_self_review, and deployment_branch_policy
+gh api repos/entur/{repoName}/environments/{env}
+
+gh api -X PUT repos/entur/{repoName}/environments/{env} --input - <<EOF
+{
+  "reviewers": [{ "type": "Team", "id": ${TEAM_ID} }]
+}
+EOF
+```
+
+Repeat the `PUT` for each environment the user chose. Add existing reviewers and settings to the request body so they are not removed.
+
+Rules:
+
+- NEVER add reviewers without the user's explicit yes.
+- ALWAYS add the team as a whole (`"type": "Team"`), not individual team members.
+- The team needs at least read access to the repository, or GitHub rejects it as a reviewer. If the call fails, tell the user to grant the team access under **Settings → Collaborators and teams**.
+- If the environments do not exist yet (the `GitHubActions` manifest is not applied), tell the user to run `entur apply` first and come back to this step.
+- If the user declines, point them to **Settings → Environments → {env} → Deployment protection rules** to do it later.
+
 ## Critical Rules
 
 - **ALWAYS use Entur reusable workflows** for all CI/CD steps
 - **Pin workflow versions** to major tags: `@v1`, `@v2`
 - **Use `secrets: inherit`** for security scanning and deploy workflows
 - **Image promotion model**: PRs build and push images; merges ALWAYS resolve the PR-built image via git tag
+- **ALWAYS resolve the image with `entur/gha-docker/.github/actions/resolve-image@v1`** -- NEVER write a `run:` script that looks up the merged PR (`gh pr list`/`gh pr view`), sanitises the branch name, or searches git tags (`git tag -l`). If an existing `cd.yml` has such a script, replace it with the action
 - **Terraform ALWAYS runs in a separate workflow** from `cd.yml`
 - **Deploy concurrency ALWAYS uses `cancel-in-progress: false`** to protect running deployments
+- **ALWAYS suggest Deployment protection rules** for each environment and ask before adding an `entur/<team-name>` team as required reviewers (see Step 13)
 - **Plan concurrency uses `cancel-in-progress: true`** -- only the latest plan matters
 - **Use `has_changes` output** from terraform-plan to skip unnecessary applies
 - **Use the conditional pattern** for deploy jobs with multiple dependency paths:
