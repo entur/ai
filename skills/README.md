@@ -95,7 +95,7 @@ Until a maintainer is confirmed, prefer Option 1, Option 2, or Option 4.
 | Skill | Purpose |
 |-------|---------|
 | [entur-project-bootstrap](entur-project-bootstrap/) | Bootstrap a new Entur app: self-service manifests, Helm, Terraform, Docker, CI/CD |
-| [entur-ai-security-review](entur-ai-security-review/) | Review Entur codebases for evidence-backed application, platform, OAuth, MCP/LLM, and data-ingestion security findings |
+| [entur-ai-security-review](entur-ai-security-review/) | Evidence-backed application, platform, OAuth, MCP/LLM, and ingestion security triage, with scoped STRIDE/LINDDUN output, DFDs, and privacy-control checks |
 | [setup-agent-config](setup-agent-config/) | Set up AI agent config for an existing repo: AGENTS.md, permissions, hooks, skill recommendations |
 | [setup-cicd-workflows](setup-cicd-workflows/) | Generate CI/CD GitHub Actions workflows using Entur reusable workflows |
 | [entur-conventions](entur-conventions/) | Thin router that fetches the matching Entur platform guide on demand (installed via the `guides` plugin) |
