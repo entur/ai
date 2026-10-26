@@ -1,7 +1,7 @@
 {
   "name": "security-review",
   "version": "0.1.0",
-  "description": "Review Entur codebases for exploitable security issues, false security claims, and AI-assisted implementation drift.",
+  "description": "Review Entur codebases for evidence-backed security weaknesses, privacy-control gaps, misleading security claims, and AI-assisted implementation drift, with scoped STRIDE/LINDDUN output.",
   "author": {
     "name": "Team KI Effekt",
     "email": "support@entur.org"
@@ -18,13 +18,18 @@
     "gdpr",
     "oauth",
     "mcp",
-    "gcp"
+    "gcp",
+    "stride",
+    "linddun",
+    "threat-modeling",
+    "dfd",
+    "privacy"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Entur AI Security Review",
-    "shortDescription": "Review Entur codebases for exploitable security issues.",
-    "longDescription": "Performs reachability-aware security triage across application code, GCP configuration, OAuth, MCP and LLM tools, and classified-data ingestion. Findings require evidence and an independent refutation pass when useful.",
+    "shortDescription": "Evidence-based security triage with scoped STRIDE/LINDDUN output.",
+    "longDescription": "Performs reachability-aware security triage across application code, GCP configuration, OAuth, MCP and LLM tools, and classified-data ingestion. Scoped STRIDE/LINDDUN output adds evidence-linked data flows, privacy-control checks, coverage, and pending team hand-off. Findings require evidence and refutation; this does not replace a formal threat model or privacy assessment.",
     "developerName": "Team KI Effekt",
     "category": "Security",
     "capabilities": [

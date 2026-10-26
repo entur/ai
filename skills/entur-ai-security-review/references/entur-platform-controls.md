@@ -52,7 +52,10 @@ standard.
   do not impose a conflicting full-SHA rule.
 - Every PR must pass lint, unit tests, CodeQL, Docker scanning, and Helm lint under
   current Entur rules. Verify workflow triggers and permissions rather than
-  merely checking filenames.
+  merely checking filenames. Helm items are `n/a` without Kubernetes. Report a
+  documented deviation as policy drift under coverage and residual risk, citing
+  its rationale, and an unverifiable exception under `Needs validation`; neither
+  is a vulnerability finding without a credible path.
 - Dependencies must be pinned according to the ecosystem, and Dependabot is the
   Entur default. A new tool or package recommendation must also follow the IT
   systems policy; do not claim approval or registration without evidence.

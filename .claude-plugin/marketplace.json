@@ -82,9 +82,9 @@
     {
       "name": "security-review",
       "source": "./plugins/security-review",
-      "description": "Review Entur codebases for exploitable security issues, false security claims, and AI-assisted implementation drift.",
+      "description": "Review Entur codebases for evidence-backed security weaknesses, privacy-control gaps, misleading security claims, and AI-assisted implementation drift, with scoped STRIDE/LINDDUN output.",
       "category": "security",
-      "keywords": ["entur", "security", "security-review", "owasp", "ai-assisted", "gdpr", "oauth", "mcp", "gcp"],
+      "keywords": ["entur", "security", "security-review", "owasp", "ai-assisted", "gdpr", "oauth", "mcp", "gcp", "stride", "linddun", "threat-modeling", "dfd", "privacy"],
       "author": {
         "name": "Team KI Effekt",
         "email": "support@entur.org"
