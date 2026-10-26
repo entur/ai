@@ -9,10 +9,16 @@ Define YAML manifests in the repository's `.entur/` directory and apply through 
 3. Comment `entur apply` on the PR.
 4. Wait for apply to succeed, then merge.
 
+> **Agents:** ALWAYS create a new branch before you create or change any file in `.entur/`, and ALWAYS open a pull request for it -- commit, push, and run `gh pr create`. Never commit `.entur/` changes directly to `main`. Comment `entur apply` only when the user explicitly allows it for that PR: show the user the orchestrator's plan first, then run `gh pr comment <pr> --body "entur apply"`. Otherwise link the PR and tell the user to review the plan and comment `entur apply`.
+>
+> **New repository:** apply and merge the `.entur/` PR before you add `.github/` workflows. The workflows authenticate through the Workload Identity and GitHub environments these manifests provision, so they fail until the manifests are applied and merged.
+
 ### Aborting or Rolling Back
 
 - **Not yet applied**: Close the PR.
 - **Already applied**: Revert the manifest, run `entur apply` again, then merge/close.
+
+> **Warning:** For 30 days after an app is deleted, the same App ID cannot be used again. This also applies when an application manifest is removed or its `metadata.id` is changed. Agents ALWAYS show this warning before deleting an application manifest. See [deprecate-service.md](../playbooks/deprecate-service.md).
 
 ### GitHub Repository Requirements
 
@@ -36,6 +42,7 @@ The **GitHub manifest** must be applied before any **Application manifest**.
 - ALWAYS name application manifests (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`) `.entur/app-<metadata.id>.yaml`
 - ALWAYS name `GitHubActions` manifests `.entur/github-<repo-name>.yaml`
 - NEVER rename existing manifests in `.entur/`. The naming rules above apply to new manifests only -- leave established filenames as they are
+- NEVER write a field whose value equals the platform default (see the **Default** column in the reference tables below). Omit it instead -- for example, leave out `spec.terraform.createBackend: true`, `spec.secretManager.enabled: true`, `spec.kubernetes.enabled: true`, and `spec.auth0.internal.type: m2m`. Drop a block entirely when every field in it would be a default. Required fields (such as `spec.environments` on Application manifests) are always written, even when their value matches a default
 
 ## GCP Project Naming
 
@@ -61,7 +68,8 @@ Data projects use a different prefix (`ent-data-`) and include an `int`/`ext` su
 - 3--10 characters, lowercase alphanumeric only (`^[a-z0-9]+$`)
 - MUST NOT end with `sbx`, `dev`, `tst`, `prd`, or `prod` (these clash with the auto-appended environment suffix)
 - MUST NOT start with `ent-` -- the platform adds this prefix automatically
-- **Immutable** -- changing it deletes and recreates all GCP projects
+- **Immutable** -- changing it deletes and recreates all GCP projects. See [Changing App ID or App Name](#changing-app-id-or-app-name)
+- **Locked for 30 days after deletion** -- the same App ID cannot be used again for 30 days after the app is deleted
 
 **Example identity chains:**
 
@@ -76,6 +84,16 @@ metadata.name: products-api  → K8s namespace: products-api
 # Data project (GoogleCloudDataProject, dataAccess.external: true)
 metadata.id: akt             → GCP projects: ent-data-akt-ext-dev, ent-data-akt-ext-prd
 ```
+
+## Changing App ID or App Name
+
+When someone tries to change `metadata.id` (App ID) or `metadata.name` (App Name) in an existing manifest in `.entur/`, agents ALWAYS stop and show this message word for word before making any change:
+
+> ⚠️ **Warning:** Do not perform these actions without consulting the Platform team first. They can have serious consequences, including the deletion of critical application resources such as service accounts and databases.
+>
+> Please contact the Platform team in **#talk-utviklingsplattform** before proceeding.
+
+Do not edit either field until the user confirms they have talked to the Platform team. Changing `metadata.id` deletes and recreates all GCP projects; changing `metadata.name` renames the Kubernetes namespace.
 
 ## Environments
 
@@ -106,9 +124,9 @@ apiVersion: orchestrator.entur.io/github/v1
 kind: GitHubActions
 metadata:
   id: myuniquerepo  # must match your repository name exactly
-spec:
-  environments: [dev, tst, prd]
 ```
+
+`spec` is omitted because `spec.environments` defaults to `[dev, tst, prd]`. Set it only when the application uses a different environment list.
 
 ### Step 2: Create the Application Manifest
 
@@ -170,7 +188,7 @@ metadata:
   id: my-repo              # Must match GitHub repository name exactly
   trigger: 1654089480      # Optional: unix timestamp to force re-apply
 spec:
-  environments: [dev, tst, prd]  # Optional: defaults to [dev, tst, prd]
+  environments: [dev, prd]  # Only needed when not [dev, tst, prd]
 ```
 
 ---
@@ -374,6 +392,8 @@ spec:
 
 ### Application Example with Common Options
 
+Only non-default values are set. Kubernetes, network policies, the Terraform state bucket, and Secret Manager are all on by default, so they do not appear.
+
 ```yaml
 apiVersion: orchestrator.entur.io/apps/v1
 kind: GoogleCloudApplication
@@ -391,20 +411,12 @@ spec:
   repositories:
     - my-github-repository
   kubernetes:
-    enabled: true
     networkPolicies:
-      enabled: true
       denyInternal: true
       denyPublic: true
-  terraform:
-    createBackend: true
   auth0:
     internal:
       enabled: true
-      type: m2m
-  secretManager:
-    enabled: true
-    serviceAccount: application
   serviceAccounts:
     - id: application
       additionalRoles:

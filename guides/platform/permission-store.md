@@ -61,7 +61,6 @@ spec:
   auth0:
     internal:
       enabled: true
-      type: m2m
 ```
 
 See [self-service.md](self-service.md) for details.
@@ -388,7 +387,7 @@ Permission Store automatically cleans up resources not refreshed in 30 days (app
 
 ### Minimal Setup Checklist
 
-1. Ensure `auth0.internal.enabled: true` and `auth0.internal.type: m2m` in self-service manifest
+1. Ensure `auth0.internal.enabled: true` in self-service manifest (`type` defaults to `m2m`)
 2. Add `permission-client` + `oidc-auth` dependencies
 3. Configure `entur.auth.tenants` in `application.yml`
 4. Configure `entur.clients.auth0.permission-store` credentials

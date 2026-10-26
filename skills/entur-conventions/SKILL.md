@@ -30,6 +30,14 @@ These rules are non-negotiable and apply to every Entur application:
 9. Conventional commits — enables automated semver via release-please.
 10. Every PR passes lint, unit tests, security scan (CodeQL + Docker scan), Helm lint.
 11. ALWAYS create GCP projects via self-service YAML manifests in `.entur/` (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`). Never use Terraform `google_project` or `gcloud projects create`.
+12. Before you create or change any file in `.github/`, `.entur/`, `terraform/`, or `helm/`, ALWAYS create a new branch from the latest default branch (`git fetch origin && git switch -c <type>/<short-description> origin/main`, e.g. `feat/add-postgres`). Never make these changes on `main`.
+13. ALWAYS open a pull request when you create or change any file in `.entur/`: conventional commit, push, `gh pr create`. Never commit `.entur/` changes directly to `main`, and comment `entur apply` (`gh pr comment <pr> --body "entur apply"`) only when the user explicitly allows it for that PR, after showing them the plan. Otherwise the user reviews the plan and applies.
+14. In a new repository (no `.entur/` on `main`), the `.entur/` PR is applied and merged before `.github/` is created. GitHub Actions pipelines fail until the manifests are provisioned.
+15. When someone tries to change `metadata.id` (App ID) or `metadata.name` (App Name) in an existing `.entur/` manifest, stop and show this message word for word. Do not edit either field until the user confirms they have talked to the Platform team:
+
+    > ⚠️ **Warning:** Do not perform these actions without consulting the Platform team first. They can have serious consequences, including the deletion of critical application resources such as service accounts and databases.
+    >
+    > Please contact the Platform team in **#talk-utviklingsplattform** before proceeding.
 
 ## How to use this skill
 
@@ -61,7 +69,7 @@ https://raw.githubusercontent.com/entur/ai/main/CONVENTIONS.md
 | Produce/consume Kafka events | `guides/playbooks/add-kafka.md` |
 | Set up authentication/authorization | `guides/playbooks/set-up-auth.md` |
 | Promote a service to prd | `guides/playbooks/deploy-to-prd.md` |
-| Deprecate or delete a service | `guides/playbooks/deprecate-service.md` |
+| Deprecate or delete a service | `guides/playbooks/deprecate-service.md` -- ALWAYS warn the user first: "For 30 days after an app is deleted, the same App ID cannot be used again." |
 | Run the service locally | `guides/playbooks/local-dev.md` |
 
 ## Platform capability index

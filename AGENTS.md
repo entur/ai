@@ -83,7 +83,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | Add authentication and authorization | [playbooks/set-up-auth.md](guides/playbooks/set-up-auth.md) |
 | Expose service on a custom `*.entur.{no,io,org}` domain | [playbooks/add-custom-domain.md](guides/playbooks/add-custom-domain.md) |
 | Promote a service to prd | [playbooks/deploy-to-prd.md](guides/playbooks/deploy-to-prd.md) |
-| Deprecate or delete a service | [playbooks/deprecate-service.md](guides/playbooks/deprecate-service.md) |
+| Deprecate or delete a service | [playbooks/deprecate-service.md](guides/playbooks/deprecate-service.md). ALWAYS warn the user first: "For 30 days after an app is deleted, the same App ID cannot be used again." |
 | Handle a critical incident | [playbooks/incident-response.md](guides/playbooks/incident-response.md) |
 | Run the service locally | [playbooks/local-dev.md](guides/playbooks/local-dev.md) |
 
@@ -137,3 +137,11 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 10. **Every PR ALWAYS passes**: lint, unit tests, security scan (CodeQL + Docker scan), Helm lint.
 11. **ALWAYS create GCP projects via self-service YAML manifests** in `.entur/` (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`). Never use Terraform `google_project` or `gcloud projects create`. See [self-service.md](guides/platform/self-service.md). For help, ask in `#talk-utviklerplattform`.
 12. **ALWAYS follow [it-systems-policy.md](it-systems-policy.md)** before introducing, recommending, configuring, documenting, or automating IT systems or software. Never claim a system is registered, classified, or approved unless the repository, user, or DAP documentation confirms it.
+13. **ALWAYS create a new branch for infrastructure changes.** Before you create or change any file in `.github/`, `.entur/`, `terraform/`, or `helm/`, ALWAYS create a new branch from the latest default branch (`git fetch origin && git switch -c <type>/<short-description> origin/main`, e.g. `feat/add-postgres`). Never make these changes on `main`.
+14. **ALWAYS open a pull request for changes in `.entur/`.** When you create or change any file in `.entur/`, commit with a conventional commit message, push, and open a PR with `gh pr create`. Never commit or push `.entur/` changes directly to `main`. The Platform Orchestrator only plans and applies manifests through a PR. Only comment `entur apply` when the user explicitly allows it for that PR: first show the user the orchestrator's plan, then run `gh pr comment <pr> --body "entur apply"`. Otherwise tell the user to review the plan and comment it. See [self-service.md](guides/platform/self-service.md#how-it-works).
+15. **ALWAYS merge `.entur/` before creating `.github/` in a new repository.** When `.entur/` does not exist on `main`, open the `.entur/` PR first and wait until it is applied and merged (`git fetch origin && git ls-tree -d --name-only origin/main .entur` prints `.entur`). Only then create `.github/` on a new branch from the updated `main`. The pipelines authenticate through resources the manifests provision and fail until they exist.
+16. **ALWAYS warn before changing App ID or App Name.** When someone tries to change `metadata.id` or `metadata.name` in an existing `.entur/` manifest, stop and show this message word for word before making any change, and do not edit either field until the user confirms they have talked to the Platform team:
+
+    > ⚠️ **Warning:** Do not perform these actions without consulting the Platform team first. They can have serious consequences, including the deletion of critical application resources such as service accounts and databases.
+    >
+    > Please contact the Platform team in **#talk-utviklingsplattform** before proceeding.

@@ -2,6 +2,10 @@
 
 Gracefully retire an application from the platform.
 
+> **Warning:** For 30 days after an app is deleted, the same App ID cannot be used again.
+>
+> **Agents:** ALWAYS show this warning to the user, word for word, as soon as you are asked to deprecate, remove, or delete an application -- before you take any step below.
+
 ## Goal
 
 The application stops serving traffic, releases its resources, and is removed cleanly without leaving orphaned cloud resources or broken consumer integrations.
@@ -23,7 +27,7 @@ The application stops serving traffic, releases its resources, and is removed cl
 
 ## Steps (Deletion -- destructive, mostly irreversible)
 
-1. **Delete the `.entur/` manifests.** Remove `.entur/app-<appid>.yaml` (and any data-project manifests). Open a PR, run `entur apply`. The Platform Orchestrator schedules GCP project teardown. See [self-service.md](../platform/self-service.md#aborting-or-rolling-back).
+1. **Delete the `.entur/` manifests.** Show the warning again first: For 30 days after an app is deleted, the same App ID cannot be used again. Remove `.entur/app-<appid>.yaml` (and any data-project manifests). Open a PR, run `entur apply`. The Platform Orchestrator schedules GCP project teardown. See [self-service.md](../platform/self-service.md#aborting-or-rolling-back).
 
 2. **Archive the GitHub repository.** Settings → Danger Zone → Archive. This preserves history but prevents pushes.
 

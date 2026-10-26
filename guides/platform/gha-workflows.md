@@ -450,6 +450,8 @@ jobs:
 
 Uses image promotion: on merge to main, resolves the image built during the PR (via git tag) and deploys it. Also supports manual deployment via `workflow_dispatch`.
 
+ALWAYS resolve the image with the [`resolve-image`](gha-actions.md#resolve-image) action. NEVER hand-roll the PR lookup, branch sanitisation, or `git tag -l` search in a `run:` block -- replace any existing script with the action.
+
 ```yaml
 name: Deploy
 on:
@@ -480,24 +482,24 @@ jobs:
     secrets: inherit
 
   resolve-image:
+    name: Resolve Image
     if: github.event_name == 'push'
     runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: read
     outputs:
-      image: ${{ steps.resolve.outputs.image }}
+      image: ${{ steps.resolve-image.outputs.image }}
+      pr_number: ${{ steps.resolve-image.outputs.pr_number }}
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout Repository
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
           fetch-tags: true
-      - name: Resolve image from merged PR git tag
-        id: resolve
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # ... resolves PR branch name, finds matching git tag, outputs image reference
+      - name: Resolve Docker Image
+        uses: entur/gha-docker/.github/actions/resolve-image@v1
+        id: resolve-image
 
   deploy-dev:
     needs: [build, resolve-image]
@@ -572,7 +574,7 @@ updates:
 2. Pin workflow versions to major tags: `@v1`, `@v2`
 3. Use `has_changes` output from terraform-plan to skip unnecessary applies
 4. Name the CodeQL workflow `codeql.yml`
-5. Use GitHub Environments with protection rules for deployment approvals
+5. Use GitHub Environments with protection rules for deployment approvals. Turn on **Deployment protection rules** for each environment and add the owning team (`entur/<team-name>`, e.g. `entur/team-plattform`) as required reviewers. Agents ALWAYS ask before adding the team -- see Step 13 of the [`setup-cicd-workflows`](../../skills/setup-cicd-workflows/SKILL.md) skill
 6. Split workflows into focused files -- separate CI, deploy, linting, and security
 7. Use matrix strategy for multi-namespace/environment deploys
 8. Use concurrency groups with `cancel-in-progress: true` on PR/feature workflows
