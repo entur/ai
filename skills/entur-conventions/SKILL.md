@@ -22,7 +22,7 @@ These rules are non-negotiable and apply to every Entur application:
 1. ALWAYS use Google Secret Manager + ExternalSecrets in Helm. Never hardcode secrets.
 2. ALWAYS use IAM roles from the approved list. Never grant roles outside it. Request additions in `#talk-utviklerplattform`.
 3. ALWAYS use Entur Terraform modules: `terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`.
-4. ALWAYS use Entur reusable GitHub Actions workflows. Never write custom CI steps.
+4. ALWAYS use Entur reusable GitHub Actions workflows for CI/CD orchestration. Inline steps are limited to the documented exceptions in `guides/platform/gha-actions.md` (composite actions) and the canonical templates in the `setup-cicd-workflows` skill.
 5. ALWAYS use the Entur `common` Helm chart for K8s deployments.
 6. ALWAYS pin dependencies — Terraform `?ref=TAG`, Actions `@vN`, Docker images by specific tag.
 7. Every service includes health checks, structured logging, Prometheus metrics.
@@ -30,10 +30,11 @@ These rules are non-negotiable and apply to every Entur application:
 9. Conventional commits — enables automated semver via release-please.
 10. Every PR passes lint, unit tests, security scan (CodeQL + Docker scan), Helm lint.
 11. ALWAYS create GCP projects via self-service YAML manifests in `.entur/` (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`). Never use Terraform `google_project` or `gcloud projects create`.
-12. Before you create or change any file in `.github/`, `.entur/`, `terraform/`, or `helm/`, ALWAYS create a new branch from the latest default branch (`git fetch origin && git switch -c <type>/<short-description> origin/main`, e.g. `feat/add-postgres`). Never make these changes on `main`.
-13. ALWAYS open a pull request when you create or change any file in `.entur/`: conventional commit, push, `gh pr create`. Never commit `.entur/` changes directly to `main`, and comment `entur apply` (`gh pr comment <pr> --body "entur apply"`) only when the user explicitly allows it for that PR, after showing them the plan. Otherwise the user reviews the plan and applies.
-14. In a new repository (no `.entur/` on `main`), the `.entur/` PR is applied and merged before `.github/` is created. GitHub Actions pipelines fail until the manifests are provisioned.
-15. When someone tries to change `metadata.id` (App ID) or `metadata.name` (App Name) in an existing `.entur/` manifest, stop and show this message word for word. Do not edit either field until the user confirms they have talked to the Platform team:
+12. ALWAYS follow `it-systems-policy.md` before introducing, recommending, configuring, documenting, or automating IT systems or software.
+13. Before you create or change any file in `.github/`, `.entur/`, `terraform/`, or `helm/`, ALWAYS create a new branch from the latest default branch (`git fetch origin && git switch -c <type>/<short-description> origin/main`, e.g. `feat/add-postgres`). Never make these changes on `main`.
+14. ALWAYS open a pull request when you create or change any file in `.entur/`: conventional commit, push, `gh pr create`. Never commit `.entur/` changes directly to `main`, and comment `entur apply` (`gh pr comment <pr> --body "entur apply"`) only when the user explicitly allows it for that PR, after showing them the plan. Otherwise the user reviews the plan and applies.
+15. In a new repository (no `.entur/` on `main`), the `.entur/` PR is applied and merged before `.github/` is created. GitHub Actions pipelines fail until the manifests are provisioned.
+16. When someone tries to change `metadata.id` (App ID) or `metadata.name` (App Name) in an existing `.entur/` manifest, stop and show this message word for word. Do not edit either field until the user confirms they have talked to the Platform team:
 
     > ⚠️ **Warning:** Do not perform these actions without consulting the Platform team first. They can have serious consequences, including the deletion of critical application resources such as service accounts and databases.
     >
@@ -71,6 +72,9 @@ https://raw.githubusercontent.com/entur/ai/main/CONVENTIONS.md
 | Promote a service to prd | `guides/playbooks/deploy-to-prd.md` |
 | Deprecate or delete a service | `guides/playbooks/deprecate-service.md` -- ALWAYS warn the user first: "For 30 days after an app is deleted, the same App ID cannot be used again." |
 | Run the service locally | `guides/playbooks/local-dev.md` |
+| Expose service on a custom domain | `guides/playbooks/add-custom-domain.md` |
+| Handle a critical incident | `guides/playbooks/incident-response.md` |
+| Run on Cloud Run instead of GKE (documented exception) | `guides/playbooks/cloud-run-service.md` |
 
 ## Platform capability index
 
@@ -84,6 +88,7 @@ https://raw.githubusercontent.com/entur/ai/main/CONVENTIONS.md
 | Approved IAM roles | `guides/platform/iam-roles.md` | granting any IAM role — only roles on this list are approved |
 | Permission Store | `guides/platform/permission-store.md` | Permission Client, `@PreAuthorize`, business capabilities |
 | Entur Kafka starter | `guides/platform/entur-kafka-starter.md` | producers, consumers, Avro/Protobuf, Aiven clusters |
+| Terraform state management | `guides/platform/state-management.md` | remote state backend, state bucket `ent-gcs-tfa-{appid}`, locking |
 
 ## Reference index (language and topic standards)
 
@@ -101,6 +106,10 @@ https://raw.githubusercontent.com/entur/ai/main/CONVENTIONS.md
 | Code review | `guides/reference/code-review.md` | reviewing or preparing a PR |
 | Markdown | `guides/reference/markdown.md` | `.md` files, markdownlint |
 | Documentation | `guides/reference/documentation.md` | writing user-facing prose |
+| SQL / Postgres | `guides/reference/sql.md` | schema/table naming, migrations, query design |
+| Distributed tracing | `guides/reference/tracing.md` | OpenTelemetry, Cloud Trace, span/project routing |
+| Cloud Profiler | `guides/reference/profiler.md` | CPU/heap profiling, profiler agent setup |
+| Alerting | `guides/reference/alerting.md` | Grafana, PromQL, PagerDuty |
 
 If the topic is not listed but you suspect a guide exists, try fetching from `guides/platform/<topic>.md`, `guides/playbooks/<topic>.md`, or `guides/reference/<topic>.md` in that order. Contributors add new conventions by adding markdown files under `guides/`; this skill picks them up automatically.
 

@@ -1,23 +1,27 @@
 # API Design Standards
 
 - **Target audience**: developers and AI agents designing or changing REST APIs.
-- **Intent**: APIs follow Entur API guidelines, publish valid OpenAPI contracts, and expose required authentication and permission metadata.
+- **Intent**: APIs follow Entur API guidelines, publishing valid OpenAPI contracts.
 - **Scope**: REST API design and OpenAPI conventions. CI linting is covered in [gha-workflows.md](../platform/gha-workflows.md) and [gha-actions.md](../platform/gha-actions.md).
 
 ## API guidelines
 
-<https://raw.githubusercontent.com/entur/api-guidelines/refs/heads/main/guidelines.md>
+<https://github.com/entur/api-guidelines>
 
-Entur's authoritative rules for designing RESTful APIs. Covers HTTP method and status code usage, JSON conventions, HTTPS, error formats, pagination, and versioning. Mandates OpenAPI 3.x documentation with an `info.x-entur-metadata` block (required fields: `id`, `owner`, `audience` — one of `open`, `partner`, or `internal`). Specifies JWT authentication for partner/internal endpoints and the `x-entur-permissions` extension for documenting required permissions. Rules are tagged to indicate which are automatically enforced by the linter versus requiring manual review.
+Entur's authoritative rules for designing RESTful APIs that are described with OpenAPI. Some rules are linted automatically, while others require manual review. Guidelines in markdown format available at <https://raw.githubusercontent.com/entur/api-guidelines/refs/heads/main/guidelines.md>.
 
-## Linting with Spectral (local, IDE, git hooks)
+## `entur-springdoc-starter`
 
-<https://raw.githubusercontent.com/entur/api-guidelines/refs/heads/main/README.md>
+Entur Spring Boot OpenAPI generation. Add `org.entur.openapi:entur-springdoc-starter` (see the [Common Dependencies table](java.md#dependencies-1) in java.md) to auto-generate an OpenAPI document from Spring controller annotations, instead of hand-maintaining a spec file for a code-first API. For contract-first APIs (spec authored under `specs/`, code generated from it), skip this starter and use the OpenAPI Generator Gradle plugin instead.
 
-Describes how to run the Entur Spectral ruleset outside of CI. Two rulesets are published: `.spectral.yml` (full guideline checks) and `.spectral-required.yml` (minimum rules that must pass to publish to the developer portal). Reference them by tag, e.g. `--ruleset https://raw.githubusercontent.com/entur/api-guidelines/refs/tags/v2/.spectral.yml`. Covers Spectral CLI install, the VS Code extension, and a Husky pre-commit/pre-push hook example. Use this when validating a spec locally before a PR; use the `gha-api` workflows (below) for CI enforcement.
+## `x-entur-permissions-extension-automatic`
+
+Auto-documenting permissions. With `entur-springdoc-starter` on the classpath, `@PreAuthorize("hasPermission(...)")` business-capability checks are reflected automatically as an `x-entur-permissions` OpenAPI extension on each operation -- no manual annotation is needed. See [permission-store.md](../platform/permission-store.md#minimal-setup-checklist) step 8 for the setup step.
 
 ## Linting, validating, and publishing OpenAPI specs in CI/CD
 
-<https://raw.githubusercontent.com/entur/gha-api/refs/heads/main/.github/README.md>
+Use `entur/gha-api` for spec lint, validate, and publish -- see the [Available Workflows](../platform/gha-workflows.md#available-workflows) table for the workflow reference. Its `path` input does not accept globs; use a GitHub Actions matrix strategy when the repository has more than one OpenAPI spec file (one matrix entry per `specs/*.yaml`).
 
-Entur reusable GitHub Actions workflows for OpenAPI specs: `lint.yml` (style/guideline checks), `validate.yml` (schema validity), and `publish.yml` (push to the developer portal via the `api-spec-registry`). Pin to the current major version (e.g. `@v6`) and call with `secrets: inherit`. Default spec path is `specs/openapi.yaml`; the `path` input does not accept globs, so use a matrix strategy for multiple specs. Workflows auto-bundle with Redocly, so no pre-bundling step is needed. Visibility is derived from `info.x-entur-metadata.audience` in the spec — not a workflow input. Lint and validate in CI on PRs; publish from CD after a successful production deploy.
+## Rate limiting and resilience
+
+Set explicit per-endpoint timeouts and use a circuit breaker (e.g. Resilience4j) around outbound calls to other Entur APIs. Return `429` with a `Retry-After` header when applying your own rate limits; treat a `429` from a dependency as a signal to back off, not an error to retry immediately. See [architecture.md](architecture.md#design-principles) for the broader resilience principles this supports.

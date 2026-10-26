@@ -1,6 +1,22 @@
+# Default reviewers for documentation, skills, and other contributions.
 * @henriktre @glenn-terjesen
 
-/guides/platform/   @entur/team-plattform
-/plugins/bootstrap/  @entur/team-plattform
-/plugins/cicd-workflows/ @entur/team-plattform
-/skills/setup-cicd-workflows/    @entur/team-plattform
+# Platform documentation.
+/guides/platform/ @entur/team-plattform
+
+# Repository maintenance and contributor configuration.
+/.github/            @entur/team-ki-effekt
+/CODEOWNERS          @entur/team-ki-effekt
+/CONTRIBUTING.md     @entur/team-ki-effekt
+/CHANGELOG.md        @entur/team-ki-effekt
+/CLAUDE.md           @entur/team-ki-effekt
+/.gitignore          @entur/team-ki-effekt
+/.markdownlint.jsonc @entur/team-ki-effekt
+/package.json        @entur/team-ki-effekt
+/scripts/            @entur/team-ki-effekt
+
+# Plugin distribution configuration; skill content keeps the default reviewers.
+/.agents/plugins/marketplace.json  @entur/team-ki-effekt
+/.claude-plugin/marketplace.json   @entur/team-ki-effekt
+/plugins/*/.claude-plugin/         @entur/team-ki-effekt
+/plugins/*/.codex-plugin/          @entur/team-ki-effekt

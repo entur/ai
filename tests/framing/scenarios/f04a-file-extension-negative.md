@@ -22,7 +22,9 @@ Provide the full file path. Answer in 1-2 sentences based ONLY on the convention
     ".yml",
     ".github/workflows"
   ],
-  "must_not_contain": [],
+  "must_not_contain": [
+    ".yaml"
+  ],
   "must_match": [
     "\\.github/workflows/.*\\.yml"
   ]

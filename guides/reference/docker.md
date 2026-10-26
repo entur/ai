@@ -37,7 +37,9 @@ Four stages: bundler (OpenAPI spec) → builder (compile) → layers (extract la
 FROM node:24-slim AS bundler
 WORKDIR /app
 COPY specs specs
-RUN npx @redocly/cli bundle specs/products.yaml --output specs/openapi.json
+COPY package.json package-lock.json ./
+RUN npm ci
+RUN npx @redocly/cli@1.34.3 bundle specs/products.yaml --output specs/openapi.json
 
 # Stage 2: Build the application
 FROM gradle:9.6.1-jdk25-alpine AS builder

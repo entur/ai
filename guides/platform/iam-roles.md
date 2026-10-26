@@ -1,6 +1,8 @@
 # Assignable IAM Roles
 
-This page is the **authoritative allowlist** of IAM roles that CD service accounts may **grant to other identities** (e.g. the service account your application runs as) via `google_project_iam_member` or `google_project_iam_binding` in your Terraform code. Roles outside this list will be rejected by the platform's policy guard.
+This page is a **hand-maintained mirror** of the allowlist the platform's policy guard actually enforces: `assignable_iam_roles` in `entur/tf-gcp-apps` (upstream source and sync procedure in the metadata comment at the bottom of this file). `terraform plan` checks against the upstream variable, not this table -- if the two have drifted, the upstream wins. This table exists so agents reading these docs don't need to fetch the upstream repository for a routine role check.
+
+**Last verified against upstream**: not yet recorded (see `sync_procedure` below) -- treat this table as indicative, not authoritative, until a verification date is recorded here.
 
 If a role you need is not on this allowlist, request it to be added in the #talk-utviklerplattform channel on Slack.
 
@@ -57,6 +59,9 @@ If a role you need is not on this allowlist, request it to be added in the #talk
 
 <!--
 metadata:
+  last_verified:
+    date: null   # YYYY-MM-DD of the last time a human/CI job diffed this table against upstream; not yet recorded
+    upstream_revision: null   # git tag or commit SHA of entur/tf-gcp-apps compared against
   source:
     repo: entur/tf-gcp-apps
     path: terraform/modules/modules/app_gcp_base/variables.tf
@@ -83,6 +88,10 @@ metadata:
     - >
       Announce the addition in #talk-utviklerplattform so consuming teams know
       it is available without polling the tag stream.
+    - >
+      Update `last_verified.date` and `last_verified.upstream_revision` above
+      to the sync date and the upstream tag/commit just compared, even if the
+      sync found no changes to mirror.
   edit_warning: >
     Do not edit only this page. A role added here without the upstream change
     fails at `terraform plan` for every consumer. A role removed upstream

@@ -131,7 +131,7 @@ Follow Prometheus naming conventions:
 
 ## Distributed Tracing
 
-See [tracing.md](tracing.md) for the full playbook: per-project trace storage initialization, Terraform wiring (API + `roles/cloudtrace.agent`), OpenTelemetry SDK setup for Spring Boot and Go, propagation, sampling, and Cloud Trace project routing.
+See [tracing.md](tracing.md) for the full playbook: OpenTelemetry Java Agent / manual instrumentation setup, sampling, log correlation, and Cloud Trace project routing. IAM and API provisioning for tracing are automatic via the common Helm chart -- no manual Terraform wiring is needed.
 
 ## Google Cloud Profiler
 

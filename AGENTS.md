@@ -74,6 +74,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | I want to… | Read |
 |------------|------|
 | Bootstrap a new service | [playbooks/bootstrap-service.md](guides/playbooks/bootstrap-service.md) |
+| Run a security review | Load skill: [`skills/entur-ai-security-review/SKILL.md`](skills/entur-ai-security-review/SKILL.md) |
 | Set up CI/CD workflows | Load skill: [`skills/setup-cicd-workflows/SKILL.md`](skills/setup-cicd-workflows/SKILL.md) |
 | Set up AI agent config for an existing repo | Load skill: [`skills/setup-agent-config/SKILL.md`](skills/setup-agent-config/SKILL.md) |
 | Introduce or recommend IT systems and software | [it-systems-policy.md](it-systems-policy.md) |
@@ -86,6 +87,8 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 | Deprecate or delete a service | [playbooks/deprecate-service.md](guides/playbooks/deprecate-service.md). ALWAYS warn the user first: "For 30 days after an app is deleted, the same App ID cannot be used again." |
 | Handle a critical incident | [playbooks/incident-response.md](guides/playbooks/incident-response.md) |
 | Run the service locally | [playbooks/local-dev.md](guides/playbooks/local-dev.md) |
+| Let Freyja review and merge Dependabot PRs | [playbooks/set-up-freyja.md](guides/playbooks/set-up-freyja.md) |
+| Run on Cloud Run instead of GKE (off golden path) | [playbooks/cloud-run-service.md](guides/playbooks/cloud-run-service.md) |
 
 ### Platform capabilities (what the platform provides)
 
@@ -128,7 +131,7 @@ Use [Agent Reading Order](#agent-reading-order) first, then use the tables below
 1. **ALWAYS use Google Secret Manager** + ExternalSecrets in Helm for all secrets. Never hardcode secrets.
 2. **ALWAYS use roles from the [allowed list](guides/platform/iam-roles.md).** Never grant IAM roles outside it. Request additions in `#talk-utviklerplattform`.
 3. **ALWAYS use Entur Terraform modules** (`terraform-google-init`, `terraform-google-sql-db`, `terraform-google-memorystore`, `terraform-google-cloud-storage`).
-4. **ALWAYS use Entur reusable GitHub Actions workflows** for all CI/CD steps.
+4. **ALWAYS use Entur reusable GitHub Actions workflows** for CI/CD orchestration. Inline steps are limited to the documented exceptions in [gha-actions.md](guides/platform/gha-actions.md#when-to-use-directly) and the canonical templates in the `setup-cicd-workflows` skill.
 5. **ALWAYS use the Entur `common` Helm chart** for K8s deployments.
 6. **ALWAYS pin all dependencies** -- Terraform (`?ref=TAG`), Actions (`@vN`), Docker images (specific tag).
 7. **All services ALWAYS include** health checks, structured logging, and Prometheus metrics.
