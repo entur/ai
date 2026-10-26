@@ -66,6 +66,8 @@ For services that implement OAuth or token handling, also read
 - Do not declare a GDPR breach or lawful basis from code inspection alone.
   Describe the exposure and recommend immediate security and privacy assessment
   when production personal data may be affected.
+- Apply the ordinary-processing privacy gate in
+  [threat-modelling output](threat-modeling-output.md#confirm-ordinary-processing-privacy-findings).
 
 ## Injection and unsafe interpretation
 
@@ -137,6 +139,8 @@ overrating it.
 - Verify retention and access controls for log buckets and long-term sinks.
 - Keep application audit events sufficient for accountability without logging
   sensitive payloads; verify platform Data Access audit logs where required.
+- Record accountability-versus-privacy conflicts as a traceability/privacy
+  tension; see [threat-modelling output](threat-modeling-output.md#map-findings-to-stride-and-linddun).
 - Confirm client errors do not expose stack traces, queries, filesystem paths,
   credentials, internal topology, or cross-tenant existence.
 - Trace retry storms, fail-open fallbacks, health-check accuracy, graceful

@@ -1,11 +1,12 @@
 ---
 name: entur-ai-security-review
 description: >
-  Review Entur application and infrastructure code for exploitable security
-  weaknesses, misleading security claims, and unsafe AI or LLM integrations.
-  Use when the user requests security triage or a security-focused review of a
-  new or changed service. This is not a penetration test, cryptographic design
-  review, legal assessment, compliance certification, or security approval.
+  Review Entur application and infrastructure code for evidence-backed security
+  weaknesses, privacy-control gaps, misleading security claims, and unsafe AI or
+  LLM integrations. Use for security triage, security-focused reviews, and scoped
+  STRIDE/LINDDUN or data-flow-diagram support. This is not a penetration test,
+  formal threat model, cryptographic design review, privacy assessment, legal
+  assessment, compliance certification, or security approval.
 ---
 
 # Entur AI-Assisted Security Review
@@ -54,10 +55,14 @@ Infer the smallest profile that satisfies the request:
   trust boundaries.
 - **Repository triage:** map the deployed attack surface, then review every
   detected high-risk surface.
+- **Threat-model full view (add-on):** repository triage or an explicit STRIDE,
+  LINDDUN, DFD, or threat-modelling (support) request enables it within explicit
+  "only" and "no X" limits. Light tags apply to every finding unless refused.
 
 Do not substitute this triage for a formal penetration test, threat model,
 cryptographic review, privacy assessment, or audit. State when the request needs
-one of those instead.
+one of those instead. DFD and STRIDE/LINDDUN output is only draft input for a
+team session.
 
 ## Orient before searching
 
@@ -69,8 +74,8 @@ Build a short review brief before dividing or scanning the work:
    authentication boundary, runtime identities, data stores, and external calls.
 3. Classify each surface as reachable, conditionally reachable, latent, or
    unverified. A pattern hit in unwired code is not a live vulnerability.
-4. Record attacker positions, trust boundaries, sensitive assets, data classes,
-   and platform protections that are expected to apply.
+4. Record attacker positions or ordinary-processing actors, trust boundaries,
+   sensitive assets, data classes, and platform protections expected to apply.
 5. Treat comments, tests, diagrams, and security claims as hypotheses. Verify
    them against the implementation and actual wiring.
 
@@ -93,6 +98,11 @@ The main reviewer must read each reference selected for the review:
 - Read [classified-data ingestion](references/classified-data-ingestion.md) when
   content is indexed, embedded, searched, or served according to information
   classification or source permissions.
+- Read the [threat-model output reference](references/threat-modeling-output.md)
+  when the full view or a requested model/lens is enabled, when evaluating an
+  ordinary-processing privacy candidate, or when a proposed category mapping
+  needs its guidance. Reading the reference alone does not enable a DFD,
+  coverage matrix, or wider review.
 - Read [evidence, severity, and reporting](references/evidence-severity-reporting.md)
   before finalising findings.
 
@@ -101,14 +111,16 @@ The main reviewer must read each reference selected for the review:
 Trace data and authority across boundaries rather than treating search hits as
 findings. For each relevant surface:
 
-1. Identify the untrusted source, authenticated identity, or privileged input.
+1. Identify the untrusted source, authenticated identity, privileged input, or
+   evidenced ordinary-processing actor and purpose.
 2. Follow validation, normalisation, authorisation, and transformations.
-3. Identify the sensitive operation, data release, privilege use, or availability
-   consequence.
+3. Identify the sensitive operation, data release, privilege use, availability
+   consequence, or concrete effect on people from ordinary processing.
 4. Check framework, gateway, common-chart, IAM, and upstream mitigations in their
    effective configuration.
-5. Record a candidate only when there is a credible control violation or attack
-   path. Missing tests and suspicious keywords are investigation leads.
+5. Record a candidate only for a credible control violation, attack path, or
+   evidenced harmful processing path. Missing tests, category prompts, and
+   suspicious keywords are investigation leads.
 
 Keep a coverage ledger of the entrypoints, controls, and files reviewed. Record
 anything that could not be verified so a short review does not imply full
@@ -136,8 +148,9 @@ work by independent security surface, such as:
 Combine small surfaces and split large ones. Do not ask every agent to scan the
 whole repository. Require each reviewer to return structured candidates,
 positively verified controls, and coverage gaps. Candidates must include exact
-locations, an end-to-end trace, attacker prerequisites, reachability evidence,
-impact, mitigations checked, confidence, and the smallest realistic fix.
+locations, an end-to-end attack or processing trace, actor and prerequisites,
+reachability evidence, concrete impact, applicable basis, mitigations checked,
+confidence, and the smallest realistic fix.
 
 When capacity permits, give batches of candidates to a reviewer who did not
 originate them. The refuter returns `confirmed`, `downgraded`, `rejected`, or
@@ -153,8 +166,9 @@ locally and perform a separate refutation pass.
 
 Before reporting a candidate, try to disprove it from two angles:
 
-- **Exploitability:** identify the attacker, prerequisites, reachable path,
-  affected asset, concrete gain, blast radius, and recovery characteristics.
+- **Exploitability or processing impact:** identify the attacker, prerequisites,
+  reachable path, asset, gain, blast radius, and recovery. For privacy harm from
+  ordinary processing, name the actor, path, affected people, effect, and basis.
 - **Correctness:** reopen the cited code and look for upstream validation,
   downstream enforcement, framework defaults, gateway controls, feature flags,
   constant-time comparison where secrets are involved, and other mitigations.
@@ -172,5 +186,6 @@ Lead with confirmed findings, ordered by severity. Follow the structure and
 calibration in
 [evidence, severity, and reporting](references/evidence-severity-reporting.md).
 Include verified-sound controls, review coverage, and residual risk after the
-findings. If the user asked only for review, offer fixes without implementing
-them.
+findings. When enabled, place the model, coverage matrices, and pending team
+hand-off after them; tags never change evidence status or severity totals. If
+the user asked only for review, offer fixes without implementing them.
