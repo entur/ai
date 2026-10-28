@@ -4,7 +4,7 @@ Define YAML manifests in the repository's `.entur/` directory and apply through 
 
 ## How It Works
 
-1. Create/modify YAML manifests in `.entur/` (e.g. `.entur/app-<metadata.id>.yaml` for a `GoogleCloudApplication`, `.entur/github-<repo-name>.yaml` for `GitHubActions`).
+1. Create/modify YAML manifests in `.entur/` (e.g. `.entur/app-<metadata.id>.yaml` for a `GoogleCloudApplication`, `.entur/github-<metadata.id>.yaml` for `GitHubActions`).
 2. Open a PR. The orchestrator validates and presents a **plan**.
 3. Comment `entur apply` on the PR.
 4. Wait for apply to succeed, then merge.
@@ -40,7 +40,7 @@ The **GitHub manifest** must be applied before any **Application manifest**.
 - Manifests live in `.entur/` at repository root
 - ALWAYS use one YAML document per file (single document, no `---` separator)
 - ALWAYS name application manifests (`GoogleCloudApplication`, `GoogleCloudFirebaseApplication`, `GoogleCloudDataProject`) `.entur/app-<metadata.id>.yaml`
-- ALWAYS name `GitHubActions` manifests `.entur/github-<repo-name>.yaml`
+- ALWAYS name `GitHubActions` manifests `.entur/github-<metadata.id>.yaml`, using the App ID of the application manifest, so both files share one identifier. The filename does not change `metadata.id` inside the `GitHubActions` manifest, which stays the repository name
 - NEVER rename existing manifests in `.entur/`. The naming rules above apply to new manifests only -- leave established filenames as they are
 - NEVER write a field whose value equals the platform default (see the **Default** column in the reference tables below). Omit it instead -- for example, leave out `spec.terraform.createBackend: true`, `spec.secretManager.enabled: true`, `spec.kubernetes.enabled: true`, and `spec.auth0.internal.type: m2m`. Drop a block entirely when every field in it would be a default. Required fields (such as `spec.environments` on Application manifests) are always written, even when their value matches a default
 
@@ -117,7 +117,7 @@ Common setup: containerized application on Kubernetes in Google Cloud.
 
 ### Step 1: Create the GitHub Manifest
 
-Create `.entur/github-myuniquerepo.yaml`:
+Create `.entur/github-myappid.yaml` (named after the App ID from Step 2):
 
 ```yaml
 apiVersion: orchestrator.entur.io/github/v1

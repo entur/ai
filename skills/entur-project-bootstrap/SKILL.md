@@ -13,9 +13,18 @@ description: >
 
 Generate the complete infrastructure scaffolding for a new Entur application. This skill coordinates across self-service, Helm, Terraform, Docker, and CI/CD to ensure all identifiers are consistent.
 
+## Asking Questions
+
+ALWAYS ask the user through your interactive question tool (for example `AskUserQuestion` in Claude Code) whenever the answer can be offered as options. Fall back to a plain-text question only when the tool is not available, or when the answer is free text with no sensible options.
+
+- **Choices and yes/no** -- language, environments, ingress, database, Redis, Kafka, Auth0 M2M, confirming the identity chain, permission to run `entur apply`, adding required reviewers. Put the default first and mark it "(Recommended)".
+- **Several inputs at once** -- batch related questions into one call (up to four), for example database, Redis, Kafka, and Auth0 M2M together.
+- **Multi-select** -- use it when the user may pick more than one option, such as environments.
+- **Free-text values** -- repository name, App ID, team, display name, and ingress hosts. When you can suggest a value (for example the current directory name, or a team found in existing manifests), offer it as an option; the user types a different value through the tool's free-text "Other" option. Never offer a guessed ingress host as an option -- show the pattern as a hint and let the user type the value.
+
 ## Step 1: Gather Inputs
 
-Ask the user for the following. If not provided, suggest sensible defaults:
+Ask the user for the following, following [Asking Questions](#asking-questions). Skip inputs the user already gave. If not provided, suggest sensible defaults:
 
 | Input | Required | Constraints | Default |
 |-------|----------|-------------|---------|
@@ -32,6 +41,8 @@ Ask the user for the following. If not provided, suggest sensible defaults:
 | **Needs Auth0 M2M** | no | boolean | `false` |
 | **Display name** | no | human-readable name | derived from repo name |
 
+When you ask for **Environments**, ALWAYS ask a multi-select question with `dev`, `tst`, and `prd` as separate options, so the user can pick one, two, or all three. Do not offer fixed bundles such as "dev, tst, prd" or "dev only".
+
 ### Validation Rules
 
 Before proceeding, validate:
@@ -41,6 +52,7 @@ Before proceeding, validate:
 - `metadata.id` ALWAYS uses base identifiers (the platform adds environment suffixes)
 - Repository name is valid kebab-case
 - Team starts with `team-`
+- At least one environment is selected
 - Unless ingress is disabled (`ingress.enabled: false`), an ingress host is given for every environment. ALWAYS ask the user for each `ingress.host` -- NEVER invent one or derive it from the repo name. You may show the pattern from `guides/playbooks/add-custom-domain.md` as a suggestion, but wait for the user to confirm the exact value. When ingress is disabled, do not ask for a host and do not write `ingress.host`
 
 ## Step 2: Print the Identity Chain
@@ -61,7 +73,7 @@ Identity Chain:
   Ingress hosts:      dev={devHost}, tst={tstHost}, prd={prdHost}   (or "disabled")
 ```
 
-Ask the user to confirm before generating files.
+Ask the user to confirm before generating files, with an interactive question whose options are to confirm or to change a value.
 
 After the user confirms, ALWAYS create a new branch before writing any file -- this skill writes to `.entur/`, `helm/`, `terraform/`, and `.github/`. Never generate these files on `main`.
 
@@ -90,7 +102,7 @@ ALWAYS open a pull request for the `.entur/` manifests: commit on the Phase 1 br
 
 Never write fields set to their platform default (for example `terraform.createBackend: true`, `secretManager.enabled: true`, `kubernetes.enabled: true`, `auth0.internal.type: m2m`). See the **Default** column in `guides/platform/self-service.md`.
 
-### `.entur/github-{repoName}.yaml`
+### `.entur/github-{appId}.yaml`
 
 ```yaml
 apiVersion: orchestrator.entur.io/github/v1

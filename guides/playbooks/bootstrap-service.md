@@ -14,7 +14,7 @@ Get a minimal "hello world" service running in `dev` with the standard golden-pa
 
 ## Steps
 
-1. **Provision GCP projects via self-service.** Create `.entur/github-<repo-name>.yaml` (`GitHubActions`) and `.entur/app-<appid>.yaml` (`GoogleCloudApplication`). Open a PR that contains only the `.entur/` files, comment `entur apply`, merge. Wait for the merge before step 5 -- the CI/CD workflows fail until these manifests are provisioned. See [self-service.md](../platform/self-service.md) for manifest fields and the apply flow.
+1. **Provision GCP projects via self-service.** Create `.entur/github-<appid>.yaml` (`GitHubActions`) and `.entur/app-<appid>.yaml` (`GoogleCloudApplication`). Open a PR that contains only the `.entur/` files, comment `entur apply`, merge. Wait for the merge before step 5 -- the CI/CD workflows fail until these manifests are provisioned. See [self-service.md](../platform/self-service.md) for manifest fields and the apply flow.
 
 2. **Lay out the repository per the golden path.** Repository name = application name = Docker image name = Kubernetes namespace = Helm release name. See [CONVENTIONS.md](../../CONVENTIONS.md#project-structure) for the full directory layout.
 
