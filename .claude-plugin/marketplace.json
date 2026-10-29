@@ -107,7 +107,8 @@
         "./entur-web-development",
         "./entur-accessibility",
         "./entur-brand-design",
-        "./migrate-react-18"
+        "./migrate-react-18",
+        "./migrate-typography"
       ],
       "description": "Entur Linje design system: @entur/* React components, design tokens, brand identity, WCAG/universell utforming compliance, and package upgrade migrations. Sourced directly from entur/design-system so there is no vendored copy to drift.",
       "category": "design",
