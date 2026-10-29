@@ -2,7 +2,7 @@
 
 ## Description
 
-Verifies the dependabot config includes the correct package ecosystems for a Kotlin project: github-actions, docker, and gradle. Must not include ecosystems for languages not in use.
+Verifies the dependabot config includes the correct package ecosystems for a Kotlin project: github-actions, docker, and gradle. Must not include ecosystems for languages not in use. Must set a conventional commit prefix so Dependabot PRs pass the PR verification workflow.
 
 ## Prompt
 
@@ -27,7 +27,8 @@ Generate the dependabot configuration file. Output ONLY the YAML content.
     "github-actions",
     "docker",
     "gradle",
-    "weekly"
+    "weekly",
+    "commit-message"
   ],
   "must_not_contain": [
     "gomod",
@@ -39,7 +40,9 @@ Generate the dependabot configuration file. Output ONLY the YAML content.
   "must_match": [
     "package-ecosystem.*github-actions",
     "package-ecosystem.*docker",
-    "package-ecosystem.*gradle"
+    "package-ecosystem.*gradle",
+    "prefix:\\s*\"?chore\"?",
+    "include:\\s*\"?scope\"?"
   ]
 }
 ```

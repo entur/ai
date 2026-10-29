@@ -525,6 +525,10 @@ several specs. See
 
 ### Dependabot Configuration
 
+The PR verification workflow requires conventional commit PR titles and
+single-commit messages. Set `commit-message` on each ecosystem so that
+Dependabot PRs use `chore(deps): bump ...` and pass the check.
+
 ```yaml
 # .github/dependabot.yml
 version: 2
@@ -533,14 +537,23 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
   - package-ecosystem: "docker"
     directories: ["/"]
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
     groups:
       flyway:
         applies-to: version-updates
