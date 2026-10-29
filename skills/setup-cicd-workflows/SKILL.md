@@ -954,6 +954,14 @@ jobs:
 
 ## Step 10: Generate `.github/dependabot.yml`
 
+> **Every ecosystem entry MUST have a `commit-message` block** with `prefix: "chore"` and `include: "scope"`.
+> `pr.yml` calls `entur/gha-meta/.github/workflows/verify-pr.yml@v1`. That workflow runs
+> `amannn/action-semantic-pull-request` with `validateSingleCommit: true`. It requires a
+> conventional commit PR title. For a PR with one commit, the commit message must also match.
+> The Dependabot default is `Bump x from 1.0 to 1.1`, which fails the check.
+> With the block, Dependabot uses `chore(deps): bump x from 1.0 to 1.1` for both the title and
+> the commit. Development dependencies get `chore(deps-dev): ...`.
+
 ```yaml
 version: 2
 updates:
@@ -961,10 +969,16 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
   - package-ecosystem: "docker"
     directories: ["/"]
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
 ```
 
 Add language-specific ecosystems:
@@ -976,6 +990,9 @@ Add language-specific ecosystems:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
 ```
 
 **Go** -- add:
@@ -985,6 +1002,9 @@ Add language-specific ecosystems:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
 ```
 
 **Python** -- add:
@@ -994,6 +1014,9 @@ Add language-specific ecosystems:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
 ```
 
 ## Step 11: Generate Optional Lint Workflows
@@ -1052,6 +1075,7 @@ Generated CI/CD workflows:
   ```
 
 - **Dependabot PRs need approval** before CI runs with secrets (`dependabot-pr.yml`)
+- **Dependabot PRs must pass `pr.yml`**: every `dependabot.yml` entry sets `commit-message: { prefix: "chore", include: "scope" }`
 - **Use `paths-ignore`** on build and cd workflows to skip Terraform-only and docs-only changes
 - **Use `paths` triggers** on Terraform workflows to only run on infrastructure changes
 - **Upload test reports** using `dorny/test-reporter` for PR check visibility (Java/Kotlin)
