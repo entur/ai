@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.0](https://github.com/entur/ai/compare/v0.3.2...v0.4.0) (2026-10-29)
+
+### Features
+
+* **security-review:** add STRIDE and LINDDUN threat-model output ([#99](https://github.com/entur/ai/issues/99)) ([1469790](https://github.com/entur/ai/commit/1469790839d006ebcb5e619cfc03540546b8ecbb))
+* **skills:** add asd-ste100 skill to the marketplace ([#94](https://github.com/entur/ai/issues/94)) ([1947ea5](https://github.com/entur/ai/commit/1947ea5ddb6e9001f583767804358ef77ea57272))
+* **skills:** add migrate-typography to the entur-linje plugin ([#101](https://github.com/entur/ai/issues/101)) ([4b02d21](https://github.com/entur/ai/commit/4b02d211566b7e6e8fbc502534487dc378f6e112))
+
+### Documentation
+
+* add guide on how-to set up Freyja. ([#97](https://github.com/entur/ai/issues/97)) ([4730808](https://github.com/entur/ai/commit/473080879dc8322c07607c3d524a340f4bc624e0))
+* update with detailed instructions and info on branch protection. ([#100](https://github.com/entur/ai/issues/100)) ([76c7707](https://github.com/entur/ai/commit/76c770713981680b06325542abae4fefc1b85f0a))
+
 ## [0.3.2](https://github.com/entur/ai/compare/v0.3.1...v0.3.2) (2026-09-29)
 
 ### Documentation
