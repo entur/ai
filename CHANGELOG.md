@@ -2,13 +2,11 @@
 
 ## [0.4.0](https://github.com/entur/ai/compare/v0.3.2...v0.4.0) (2026-10-29)
 
-
 ### Features
 
 * **security-review:** add STRIDE and LINDDUN threat-model output ([#99](https://github.com/entur/ai/issues/99)) ([1469790](https://github.com/entur/ai/commit/1469790839d006ebcb5e619cfc03540546b8ecbb))
 * **skills:** add asd-ste100 skill to the marketplace ([#94](https://github.com/entur/ai/issues/94)) ([1947ea5](https://github.com/entur/ai/commit/1947ea5ddb6e9001f583767804358ef77ea57272))
 * **skills:** add migrate-typography to the entur-linje plugin ([#101](https://github.com/entur/ai/issues/101)) ([4b02d21](https://github.com/entur/ai/commit/4b02d211566b7e6e8fbc502534487dc378f6e112))
-
 
 ### Documentation
 
