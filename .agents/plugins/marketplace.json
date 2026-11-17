@@ -75,6 +75,18 @@
         "authentication": "ON_INSTALL"
       },
       "category": "Security"
+    },
+    {
+      "name": "sd-hjernen",
+      "source": {
+        "source": "local",
+        "path": "./plugins/sd-hjernen"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Research"
     }
   ]
 }
