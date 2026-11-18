@@ -7,6 +7,11 @@ page numbers in the source document. The first lines of a page, before
 the first heading, are a note from the bot about how the page is made;
 skip them.
 
+When a person has edited a page, the bot adds its new text in a block
+titled «Oppdatering fra boten <date>». Such a page holds the text
+twice. Use the text in the block with the newest date. The text before
+the block is the earlier version.
+
 ## Partner page
 
 One page per partner, titled with the partner's name, for example
@@ -59,20 +64,31 @@ arbeidet med ny NTP». Headings, in this order:
 
 ## Data page
 
-One page per partner, titled «Data fra <partner>». It is written from
-the team's data catalogue, not from documents. Parts, in this order:
+One page per publisher, titled «Data fra <publisher>». Most publishers
+are partners, and some are not, such as Kartverket. The page is written
+from the team's data catalogue, not from documents. Parts, in this
+order:
 
 | Part | Holds |
 |---|---|
-| The first paragraph | What the partner shares, in a few sentences |
+| The first paragraph | What the publisher shares, in a few sentences |
 | One section per group of datasets | A heading, a paragraph about the group, and one line per dataset |
-| Each dataset line | The name, then in parentheses the catalogue id, `tilgang:` with the access (`åpen`, `krever registrering`, `begrenset`, or `uavklart`), the access route as the page states it, such as REST-API, GraphQL-API, SIRI, DATEX II, filnedlasting, WFS, or WMS, and `format:`, then a sentence about the dataset |
+| Each dataset line | The name, then in parentheses: the catalogue id, `ikke verifisert` if nobody has checked the source, `tilgang:` with the access (`åpen`, `krever registrering`, `begrenset`, or `uavklart`), the access route, such as REST-API, GraphQL-API, SIRI, DATEX II, filnedlasting, WFS, or WMS, and `format:`. Many lines have no access route, no `format:`, or neither. After the parentheses, a sentence about the dataset |
 | «Skrevet fra katalogen <date>» | When the page was last written |
 
-The owner of a dataset is the partner the page is about.
+The owner of a dataset is the publisher the page is about.
 
 ## Section pages
 
 Pages such as «Problemstillinger», «Partnere», «Nasjonale føringer»,
 and «Mandat og styring» hold one or two sentences about what lies under
 them. Do not read or cite them.
+
+## Other pages
+
+Pages that have none of the four shapes are not evidence from the
+knowledge base, also when a search returns them. Two such pages are
+«Idébank», which holds ideas that people saved, with their names and
+risk assessments, and «Uavklart». Do not cite them as the knowledge
+base. Never repeat the name of a person from them. If the user asks
+about earlier ideas, report them under «Utenfor kunnskapsbasen».

@@ -2,9 +2,9 @@
 
 Each recipe says which pages to search, which to read, and how to shape
 the answer.
-Every heading gets its pages linked. Under a heading with nothing in
-the knowledge base, write one line that says so, and keep the heading,
-unless the recipe says to leave that heading out. The page shapes are
+Every heading gets its pages linked. Under a heading where you found
+no pages, write one line that says so, and keep the heading, unless the
+recipe says to leave that heading out. The page shapes are
 in `sider.md`.
 
 ## A brief before a meeting with a partner
@@ -19,9 +19,10 @@ Search and read:
 2. The problem pages that concern the partner: search `space KI1
    problemstilling Gjelder: <partner>` and read each problem page whose
    «Gjelder» line names the partner. Pages marked «Hele sektoren»
-   concern every partner: list them by title from the hits, with one
-   line each from the excerpt, and read only those whose excerpt
-   touches the partner's own domain.
+   concern every partner. Read those whose title touches the partner's
+   own domain. List the others by title and link only, and say that you
+   did not read them. State nothing about what a page says unless you
+   read the page.
 3. The data page, if the user asks about data: search `space KI1 Data
    fra <partner>`.
 
@@ -84,14 +85,16 @@ Search and read:
 2. If a problem page or a partner page mentions a data source on the
    topic, name it too, with its page.
 
-Answer with one heading per partner, «Data fra <partner>», linked to
-the data page. Under it, one line per dataset: the name, the access as
-the page states it (`åpen`, `krever registrering`, `begrenset`, or
-`uavklart`), the access route as the page states it, such as REST-API,
-GraphQL-API, SIRI, DATEX II, filnedlasting, WFS, or WMS, the format,
-and one sentence about what it holds. The owner of every
-dataset under a heading is that partner. Do not invent a dataset or an
-access that the page does not state.
+Answer with one heading per publisher, «Data fra <publisher>», linked
+to the data page. Under it, one line per dataset: the name, «ikke
+verifisert» if the page marks the dataset so, the access as the page
+states it (`åpen`, `krever registrering`, `begrenset`, or `uavklart`),
+the access route, such as REST-API, GraphQL-API, SIRI, DATEX II,
+filnedlasting, WFS, or WMS, the format, and one sentence about what it
+holds. Where the page states no access route or no format, write «ikke
+oppgitt». The owner of every dataset under a heading is that
+publisher. Do not invent a dataset, an access, an access route, or a
+format that the page does not state.
 
 ## Grounding an idea, a plan, or a draft
 
@@ -114,7 +117,7 @@ Answer under these headings, in this order:
   supports, with the page linked and the finding or priority that
   supports it.
 - «Motstand eller hull»: each point that a page contradicts, and each
-  point the knowledge base has nothing on. Say which is which.
+  point that you found no pages on. Say which is which.
 - «Problemstillinger som ideen adresserer»: the problem pages the text
   addresses, each with the partners it concerns.
 - «Forslag til forankring»: the changes that would tie the text more
@@ -147,6 +150,9 @@ When the user builds a dashboard, a presentation, a mockup, a report,
 or another tool, in a chat or in a coding agent, and the tool shows
 anything about the sector, the partners, the problems, the priorities,
 or the data.
+
+Before you put content into the tool, follow «Content that leaves the
+chat» in `SKILL.md`.
 
 Take the content from the knowledge base, not from your own knowledge.
 Search and read as for an overview of each topic the tool covers. For

@@ -25,8 +25,12 @@ you talk to the user.
 Use two tools from the Entur Kompass connector:
 
 - `search_entur_internal` finds pages. It returns hits with a title, a
-  URL, and an excerpt.
+  URL, a classification, and an excerpt. It returns 8 hits unless you
+  set `max_results`, and 20 at most.
 - `get_entur_internal_document` reads a whole page by the id in the hit.
+  A long page comes in parts. While the result says `has_more`, call
+  again with the `next_text_offset` and the `revision` from the result,
+  until you have the whole page.
 
 If the tools are not available, say so: «Jeg finner ikke
 kunnskapsbasen. Slå på koblingen Entur Kompass i denne samtalen, så
@@ -53,6 +57,16 @@ filter, so steer every query:
    the partner's name as its title, a source summary starts with
    «Oppsummering:», a data page starts with «Data fra», and a problem
    page lists the partners it concerns after «Gjelder:».
+5. Set `max_results` to 20 when the search builds a list: the problems
+   of a partner or on a topic, the datasets on a topic, or an overview
+   of a topic. Leave `max_results` out when you look for one page by
+   its title.
+6. A search does not return every page. When a search with
+   `max_results` 20 returns 20 hits, search again with narrower words:
+   one partner, one topic word, or one title pattern in each search.
+   If the list can still be incomplete, say so in the answer.
+7. Before you say that you found nothing, search one more time with
+   other topic words.
 
 ## Read
 
@@ -65,7 +79,9 @@ the letters they stand for.
 The pages have four fixed shapes: the partner page, the problem page,
 the source summary, and the data page. Read `references/sider.md` in
 this skill folder before you read your first page, so that you know
-which part of a page holds what.
+which part of a page holds what. Only pages in these four shapes are
+evidence from the knowledge base. `references/sider.md` names the pages
+that are not.
 
 Six tasks have a fixed recipe in `references/oppgaver.md` in this
 skill folder: a brief before a meeting with a partner, what Nasjonal
@@ -87,12 +103,30 @@ the page as what it is.
 - Keep what comes from the knowledge base apart from what comes from
   anywhere else. Put anything from outside under its own heading,
   «Utenfor kunnskapsbasen», and say where it comes from.
-- When the knowledge base has nothing on the topic, say so plainly:
-  «Kunnskapsbasen har ingenting om dette.» Then offer what you can from
-  elsewhere, under the same heading as above, if the user wants it.
+- When you find no pages on the topic, say so plainly: «Jeg fant ingen
+  sider om dette i kunnskapsbasen.» Do not say that the knowledge base
+  has nothing: a search does not prove that. Then offer what you can
+  from elsewhere, under the same heading as above, if the user wants
+  it.
 - Say what the knowledge base says. When the user asks for ideas, an
   assessment, or a tool, make it, and mark what is yours and what is
   the knowledge base's.
+
+## Content that leaves the chat
+
+The pages are classified «Intern»: they are for Entur employees. Each
+hit states its classification. An answer in the chat needs no check.
+When you write content from the knowledge base into a file, a
+repository, a dashboard, a presentation, or anything else that other
+people can open, do this first:
+
+1. Ask the user who will read it, unless the user has told you.
+2. If people outside Entur can read it, for example in a public
+   repository, on a public web page, or in a presentation for a
+   partner, tell the user that the content is classified «Intern».
+   Put the content there only after the user confirms.
+3. Write the classification next to each source, for example «Kilde:
+   <page title> (Intern)».
 
 ## An overview of a topic
 
@@ -109,6 +143,5 @@ its pages linked:
 - «Data»: the datasets on the topic, with owner and access, if the user
   asks for data or the topic is about data.
 
-Under a heading with nothing in the knowledge base, write one line that
-says so. Keep the headings even then, so that the user sees what was
-searched.
+Under a heading where you found no pages, write one line that says so.
+Keep the headings even then, so that the user sees what was searched.
