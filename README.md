@@ -176,6 +176,7 @@ skills/
   entur-ai-security-review/            # Evidence-backed security review
   entur-conventions/                   # Thin router that fetches guides on demand
   scr-situation-complication-resolution/  # SCR writing format
+  sd-hjernen/                          # Samferdselsdata knowledge base via Entur Kompass
   setup-agent-config/                  # AI agent config for an existing repo
   setup-cicd-workflows/                # Generate CI/CD workflows by language
 plugins/

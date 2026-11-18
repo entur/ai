@@ -1,0 +1,33 @@
+{
+  "name": "sd-hjernen",
+  "version": "0.1.0",
+  "description": "Ground research, meeting preparation, ideas, and tools in the Samferdselsdata team's knowledge base in Confluence, through Entur Kompass, with a link to each page used.",
+  "author": {
+    "name": "Team Samferdselsdata",
+    "email": "support@entur.org"
+  },
+  "homepage": "https://github.com/entur/ai",
+  "repository": "https://github.com/entur/ai",
+  "license": "EUPL-1.2",
+  "keywords": [
+    "entur",
+    "samferdselsdata",
+    "sd-hjernen",
+    "kompass",
+    "confluence",
+    "knowledge-base",
+    "research"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "SD-hjernen",
+    "shortDescription": "Ground work in the Samferdselsdata knowledge base.",
+    "longDescription": "Searches and reads the Samferdselsdata team's knowledge base in Confluence through the Entur Kompass connector: the partners' mandates and priorities, the problems in the transport sector, the national guidelines, and the data the partners share. Answers link to each page used and keep the knowledge base apart from other sources. Requires the Entur Kompass connector.",
+    "developerName": "Team Samferdselsdata",
+    "category": "Research",
+    "capabilities": [
+      "Read"
+    ],
+    "websiteURL": "https://github.com/entur/ai"
+  }
+}
