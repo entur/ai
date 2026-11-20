@@ -131,7 +131,7 @@ A new `ent-<appid>-prd` project hosts a Cloud Run service deployed by GitHub Act
 
    See [iam-roles.md](../platform/iam-roles.md) for the Entur-assignable role list. Do not grant blanket `roles/editor` or project-level `roles/run.admin`.
 
-6. **Ask team-plattform for Artifact Registry Reader on the central registry.** The Cloud Run service pulls images from `eu.gcr.io/entur-system-1287/`, which lives in the central `entur-system-1287` project — a different project from yours, with IAM owned by team-plattform. Two identities in `ent-<appid>-prd` need `roles/artifactregistry.reader` there before the first deploy can succeed:
+6. **Ask team-plattform for Artifact Registry Reader on the central registry.** The Cloud Run service pulls images from `eu.gcr.io/entur-system-1287/`, which lives in the central `entur-system-1287` project — a different project from yours, with IAM owned by team-plattform. Three identities per environment need `roles/artifactregistry.reader` there before the first deploy can succeed:
 
    - The runtime service account created in step 5: `<repo-name>@ent-<appid>-prd.iam.gserviceaccount.com`.
    - The Cloud Run Service Agent of the prd project: `service-<PROJECT_NUMBER>@serverless-robot-prod.iam.gserviceaccount.com`. Resolve `<PROJECT_NUMBER>` with:
@@ -140,17 +140,29 @@ A new `ent-<appid>-prd` project hosts a Cloud Run service deployed by GitHub Act
      gcloud projects describe ent-<appid>-prd --format='value(projectNumber)'
      ```
 
-   Cross-project IAM on `entur-system-1287` is not grantable from your repo's Terraform. Open a ticket in [#talk-utviklerplattform](https://entur.slack.com/archives/talk-utviklerplattform) with both service-account emails and ask for `roles/artifactregistry.reader` on `entur-system-1287`. Without this binding, the first CD run in step 9 fails with an image-pull error and no Cloud Run revision is created.
+   - The GitHub Actions CD service account that runs the deploy in step 7: `gh-<repo-name>-<hash>-prd@ent-github-shr.iam.gserviceaccount.com`. Read the exact email from the `SERVICE_ACCOUNT` variable on the repository's `prd` GitHub environment. `gcloud run services replace` checks that the image is readable with the caller's credentials, so this account needs the role even though it never runs the container. Do **not** list the repository-wide CI service account (`vars.CI_SERVICE_ACCOUNT`, `gh-<repo-name>-<hash>-ci@…`): it does not deploy.
+
+   Cross-project IAM on `entur-system-1287` is not grantable from your repo's Terraform. Open a ticket in [#talk-utviklerplattform](https://entur.slack.com/archives/talk-utviklerplattform) with all three service-account emails and ask for `roles/artifactregistry.reader` on `entur-system-1287`. Without the first two bindings, the revision fails with an image-pull error. Without the CD binding, the deploy fails before any revision is created, with `Permission 'artifactregistry.repositories.downloadArtifacts' denied` naming the CD service account.
 
 7. **Add the CD workflow.** GitHub Actions builds the image, pushes it to the central GAR (`eu.gcr.io/entur-system-1287/<image>`), substitutes the tag into `cloudrun.yaml`, and hands the manifest to `deploy-cloudrun`. Terraform does **not** own the Cloud Run service itself — the workflow does.
 
-   `needs.ci.outputs.image_and_tag` is already the fully qualified image reference (`eu.gcr.io/entur-system-1287/<image>:<tag>`) — do not prepend the registry again:
+   `needs.ci.outputs.image_and_tag` is `<image>:<tag>` without the registry (`entur/gha-docker` push outputs `image_name:image_tag`). Prepend `eu.gcr.io/entur-system-1287/`. Do **not** pass `image_and_tag` alone: Cloud Run resolves an unqualified name on Docker Hub and the deploy fails with `Image 'mirror.gcr.io/library/<image>:<tag>' not found`.
+
+   Authenticate the deploy job with the environment's CD service account (`vars.SERVICE_ACCOUNT` and `vars.WORKLOAD_IDENTITY_PROVIDER` on the job's GitHub environment), not `vars.CI_SERVICE_ACCOUNT`. The CI service account only reads the project and gets `Permission 'run.services.create' denied`.
 
    ```yaml
-   # .github/workflows/cd.yml — deploy step
+   # .github/workflows/cd.yml — deploy job
+   environment: prd
+   steps:
+   - uses: entur/gha-meta/.github/actions/cloud-auth@v1
+     with:
+       environment: prd
+       gcp_workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_PROVIDER }}
+       gcp_service_account: ${{ vars.SERVICE_ACCOUNT }}
+
    - name: Set image in cloudrun.yaml
      env:
-       IMAGE: ${{ needs.ci.outputs.image_and_tag }}
+       IMAGE: eu.gcr.io/entur-system-1287/${{ needs.ci.outputs.image_and_tag }}
      run: sed -i "s|image: placeholder|image: ${IMAGE}|" cloudrun.yaml
 
    - name: Deploy to Cloud Run
@@ -191,9 +203,9 @@ A new `ent-<appid>-prd` project hosts a Cloud Run service deployed by GitHub Act
 
 9. **Expect a one-time failure cycle on first deploy.** The dependencies between Cloud Run, the LB, and cross-project Artifact Registry IAM cannot be satisfied in a single pass — the actual order is deploy → fail → terraform → fail → team-plattform → deploy → success. Walk through it:
 
-   1. **First CD run fails** with an image-pull error. Neither the Cloud Run Service Agent nor the runtime SA have `roles/artifactregistry.reader` on `entur-system-1287` yet, so the revision cannot pull the image.
+   1. **First CD run fails** on the image. Neither the CD service account, the Cloud Run Service Agent nor the runtime SA have `roles/artifactregistry.reader` on `entur-system-1287` yet: the deploy is denied `downloadArtifacts`, or the revision cannot pull the image.
    2. **First `terraform apply` of the LB chain fails** for the same generation. The serverless NEG and the public-invoker binding reference the Cloud Run service by name, but no service exists yet.
-   3. **Open (or chase) the team-plattform ticket from step 6** with the runtime SA email and the Cloud Run Service Agent email. Wait for the grant.
+   3. **Open (or chase) the team-plattform ticket from step 6** with the runtime SA, Cloud Run Service Agent and CD service account emails. Wait for the grant.
    4. **Re-run CD.** It succeeds. The Cloud Run service is created.
    5. **Re-run `terraform apply`.** The LB chain comes up; the managed cert enters `PROVISIONING`.
    6. **Open a second team-plattform ticket** in [#talk-utviklerplattform](https://entur.slack.com/archives/talk-utviklerplattform) with the LB IPv4 (`terraform output lb_ipv4`) and the hostname under `entur.{no,io,org}`. Reference [add-custom-domain.md → Off the golden path](add-custom-domain.md#off-the-golden-path).
