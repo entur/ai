@@ -35,10 +35,10 @@ A marketplace entry can install a plugin from another repository. Pin it to a co
 
 - To ship a new version, open a PR here that changes only the `sha`. The commit must be on the linked repo's default branch.
 - Reviewers: open the "Check marketplace plugins" job summary and read the compare link before approving. The PR diff only shows a new sha; the summary shows what users will get, and flags scripts.
-- No plugin may add hooks, MCP servers or LSP servers. They run code on every user's machine without asking.
-- A skill must read its own files from the installed plugin. Do not point it at `main` on GitHub: that skips the pin.
+- No plugin may run code by itself: no hooks, MCP, LSP or monitor servers, no `bin/` or `workflows/`, and no skill or command that declares `hooks` or `allowed-tools` or runs shell output with `` !`command` ``. They run code on the user's machine as soon as the plugin loads or the skill starts.
+- A skill must read its own files from the installed plugin. Do not point it at a branch on GitHub, or at content built from one (such as `llms-full.txt`): that skips the pin. Links pinned to a commit are fine.
 
-`scripts/check_marketplace.py` enforces the pin and the ban on hooks and servers.
+`scripts/check_marketplace.py` enforces the pin and the ban on code. It warns about skills that read another repository's branch; the warning becomes an error once the linked plugins have moved off `main`.
 
 ## Writing AI Documentation
 
