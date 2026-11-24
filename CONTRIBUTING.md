@@ -20,6 +20,26 @@ When submitting changes:
 
 For questions, ideas, or just to say hi, find us in `#talk-utviklerplattform` on Slack.
 
+## Plugins from other repositories
+
+A marketplace entry can install a plugin from another repository. Pin it to a commit, never a branch:
+
+```json
+"source": {
+  "source": "git-subdir",
+  "url": "https://github.com/entur/<repo>.git",
+  "path": "skills",
+  "sha": "<full 40-character commit sha>"
+}
+```
+
+- To ship a new version, open a PR here that changes only the `sha`. The commit must be on the linked repo's default branch.
+- Reviewers: open the "Check marketplace plugins" job summary and read the compare link before approving. The PR diff only shows a new sha; the summary shows what users will get, and flags scripts.
+- No plugin may add hooks, MCP servers or LSP servers. They run code on every user's machine without asking.
+- A skill must read its own files from the installed plugin. Do not point it at `main` on GitHub: that skips the pin.
+
+`scripts/check_marketplace.py` enforces the pin and the ban on hooks and servers.
+
 ## Writing AI Documentation
 
 The docs in `guides/`, `skills/`, and root policy files such as `CONVENTIONS.md`, `AGENTS.md`, and `it-systems-policy.md` are read by AI coding agents that generate platform-compliant code and recommendations. Humans skim; agents execute. Optimise every agent-facing document for the agent.
