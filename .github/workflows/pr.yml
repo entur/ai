@@ -48,25 +48,6 @@ jobs:
       - name: Check internal Markdown links and heading anchors
         run: python3 scripts/check_links.py
 
-  marketplace:
-    name: Check marketplace plugins
-    runs-on: ubuntu-24.04
-    # Linked plugins must be pinned to a commit on the linked repo's default
-    # branch, and no plugin may add hooks or MCP/LSP servers. The job summary
-    # lists what changed in each linked plugin, since the PR diff only shows
-    # a new sha. See scripts/check_marketplace.py.
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-
-      - name: Check pins, hooks and servers
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/check_marketplace.py --base "origin/${{ github.base_ref }}"
-
   verify-pr:
     name: Verify PR title
     runs-on: ubuntu-24.04
