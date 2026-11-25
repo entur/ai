@@ -113,7 +113,7 @@
         "source": "git-subdir",
         "url": "https://github.com/entur/design-system.git",
         "path": "skills",
-        "sha": "a567edc185d7974ef9895d5d41e6ef5a1f248a27"
+        "sha": "ad612789b62f9a9526e4dcd6d96e72652e5b0846"
       },
       "strict": false,
       "skills": [
