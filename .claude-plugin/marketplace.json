@@ -113,7 +113,7 @@
         "source": "git-subdir",
         "url": "https://github.com/entur/design-system.git",
         "path": "skills",
-        "ref": "main"
+        "sha": "ad612789b62f9a9526e4dcd6d96e72652e5b0846"
       },
       "strict": false,
       "skills": [
@@ -141,7 +141,7 @@
         "source": "git-subdir",
         "url": "https://github.com/entur/uniformen.git",
         "path": "skills",
-        "ref": "main"
+        "sha": "2d0deb9a216c1c43cd5681ec5371296b9137555f"
       },
       "strict": false,
       "skills": [
