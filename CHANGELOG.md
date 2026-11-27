@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.4.0](https://github.com/entur/ai/compare/v0.3.2...v0.4.0) (2026-11-27)
+
+### Features
+
+* **security-review:** add STRIDE and LINDDUN threat-model output ([#99](https://github.com/entur/ai/issues/99)) ([1469790](https://github.com/entur/ai/commit/1469790839d006ebcb5e619cfc03540546b8ecbb))
+* **skills:** add asd-ste100 skill to the marketplace ([#94](https://github.com/entur/ai/issues/94)) ([1947ea5](https://github.com/entur/ai/commit/1947ea5ddb6e9001f583767804358ef77ea57272))
+* **skills:** add migrate-typography to the entur-linje plugin ([#101](https://github.com/entur/ai/issues/101)) ([4b02d21](https://github.com/entur/ai/commit/4b02d211566b7e6e8fbc502534487dc378f6e112))
+* **skills:** add sd-hjernen skill and plugin ([#103](https://github.com/entur/ai/issues/103)) ([a6c18e1](https://github.com/entur/ai/commit/a6c18e14873cb17838960e0e91b1864bd1b8827f))
+
+### Bug Fixes
+
+* **marketplace:** pin linked plugins and check what they ship ([#105](https://github.com/entur/ai/issues/105)) ([35a571f](https://github.com/entur/ai/commit/35a571f57f09b4586991041e0954ed8dd0b61613))
+
+### Documentation
+
+* add guide on how-to set up Freyja. ([#97](https://github.com/entur/ai/issues/97)) ([4730808](https://github.com/entur/ai/commit/473080879dc8322c07607c3d524a340f4bc624e0))
+* **cloud-run:** CD service account needs registry read, and image_and_tag needs the registry ([#104](https://github.com/entur/ai/issues/104)) ([05c3711](https://github.com/entur/ai/commit/05c37116f13f2f0f635540db9f1ddbd827ce8e12))
+* **playbooks:** move the incident response playbook to Entur Kompass ([#106](https://github.com/entur/ai/issues/106)) ([04aecd5](https://github.com/entur/ai/commit/04aecd51b379b62c1aabd57f4451ddc671a3ed98))
+* **privacy:** add Entur-wide legitimate interests assessment guide ([#93](https://github.com/entur/ai/issues/93)) ([30a028e](https://github.com/entur/ai/commit/30a028ed8b8e989077ed2943663b18de34bcbfeb))
+* update with detailed instructions and info on branch protection. ([#100](https://github.com/entur/ai/issues/100)) ([76c7707](https://github.com/entur/ai/commit/76c770713981680b06325542abae4fefc1b85f0a))
+
 ## [0.3.2](https://github.com/entur/ai/compare/v0.3.1...v0.3.2) (2026-09-29)
 
 ### Documentation
