@@ -8,7 +8,7 @@
 
 <https://github.com/entur/api-guidelines>
 
-Entur's authoritative rules for designing RESTful APIs that are described with OpenAPI. Some rules are linted automatically, while others require manual review. Guidelines in markdown format available at <https://raw.githubusercontent.com/entur/api-guidelines/refs/heads/main/page/index.md>.
+Entur's authoritative rules for designing RESTful APIs that are described with OpenAPI. Some rules are linted automatically, while others require manual review. Guidelines in markdown format available at <https://raw.githubusercontent.com/entur/api-guidelines/c7ec735de250935062af1fd51f03c3dc46d8e0b8/page/index.md>.
 
 ## `entur-springdoc-starter`
 

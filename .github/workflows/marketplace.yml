@@ -1,0 +1,40 @@
+name: Marketplace
+
+# Linked plugins must be pinned to a commit on the linked repo's default branch,
+# and no plugin may run code by itself. The job summary lists what changed in each
+# linked plugin, since the PR diff only shows a new sha. Also runs on main, so a
+# bypassed merge still leaves a record. See scripts/check_marketplace.py.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  marketplace:
+    name: Check marketplace plugins
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      # On a PR, run the script from the base branch, so a PR can't weaken the
+      # check in the same change it is checked by. Falls back to the PR's copy
+      # only while the base has none.
+      - name: Check pins, hooks and servers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: |
+          script="$RUNNER_TEMP/check_marketplace.py"
+          git show "$BASE:scripts/check_marketplace.py" > "$script" 2>/dev/null \
+            || cp scripts/check_marketplace.py "$script"
+          python3 "$script" --base "$BASE"
