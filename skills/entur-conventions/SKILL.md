@@ -65,7 +65,7 @@ https://raw.githubusercontent.com/entur/ai/main/CONVENTIONS.md
 | Deprecate or delete a service | `guides/playbooks/deprecate-service.md` |
 | Run the service locally | `guides/playbooks/local-dev.md` |
 | Expose service on a custom domain | `guides/playbooks/add-custom-domain.md` |
-| Handle a critical incident | `guides/playbooks/incident-response.md` |
+| Handle a critical incident | Entur Kompass MCP resource `kompass://guide/incident-response` (authenticated Entur users only) |
 | Run on Cloud Run instead of GKE (documented exception) | `guides/playbooks/cloud-run-service.md` |
 
 ## Platform capability index
