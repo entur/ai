@@ -236,4 +236,4 @@ These sources explain the rules behind this guide:
 - EDPB Guidelines 1/2024 on processing of personal data based on article 6 (1) (f) GDPR -- the European interpretation of the three-part test, with examples.
 - GDPR articles 5, 6, 13, 14, 21, 30, and 35, and recitals 47 to 49, as incorporated into Norwegian law by the Personal Data Act (personopplysningsloven).
 - [security.md](security.md) -- technical controls such as access control and secret handling that serve as safeguards.
-- [incident-response.md](../playbooks/incident-response.md) -- escalation to Personvernleder for personal data breaches.
+- The incident response playbook, the Entur Kompass MCP resource `kompass://guide/incident-response` (authenticated Entur users only) -- escalation to Personvernleder for personal data breaches.
