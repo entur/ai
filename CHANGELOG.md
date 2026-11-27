@@ -2,7 +2,6 @@
 
 ## [0.4.0](https://github.com/entur/ai/compare/v0.3.2...v0.4.0) (2026-11-27)
 
-
 ### Features
 
 * **security-review:** add STRIDE and LINDDUN threat-model output ([#99](https://github.com/entur/ai/issues/99)) ([1469790](https://github.com/entur/ai/commit/1469790839d006ebcb5e619cfc03540546b8ecbb))
@@ -10,11 +9,9 @@
 * **skills:** add migrate-typography to the entur-linje plugin ([#101](https://github.com/entur/ai/issues/101)) ([4b02d21](https://github.com/entur/ai/commit/4b02d211566b7e6e8fbc502534487dc378f6e112))
 * **skills:** add sd-hjernen skill and plugin ([#103](https://github.com/entur/ai/issues/103)) ([a6c18e1](https://github.com/entur/ai/commit/a6c18e14873cb17838960e0e91b1864bd1b8827f))
 
-
 ### Bug Fixes
 
 * **marketplace:** pin linked plugins and check what they ship ([#105](https://github.com/entur/ai/issues/105)) ([35a571f](https://github.com/entur/ai/commit/35a571f57f09b4586991041e0954ed8dd0b61613))
-
 
 ### Documentation
 
