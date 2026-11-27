@@ -151,7 +151,6 @@ guides/
     cloud-run-service.md               # Cloud Run (documented exception to the GKE default)
     deploy-to-prd.md                   # Promote to production
     deprecate-service.md               # Retire an application
-    incident-response.md               # Critical incident handling
     local-dev.md                       # Run the service locally
   reference/
     java.md                            # Java standards (Spring Boot, Gradle)
